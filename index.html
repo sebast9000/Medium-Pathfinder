@@ -1,0 +1,2920 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Médium PF1e — Ficha, Espíritus y Calculador de Armas</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fuentes: Inter y Cinzel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Cinzel', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Variables dinámicas que cambian según el espíritu canalizado */
+    :root {
+      --bg-base: #090b10;
+      --bg-card: #111520;
+      --bg-card-alt: #171d2c;
+      --border-subtle: #232b3e;
+      --accent: #94a3b8;
+      --accent-soft: rgba(148, 163, 184, 0.14);
+      --accent-border: rgba(148, 163, 184, 0.45);
+      --accent-glow: rgba(148, 163, 184, 0.22);
+      --accent-text: #cbd5e1;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(ellipse 85% 45% at 50% -15%, var(--accent-glow), transparent 70%),
+        radial-gradient(circle at 90% 90%, rgba(15, 23, 42, 0.85), transparent 55%);
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      transition: background-image 0.4s ease;
+    }
+
+    .accent-text { color: var(--accent-text); }
+    .accent-bg { background-color: var(--accent); }
+    .accent-bg-soft { background-color: var(--accent-soft); }
+    .accent-border { border-color: var(--accent-border); }
+    .accent-ring:focus { outline: none; box-shadow: 0 0 0 2px var(--accent-border); }
+
+    .card-occult {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.65);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card-occult-accent {
+      background-color: var(--bg-card);
+      border: 1px solid var(--accent-border);
+      box-shadow: 0 0 24px -6px var(--accent-glow);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Limpiar controles numéricos nativos */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* Scrollbar estilizada */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0c0f17; }
+    ::-webkit-scrollbar-thumb { background: #29334a; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3d4b6b; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade { animation: fadeIn 0.2s ease-out; }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-slate-700 selection:text-white pb-16">
+
+  <!-- =========================================================
+       CABECERA FIJA CON RESUMEN RÁPIDO E INFLUENCIA
+       ========================================================= -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#090b10]/92 border-b border-slate-800/80 shadow-lg">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Identidad y Espíritu -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="header-spirit-icon" class="w-10 h-10 rounded-xl accent-bg-soft border accent-border flex items-center justify-center text-xl shrink-0">
+            ✦
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 id="header-char-name" class="font-display font-bold text-base sm:text-lg text-white truncate">Vaelen el Médium</h1>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full accent-bg-soft accent-text border accent-border shrink-0">
+                Niv. <span id="header-level">1</span>
+              </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
+              <span>Espíritu: <strong id="header-spirit-name" class="accent-text">Sin Espíritu</strong></span>
+              <span class="text-slate-600">•</span>
+              <span>Bono: <strong id="header-spirit-bonus" class="text-slate-200">+0</strong></span>
+              <span class="text-slate-600">•</span>
+              <span>Oleada: <strong id="header-surge-die" class="text-slate-200">1d6</strong></span>
+              <span class="hidden md:inline text-slate-600">•</span>
+              <span class="hidden md:inline">BAB: <strong id="header-bab" class="text-slate-200">+0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rastreador de Influencia Compacto + Botones JSON/Reset -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 ml-auto">
+          <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800" title="Puntos de Influencia del Espíritu (0-5)">
+            <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Influencia</span>
+            <div id="header-influence-dots" class="flex items-center gap-1"></div>
+            <span id="header-influence-badge" class="text-xs font-bold tabular-nums text-slate-300 ml-0.5">0/5</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="openExportModal()" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/70 transition text-xs font-medium flex items-center gap-1.5" title="Exportar JSON">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span class="hidden lg:inline">Exportar</span>
+            </button>
+            <button onclick="openImportModal()" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/70 transition text-xs font-medium flex items-center gap-1.5" title="Importar JSON">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span class="hidden lg:inline">Importar</span>
+            </button>
+            <button onclick="openResetModal()" class="p-2 rounded-lg bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 hover:text-white border border-rose-800/50 transition text-xs font-medium" title="Reiniciar ficha">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta global de Influencia Alta -->
+      <div id="global-influence-alert" class="hidden mt-2 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between gap-2">
+        <span id="global-influence-alert-text"></span>
+      </div>
+
+      <!-- Navegación por 5 Pestañas -->
+      <nav class="flex items-center gap-1.5 mt-3 overflow-x-auto pb-0.5" role="tablist">
+        <button onclick="switchTab('summary')" id="tab-btn-summary" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>🕯️</span> Resumen y Espíritu
+        </button>
+        <button onclick="switchTab('weapons')" id="tab-btn-weapons" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>🏹</span> Armas y Combate
+        </button>
+        <button onclick="switchTab('skills')" id="tab-btn-skills" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>📜</span> Habilidades (35)
+          <span id="tab-skills-pill" class="text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 tabular-nums">0/0</span>
+        </button>
+        <button onclick="switchTab('spells')" id="tab-btn-spells" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>✨</span> Conjuros
+        </button>
+        <button onclick="switchTab('powers')" id="tab-btn-powers" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>📖</span> Poderes y Reglas
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       CONTENIDO PRINCIPAL
+       ========================================================= -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 pt-5">
+
+    <!-- =======================================================
+         PESTAÑA 1: RESUMEN Y ESPÍRITU
+         ======================================================= -->
+    <section id="tab-summary" class="tab-panel space-y-5 animate-fade">
+
+      <!-- Fila 1: Identidad + Selector de Espíritu e Influencia -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- Tarjeta Identidad -->
+        <div class="lg:col-span-5 card-occult rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4">
+          <div>
+            <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+              Identidad y Escalado
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-slate-400 mb-1">Nombre del Personaje</label>
+                <input type="text" id="input-name" oninput="updateField('name', this.value)" placeholder="Ej. Vaelen el Canalizador"
+                  class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white accent-ring" />
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Nivel de Médium (1–20)</label>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="changeLevel(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold transition">−</button>
+                  <input type="number" id="input-level" min="1" max="20" oninput="setLevel(this.value)"
+                    class="w-full text-center bg-slate-900/90 border border-slate-700/80 rounded-xl py-2 text-sm font-bold text-white tabular-nums accent-ring" />
+                  <button onclick="changeLevel(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold transition">+</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Clase Predilecta (+1/niv)</label>
+                <select id="input-favored" onchange="updateField('favoredClass', this.value)"
+                  class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white accent-ring">
+                  <option value="hp">+1 PG por nivel</option>
+                  <option value="skill">+1 Rango habilidad/niv</option>
+                  <option value="none">Ninguno / Otro</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Raza</label>
+                <input type="text" id="input-race" oninput="updateField('race', this.value)" placeholder="Humano, Elfo..."
+                  class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white accent-ring" />
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Alineamiento</label>
+                <input type="text" id="input-alignment" oninput="updateField('alignment', this.value)" placeholder="Ej. NB, CN..."
+                  class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white accent-ring" />
+              </div>
+
+              <div class="sm:col-span-2 grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Tamaño</label>
+                  <select id="input-size" onchange="updateField('size', this.value)"
+                    class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-2 py-2 text-xs text-white accent-ring">
+                    <option value="small">Pequeño (+1)</option>
+                    <option value="medium">Mediano (0)</option>
+                    <option value="large">Grande (-1)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs text-slate-400 mb-1">Velocidad</label>
+                  <input type="text" id="input-speed" oninput="updateField('speed', this.value)" placeholder="30 pies"
+                    class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-2.5 py-2 text-xs text-white accent-ring" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen Escalado -->
+          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-800/80">
+            <div class="bg-slate-900/70 rounded-xl p-2.5 text-center border border-slate-800">
+              <div class="text-[11px] text-slate-400">Ataque Base</div>
+              <div id="stat-bab-summary" class="text-base sm:text-lg font-bold text-white tabular-nums">+0</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2.5 text-center border border-slate-800">
+              <div class="text-[11px] text-slate-400">Bono Espíritu</div>
+              <div id="stat-spirit-bonus-summary" class="text-base sm:text-lg font-bold accent-text tabular-nums">+1</div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-2.5 text-center border border-slate-800">
+              <div class="text-[11px] text-slate-400">Oleada</div>
+              <div id="stat-surge-summary" class="text-base sm:text-lg font-bold text-white tabular-nums">1d6</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Selector de Espíritu e Influencia -->
+        <div class="lg:col-span-7 card-occult-accent rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4">
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h2 class="font-display text-sm uppercase tracking-wider accent-text flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+                Sesión de Espiritismo y Canalización
+              </h2>
+              <button onclick="newSeance()" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600/70 text-xs font-semibold text-slate-200 transition flex items-center gap-1.5">
+                <span>🕯️</span> Nueva Sesión / Descanso
+              </button>
+            </div>
+
+            <div id="spirit-selector-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2"></div>
+          </div>
+
+          <!-- Rastreador de Influencia + Oleada + Tabú -->
+          <div class="bg-slate-900/75 rounded-xl p-3.5 border border-slate-800 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-300 flex items-center gap-2">
+                  Rastreador de Influencia
+                  <span id="influence-status-pill" class="px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-300">Bajo control</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">En 3+ sufres penalización de influencia. En 5 el espíritu toma el control (PNJ).</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="changeInfluence(-1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold">−</button>
+                <div id="panel-influence-dots" class="flex items-center gap-1.5 px-1"></div>
+                <button onclick="changeInfluence(1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold">+</button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-slate-800/90">
+              <div class="flex flex-wrap items-center gap-2">
+                <button onclick="useSpiritSurge(false)" id="btn-spirit-surge" class="px-3.5 py-2 rounded-xl accent-bg text-slate-950 font-bold text-xs hover:brightness-110 transition shadow-md flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                  <span>⚡</span> Usar Oleada Espiritual (+1 Inf.)
+                </button>
+                <button onclick="useSpiritSurge(true)" id="btn-taboo-surge" class="hidden px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 font-semibold text-xs transition">
+                  Usar Oleada Gratis (Tabú)
+                </button>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" id="input-taboo" onchange="toggleTaboo(this.checked)" class="w-4 h-4 rounded accent-amber-500 bg-slate-800 border-slate-600" />
+                  <span class="text-xs font-medium text-slate-300">Tabú aceptado</span>
+                </label>
+                <div id="taboo-uses-container" class="hidden items-center gap-1 text-xs text-amber-300 bg-amber-950/40 px-2.5 py-1 rounded-lg border border-amber-700/40">
+                  <span>Gratis:</span>
+                  <strong id="taboo-uses-count" class="tabular-nums">2/2</strong>
+                </div>
+              </div>
+            </div>
+
+            <div id="surge-roll-result" class="hidden text-xs bg-slate-950/90 border accent-border rounded-lg px-3 py-2 flex items-center justify-between">
+              <span id="surge-roll-text" class="text-slate-200"></span>
+              <button onclick="document.getElementById('surge-roll-result').classList.add('hidden')" class="text-slate-500 hover:text-slate-300 ml-2">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 2: Atributos Base + Bonos -->
+      <div class="card-occult rounded-2xl p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+            Atributos (Base + Bonos Racial/Nivel/Equipo/Temp)
+          </h2>
+          <span class="text-xs text-slate-400">Modificador = ⌊(Total − 10) / 2⌋</span>
+        </div>
+        <div id="abilities-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+      </div>
+
+      <!-- Fila 3: PG, CA, Salvaciones, Iniciativa y Maniobras -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- PG y CA -->
+        <div class="lg:col-span-5 space-y-5">
+          <!-- PG -->
+          <div class="card-occult rounded-2xl p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full bg-rose-500 inline-block"></span>
+                Puntos de Golpe (d8)
+              </h2>
+              <label class="inline-flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+                <input type="checkbox" id="input-hp-auto" onchange="updateNested('hp', 'autoAvg', this.checked)" class="rounded bg-slate-800 border-slate-600" />
+                <span>Promedio d8</span>
+              </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-center">
+                <div class="text-[11px] uppercase tracking-wider text-slate-400">PG Máximos</div>
+                <div id="stat-hp-max" class="text-3xl font-bold text-white tabular-nums mt-0.5">8</div>
+                <div id="stat-hp-breakdown" class="text-[11px] text-slate-400 mt-1">8 base + 0 CON</div>
+              </div>
+              <div class="bg-slate-900/90 border border-rose-900/40 rounded-xl p-3 text-center flex flex-col justify-between">
+                <div class="text-[11px] uppercase tracking-wider text-rose-300/80">PG Actuales</div>
+                <div class="flex items-center justify-center gap-1.5 mt-1">
+                  <button onclick="adjustCurrentHp(-1)" class="w-7 h-7 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-200 font-bold text-sm">−</button>
+                  <input type="number" id="input-hp-current" oninput="updateNested('hp', 'current', parseInt(this.value) || 0)"
+                    class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-xl font-bold text-rose-300 tabular-nums accent-ring" />
+                  <button onclick="adjustCurrentHp(1)" class="w-7 h-7 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-200 font-bold text-sm">+</button>
+                </div>
+                <button onclick="healFullHp()" class="text-[11px] text-slate-400 hover:text-white mt-1 underline decoration-slate-600">Curar al máximo</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">PG Base acumulados</label>
+                <input type="number" id="input-hp-base" oninput="updateNested('hp', 'baseRolled', parseInt(this.value) || 0)"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-sm text-white tabular-nums disabled:opacity-50 accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Bonos Extra (Dureza, etc.)</label>
+                <input type="number" id="input-hp-misc" oninput="updateNested('hp', 'misc', parseInt(this.value) || 0)"
+                  class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-sm text-white tabular-nums accent-ring" />
+              </div>
+            </div>
+          </div>
+
+          <!-- CA -->
+          <div class="card-occult rounded-2xl p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+                Clase de Armadura (CA)
+              </h2>
+              <span id="ac-spirit-tag" class="hidden text-[11px] px-2 py-0.5 rounded-full accent-bg-soft accent-text border accent-border">+0 Guardián</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 mb-3">
+              <div class="bg-slate-900/90 border accent-border rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-slate-400">CA Total</div>
+                <div id="stat-ac-total" class="text-2xl font-bold text-white tabular-nums">10</div>
+              </div>
+              <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-slate-400">Toque</div>
+                <div id="stat-ac-touch" class="text-2xl font-bold text-slate-200 tabular-nums">10</div>
+              </div>
+              <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 text-center">
+                <div class="text-[11px] text-slate-400">Desprevenido</div>
+                <div id="stat-ac-flat" class="text-2xl font-bold text-slate-200 tabular-nums">10</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1 truncate">Armadura</label>
+                <input type="number" id="input-ac-armor" oninput="updateNested('ac', 'armor', parseInt(this.value) || 0)"
+                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1 truncate">Escudo</label>
+                <input type="number" id="input-ac-shield" oninput="updateNested('ac', 'shield', parseInt(this.value) || 0)"
+                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1 truncate">Natural</label>
+                <input type="number" id="input-ac-natural" oninput="updateNested('ac', 'natural', parseInt(this.value) || 0)"
+                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1 truncate">Desvío</label>
+                <input type="number" id="input-ac-deflect" oninput="updateNested('ac', 'deflect', parseInt(this.value) || 0)"
+                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-1 truncate">Otros</label>
+                <input type="number" id="input-ac-misc" oninput="updateNested('ac', 'misc', parseInt(this.value) || 0)"
+                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Penalización de armadura (negativo, aplica a habilidades de FUE/DES)">Pen. Arm.</label>
+                <input type="number" id="input-ac-acp" max="0" oninput="updateNested('ac', 'acp', Math.min(0, parseInt(this.value) || 0))"
+                  class="w-full text-center bg-slate-900 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
+              </div>
+            </div>
+            <p id="stat-ac-breakdown" class="text-[11px] text-slate-400 mt-2.5"></p>
+          </div>
+        </div>
+
+        <!-- Salvaciones, Iniciativa y Maniobras -->
+        <div class="lg:col-span-7 space-y-5">
+          <!-- Salvaciones -->
+          <div class="card-occult rounded-2xl p-4 sm:p-5">
+            <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+              Tiradas de Salvación
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Fortaleza (CON)</span>
+                  <span id="save-fort-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="save-fort-breakdown" class="text-[11px] text-slate-400 mt-1">Base 0 + CON 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-save-fort" oninput="updateNested('saves', 'fortMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Reflejos (DES)</span>
+                  <span id="save-ref-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="save-ref-breakdown" class="text-[11px] text-slate-400 mt-1">Base 0 + DES 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-save-ref" oninput="updateNested('saves', 'refMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Voluntad (SAB)</span>
+                  <span id="save-will-total" class="text-xl font-bold text-white tabular-nums">+2</span>
+                </div>
+                <div id="save-will-breakdown" class="text-[11px] text-slate-400 mt-1">Base 2 + SAB 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-save-will" oninput="updateNested('saves', 'willMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Iniciativa, Ataques Base y Maniobras -->
+          <div class="card-occult rounded-2xl p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+                Iniciativa, Ataque Base y Maniobras
+              </h2>
+              <button onclick="switchTab('weapons')" class="text-xs accent-text hover:underline font-medium">
+                Ir al Calculador de Armas →
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Iniciativa</span>
+                  <span id="stat-init-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="stat-init-breakdown" class="text-[11px] text-slate-400 mt-1">DES 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-init-misc" oninput="updateNested('combat', 'initMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Ataque CaC</span>
+                  <span id="stat-melee-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="stat-melee-breakdown" class="text-[11px] text-slate-400 mt-1">BAB 0 + FUE 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-melee-misc" oninput="updateNested('combat', 'meleeMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">Ataque Dist.</span>
+                  <span id="stat-ranged-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="stat-ranged-breakdown" class="text-[11px] text-slate-400 mt-1">BAB 0 + DES 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-ranged-misc" oninput="updateNested('combat', 'rangedMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">BMC (CMB)</span>
+                  <span id="stat-cmb-total" class="text-xl font-bold text-white tabular-nums">+0</span>
+                </div>
+                <div id="stat-cmb-breakdown" class="text-[11px] text-slate-400 mt-1">BAB 0 + FUE 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-cmb-misc" oninput="updateNested('combat', 'cmbMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+
+              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">DMC (CMD)</span>
+                  <span id="stat-cmd-total" class="text-xl font-bold text-white tabular-nums">10</span>
+                </div>
+                <div id="stat-cmd-breakdown" class="text-[11px] text-slate-400 mt-1">10 + BAB 0 + FUE 0 + DES 0</div>
+                <div class="mt-2 flex items-center gap-2">
+                  <span class="text-[11px] text-slate-500">Otros:</span>
+                  <input type="number" id="input-cmd-misc" oninput="updateNested('combat', 'cmdMisc', parseInt(this.value) || 0)"
+                    class="w-16 bg-slate-950 border border-slate-700/80 rounded-md px-2 py-0.5 text-xs text-white text-center tabular-nums accent-ring" />
+                </div>
+              </div>
+
+              <div class="bg-slate-900/80 border accent-border rounded-xl p-3 flex flex-col justify-between">
+                <div class="text-xs font-semibold accent-text">Don de Sesión Activo</div>
+                <div id="combat-seance-summary" class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Sin espíritu canalizado.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PESTAÑA 2: CALCULADOR DE ARMAS Y COMBATE
+         ======================================================= -->
+    <section id="tab-weapons" class="tab-panel hidden space-y-5 animate-fade">
+
+      <!-- Panel Superior de Feats & Combat Toggles (En Inglés) -->
+      <div class="card-occult-accent rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-display text-sm sm:text-base uppercase tracking-wider accent-text flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+              Feats &amp; Combat Toggles (Vista Previa para Dados Físicos)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Activa o desactiva feats y buffs en tiempo real; el desglose y los totales de cada arma se actualizan al instante.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400">Escalado BAB (<span id="weapons-bab-label" class="text-white font-bold">+0</span>):</span>
+            <span id="weapons-scale-label" class="accent-text font-semibold">-1 Atk / +2(+3) Dmg</span>
+          </div>
+        </div>
+
+        <!-- Grupo 1: Ranged Feats -->
+        <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+              <span>🏹</span> Ranged Feats
+            </span>
+            <span id="precise-shot-warning" class="hidden text-[11px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700/60 font-semibold">
+              ⚠️ -4 Atk (Target in Melee without Precise Shot)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5" id="ranged-toggles-container">
+            <!-- Generado por JS -->
+          </div>
+        </div>
+
+        <!-- Grupo 2: Melee & Buffs + Temp Modifiers -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div class="lg:col-span-8 bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <span>⚔️</span> Melee &amp; Buffs
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="global-toggles-container">
+              <!-- Power Attack, Haste, Sudden Attack -->
+            </div>
+          </div>
+
+          <!-- Modificadores rápidos temporales -->
+          <div class="lg:col-span-4 bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between gap-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-300">Temporary Modifiers</div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Temp Atk</label>
+                <div class="flex items-center gap-1">
+                  <button onclick="adjustTempCombat('tempAtk', -1)" class="w-7 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">−</button>
+                  <input type="number" id="input-temp-atk" oninput="updateNested('combatToggles', 'tempAtk', parseInt(this.value) || 0)"
+                    class="w-full text-center bg-slate-950 border border-slate-700 rounded-lg py-1.5 text-xs font-bold text-white tabular-nums accent-ring" />
+                  <button onclick="adjustTempCombat('tempAtk', 1)" class="w-7 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">+</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Temp Dmg</label>
+                <div class="flex items-center gap-1">
+                  <button onclick="adjustTempCombat('tempDmg', -1)" class="w-7 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">−</button>
+                  <input type="number" id="input-temp-dmg" oninput="updateNested('combatToggles', 'tempDmg', parseInt(this.value) || 0)"
+                    class="w-full text-center bg-slate-950 border border-slate-700 rounded-lg py-1.5 text-xs font-bold text-white tabular-nums accent-ring" />
+                  <button onclick="adjustTempCombat('tempDmg', 1)" class="w-7 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs">+</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500">Ej: Bless, Inspire Courage, Prayer, Flanking.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cabecera de Armas + Botón Añadir Arma -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="font-display text-sm sm:text-base uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+          Arsenal del Personaje
+        </h2>
+        <button onclick="addCustomWeapon()" class="px-3.5 py-2 rounded-xl accent-bg-soft hover:brightness-125 accent-text border accent-border text-xs font-bold transition flex items-center gap-1.5">
+          <span>+</span> Añadir Arma
+        </button>
+      </div>
+
+      <!-- Cuadrícula de Tarjetas de Armas -->
+      <div id="weapons-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- =======================================================
+         PESTAÑA 3: HABILIDADES (35)
+         ======================================================= -->
+    <section id="tab-skills" class="tab-panel hidden space-y-5 animate-fade">
+      <div class="card-occult rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-4">
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Rangos Gastados / Disponibles</div>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span id="skills-spent" class="text-2xl font-bold text-white tabular-nums">0</span>
+                <span class="text-slate-500">/</span>
+                <span id="skills-total" class="text-2xl font-bold accent-text tabular-nums">4</span>
+                <span id="skills-remaining-badge" class="ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">4 restantes</span>
+              </div>
+              <p id="skills-formula-note" class="text-[11px] text-slate-400 mt-0.5">Base: máx(1, 4 + mod INT) × Nivel</p>
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800">
+              <label class="text-xs text-slate-400 whitespace-nowrap">Rangos extra (Humano/Dote):</label>
+              <input type="number" id="input-extra-skill-ranks" min="0" oninput="updateField('extraSkillRanks', Math.max(0, parseInt(this.value) || 0))"
+                class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-sm font-bold text-white tabular-nums accent-ring" />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+            <div class="relative flex-1 sm:w-60">
+              <input type="text" id="skills-search" oninput="renderSkills()" placeholder="Buscar habilidad..."
+                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm text-white accent-ring" />
+              <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 cursor-pointer select-none">
+              <input type="checkbox" id="skills-filter-trained" onchange="renderSkills()" class="rounded bg-slate-800 border-slate-600" />
+              <span>Solo entrenadas</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Panel Especial del Embaucador (2 habilidades Filo + 1 Don de Sesión) -->
+        <div id="trickster-skills-panel" class="hidden bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase tracking-wider">
+            <span>🎭</span> Opciones del Espíritu Embaucador (Trickster)
+          </div>
+          <p class="text-xs text-slate-300">
+            Todas las habilidades pueden usarse <strong>sin entrenar</strong> y reciben tu bono de Embaucador. Elige tus habilidades de <strong>Filo del Embaucador</strong> (rangos gratis = nivel + de clase) y tu <strong>Don de Sesión</strong> (+1 y de clase):
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Filo del Embaucador #1</label>
+              <select id="select-trickster-edge-1" onchange="updateField('tricksterEdgeSkill1', this.value)"
+                class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Filo del Embaucador #2</label>
+              <select id="select-trickster-edge-2" onchange="updateField('tricksterEdgeSkill2', this.value)"
+                class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Don de Sesión (+1 y de clase)</label>
+              <select id="select-trickster-boon" onchange="updateField('tricksterBoonSkill', this.value)"
+                class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de 35 Habilidades -->
+      <div class="card-occult rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900/90 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
+                <th class="py-3 px-2.5 text-center w-10" title="Habilidad de clase (+3 si tiene ≥1 rango)">Cl.</th>
+                <th class="py-3 px-3">Habilidad</th>
+                <th class="py-3 px-2 text-center">Atrib.</th>
+                <th class="py-3 px-2 text-center">Rangos</th>
+                <th class="py-3 px-2 text-center hidden md:table-cell">Mod</th>
+                <th class="py-3 px-2 text-center hidden sm:table-cell">Espíritu</th>
+                <th class="py-3 px-2 text-center hidden lg:table-cell">Pen.Arm</th>
+                <th class="py-3 px-2 text-center">Otros</th>
+                <th class="py-3 px-3 sm:px-4 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="skills-table-body" class="divide-y divide-slate-800/70 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PESTAÑA 4: CONJUROS
+         ======================================================= -->
+    <section id="tab-spells" class="tab-panel hidden space-y-5 animate-fade">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Estadísticas de Magia -->
+        <div class="lg:col-span-4 card-occult rounded-2xl p-4 sm:p-5 space-y-4">
+          <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+            Magia Psíquica (CAR)
+          </h2>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+              <div class="text-[11px] text-slate-400">Nivel Lanzador</div>
+              <div id="spell-cl" class="text-2xl font-bold text-white tabular-nums">1</div>
+              <div id="spell-cl-note" class="text-[10px] text-slate-400 mt-0.5">Pruebas NL: +1</div>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+              <div class="text-[11px] text-slate-400">Concentración</div>
+              <div id="spell-conc" class="text-2xl font-bold accent-text tabular-nums">+1</div>
+              <div id="spell-conc-note" class="text-[10px] text-slate-400 mt-0.5">Niv + CAR</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-300">CD de Salvación</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] text-slate-400">Bono CD:</span>
+                <input type="number" id="input-spell-dc-misc" oninput="updateField('spellDcMisc', parseInt(this.value) || 0)"
+                  class="w-12 text-center bg-slate-950 border border-slate-700 rounded-md py-0.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
+            </div>
+            <div id="spell-dc-list" class="grid grid-cols-5 gap-1.5 text-center"></div>
+            <p class="text-[11px] text-slate-400">Fórmula: 10 + Nivel de Conjuro + Mod CAR + Bonos.</p>
+          </div>
+
+          <div id="spell-spirit-bonus-box" class="hidden bg-slate-900/90 border accent-border rounded-xl p-3 text-xs text-slate-300 leading-relaxed"></div>
+        </div>
+
+        <!-- Espacios de Conjuro -->
+        <div class="lg:col-span-8 card-occult rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+              Espacios de Conjuro Diarios
+            </h2>
+            <button onclick="restoreAllSpellSlots()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+              ✨ Recuperar todos los espacios
+            </button>
+          </div>
+
+          <div id="spell-slots-container" class="space-y-2.5"></div>
+
+          <div id="spirit-bonus-spells-section" class="hidden pt-3 border-t border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h3 id="spirit-bonus-spells-title" class="text-xs font-bold uppercase tracking-wider accent-text">Espacios del Espíritu</h3>
+              <span class="text-[11px] text-slate-400">Poder Menor (1 espacio extra por nivel lanzable)</span>
+            </div>
+            <div id="spirit-bonus-slots-container" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         PESTAÑA 5: PODERES Y REGLAS
+         ======================================================= -->
+    <section id="tab-powers" class="tab-panel hidden space-y-5 animate-fade">
+      <!-- Detalles del Espíritu Activo -->
+      <div class="card-occult-accent rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div id="spirit-detail-icon" class="w-12 h-12 rounded-xl accent-bg-soft border accent-border flex items-center justify-center text-2xl">✦</div>
+            <div>
+              <h2 id="spirit-detail-name" class="font-display text-lg font-bold text-white">Sin Espíritu Canalizado</h2>
+              <p id="spirit-detail-subtitle" class="text-xs text-slate-400">Selecciona un espíritu en Resumen y Espíritu para ver sus poderes.</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] text-slate-400 uppercase">Bono de Espíritu</div>
+            <div id="spirit-detail-bonus" class="text-xl font-bold accent-text tabular-nums">+0</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Don de Sesión (Seance Boon)</div>
+            <p id="spirit-detail-boon" class="text-xs sm:text-sm text-slate-200 leading-relaxed">—</p>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Competencias y Bonos Pasivos</div>
+            <p id="spirit-detail-proficiencies" class="text-xs sm:text-sm text-slate-200 leading-relaxed">—</p>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Poderes del Espíritu (Escalado por Nivel)</h3>
+          <div id="spirit-powers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- Referencia Rápida de Reglas del Médium -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="card-occult rounded-2xl p-4 sm:p-5 space-y-2.5">
+          <h3 class="font-display text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+            Reglas de Influencia, Oleada y Tabú
+          </h3>
+          <ul class="text-xs text-slate-300 space-y-2 leading-relaxed list-disc pl-4">
+            <li><strong>Sesión de Espiritismo:</strong> Dura 1 hora y te vincula a un espíritu legendario durante 24 horas comenzando con <strong>1 punto de Influencia</strong>.</li>
+            <li><strong>Oleada Espiritual (Spirit Surge):</strong> Como acción inmediata tras fallar una tirada (ataque, salvación, habilidad o prueba de atributo), aceptas +1 Influencia para sumar el dado de Oleada (1d6 / 1d8 a niv 10 / 1d10 a niv 20).</li>
+            <li><strong>Influencia 3+:</strong> La personalidad del espíritu te domina y sufres su penalización de influencia.</li>
+            <li><strong>Influencia 5:</strong> El espíritu toma el control completo de tu cuerpo durante 24 horas (pasas a ser un PNJ controlado por el DJ).</li>
+            <li><strong>Tabú:</strong> Si aceptas el tabú del espíritu en la sesión, obtienes <strong>2 usos gratuitos</strong> de Oleada Espiritual sin ganar Influencia.</li>
+          </ul>
+        </div>
+
+        <div class="card-occult rounded-2xl p-4 sm:p-5 space-y-2.5">
+          <h3 class="font-display text-sm uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+            Tabla de Progresión del Médium (1–20)
+          </h3>
+          <div class="overflow-x-auto max-h-64">
+            <table class="w-full text-xs text-left border-collapse tabular-nums">
+              <thead class="sticky top-0 bg-slate-900 text-slate-400">
+                <tr>
+                  <th class="py-1.5 px-2">Niv</th>
+                  <th class="py-1.5 px-2">BAB</th>
+                  <th class="py-1.5 px-2">F/R/V</th>
+                  <th class="py-1.5 px-2">Bono Esp.</th>
+                  <th class="py-1.5 px-2">Oleada</th>
+                  <th class="py-1.5 px-2">Hito</th>
+                </tr>
+              </thead>
+              <tbody id="progression-table-body" class="divide-y divide-slate-800/70"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       MODALES PERSONALIZADOS (EXPORTAR, IMPORTAR, REINICIAR)
+       ========================================================= -->
+  <div id="modal-export" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="card-occult rounded-2xl max-w-lg w-full p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-display text-base font-bold text-white">Exportar Ficha (JSON)</h3>
+        <button onclick="closeModal('modal-export')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <textarea id="export-json-text" readonly rows="8"
+        class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none"></textarea>
+      <div class="flex flex-wrap justify-end gap-2">
+        <button onclick="copyExportJson()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition">📋 Copiar</button>
+        <button onclick="downloadExportJson()" class="px-4 py-2 rounded-xl accent-bg text-slate-950 text-xs font-bold hover:brightness-110 transition">💾 Descargar .json</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-import" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="card-occult rounded-2xl max-w-lg w-full p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-display text-base font-bold text-white">Importar Ficha (JSON)</h3>
+        <button onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-2">Selecciona un archivo .json o pega el contenido:</label>
+        <input type="file" id="import-file-input" accept=".json" onchange="handleImportFile(event)"
+          class="block w-full text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-white hover:file:bg-slate-700 mb-3" />
+        <textarea id="import-json-text" rows="7" placeholder='{"name": "...", ...}'
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 accent-ring"></textarea>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('modal-import')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">Cancelar</button>
+        <button onclick="confirmImportJson()" class="px-4 py-2 rounded-xl accent-bg text-slate-950 text-xs font-bold hover:brightness-110">Importar Ficha</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-reset" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="card-occult rounded-2xl max-w-md w-full p-5 space-y-4 border-rose-900/60">
+      <h3 class="font-display text-base font-bold text-rose-300">¿Reiniciar toda la ficha?</h3>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        Se restaurarán todos los atributos, armas precargadas, rangos de habilidades y conjuros al estado inicial de nivel 1.
+      </p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('modal-reset')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">Cancelar</button>
+        <button onclick="confirmResetSheet()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white">Sí, reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Toasts -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- =========================================================
+       MOTOR JAVASCRIPT COMPLETO (PF1E MÉDIUM + ARMAS)
+       ========================================================= -->
+  <script>
+    /* =====================================================================
+       1. CONSTANTES Y TABLAS DE PATHFINDER 1E
+       ===================================================================== */
+    const STORAGE_KEY = 'pf1e_medium_sheet_v3';
+
+    const MEDIUM_SPELLS_PER_DAY = {
+      1: [0,0,0,0], 2: [0,0,0,0], 3: [0,0,0,0], 4: [1,0,0,0], 5: [2,0,0,0],
+      6: [2,0,0,0], 7: [3,1,0,0], 8: [3,2,0,0], 9: [4,2,0,0], 10: [4,3,1,0],
+      11: [4,3,2,0], 12: [5,4,2,0], 13: [5,4,3,1], 14: [5,4,3,2], 15: [5,5,4,2],
+      16: [5,5,4,3], 17: [5,5,4,3], 18: [5,5,5,4], 19: [5,5,5,4], 20: [5,5,5,5]
+    };
+
+    const ABILITIES = [
+      { key: 'str', label: 'FUE', name: 'Fuerza' },
+      { key: 'dex', label: 'DES', name: 'Destreza' },
+      { key: 'con', label: 'CON', name: 'Constitución' },
+      { key: 'int', label: 'INT', name: 'Inteligencia' },
+      { key: 'wis', label: 'SAB', name: 'Sabiduría' },
+      { key: 'cha', label: 'CAR', name: 'Carisma' }
+    ];
+
+    const SIZE_MODS = {
+      small: { acAtk: 1, cmbCmd: -1, stealth: 4, label: 'Pequeño' },
+      medium: { acAtk: 0, cmbCmd: 0, stealth: 0, label: 'Mediano' },
+      large: { acAtk: -1, cmbCmd: 1, stealth: -4, label: 'Grande' }
+    };
+
+    // Paleta exacta solicitada por espíritu
+    const SPIRITS = {
+      none: {
+        id: 'none', name: 'Sin Espíritu', short: 'Ninguno', icon: '✦',
+        theme: { accent: '#94a3b8', soft: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.42)', glow: 'rgba(148,163,184,0.16)', text: '#cbd5e1' },
+        subtitle: 'Aún no has realizado una sesión de espiritismo hoy.',
+        boon: 'Ninguno activo.',
+        proficiencies: 'Competencias base de Médium: armas sencillas, armaduras ligeras y medias.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Sin espíritu', desc: 'Canaliza uno de los seis espíritus legendarios para obtener poderes y bonos automáticos.' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Sin espíritu', desc: 'Se desbloquea a nivel 6 de Médium.' },
+          { tier: 'Mayor', minLevel: 11, name: 'Sin espíritu', desc: 'Se desbloquea a nivel 11 de Médium.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Sin espíritu', desc: 'Se desbloquea a nivel 17 de Médium.' }
+        ]
+      },
+      archmage: {
+        id: 'archmage', name: 'Archimago', short: 'Archimago', icon: '🔮',
+        theme: { accent: '#3b82f6', soft: 'rgba(59,130,246,0.16)', border: 'rgba(59,130,246,0.52)', glow: 'rgba(59,130,246,0.26)', text: '#93c5fd' },
+        subtitle: 'Leyenda arcana de intelecto supremo y maestría mágica.',
+        boon: '+2 al daño con conjuros que inflijan daño (una vez por conjuro).',
+        proficiencies: '+Bono de Espíritu a pruebas/habilidades de INT, Concentración y pruebas de Nivel de Lanzador.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Arcano del Archimago', desc: 'Obtienes espacios adicionales de conjuros arcanos (lista Hechicero/Mago): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Oleada Arcana', desc: 'Acepta 1 de Influencia para lanzar un conjuro arcano conocido con +2 al Nivel de Lanzador y +2 a la CD.' },
+          { tier: 'Mayor', minLevel: 11, name: 'Contraconjuro / Maestría Arcana', desc: 'Puedes usar disipar magia como acción inmediata aceptando Influencia y accedes a círculos arcanos superiores.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Conocimiento Legendario', desc: 'Accedes a conjuros arcanos de nivel 5 y 6 mediante tus espacios del Archimago.' }
+        ]
+      },
+      champion: {
+        id: 'champion', name: 'Campeón', short: 'Campeón', icon: '⚔️',
+        theme: { accent: '#ef4444', soft: 'rgba(239,68,68,0.16)', border: 'rgba(239,68,68,0.52)', glow: 'rgba(239,68,68,0.26)', text: '#fca5a5' },
+        subtitle: 'Guerrero mítico de precisión letal y poderío físico.',
+        boon: '+2 a todas las tiradas de daño no mágico (armas cuerpo a cuerpo y a distancia).',
+        proficiencies: 'Competencia con todas las armas marciales y 1 arma exótica. +Bono de Espíritu a Ataque, Daño no mágico, Fortaleza y pruebas/habilidades de FUE.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Destreza del Campeón', desc: 'Competencia con todas las armas marciales y 1 arma exótica elegida en la sesión.' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Ataque Súbito (Sudden Attack)', desc: 'Al realizar un ataque completo puedes hacer 1 ataque adicional con tu bonificador máximo de ataque (disponible como toggle en Armas y Combate).' },
+          { tier: 'Mayor', minLevel: 11, name: 'Asalto Veloz', desc: 'Usa una acción rápida aceptando 1 de Influencia para moverte y realizar un ataque completo devastador.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Crítico Legendario', desc: 'Confirmas automáticamente críticos y puedes aceptar Influencia para maximizar el daño de un impacto.' }
+        ]
+      },
+      guardian: {
+        id: 'guardian', name: 'Guardián', short: 'Guardián', icon: '🛡️',
+        theme: { accent: '#f59e0b', soft: 'rgba(245,158,11,0.16)', border: 'rgba(245,158,11,0.52)', glow: 'rgba(245,158,11,0.24)', text: '#fcd34d' },
+        subtitle: 'Baluarte inquebrantable que protege a sus aliados.',
+        boon: '+1 a la Defensa contra Maniobras de Combate (DMC / CMD).',
+        proficiencies: 'Competencia con armaduras pesadas y todos los escudos. +Bono de Espíritu a CA, DMC, pruebas de CON, Fortaleza y Reflejos.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Armadura del Guardián', desc: 'Competencia con armaduras pesadas y todos los escudos (incluido pavés).' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Absorber Golpe', desc: 'Como acción inmediata aceptando Influencia, rediriges daño de un aliado adyacente hacia ti con RD temporal.' },
+          { tier: 'Mayor', minLevel: 11, name: 'Cuerpo de Bastión', desc: 'Obtienes reducción de daño (RD/—) y resistencia contra aturdimiento y críticos.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Guardián Legendario', desc: 'Como acción inmediata aceptando Influencia, otorgas inmunidad breve al daño a ti y a tus aliados cercanos.' }
+        ]
+      },
+      hierophant: {
+        id: 'hierophant', name: 'Hierofante', short: 'Hierofante', icon: '🌿',
+        theme: { accent: '#10b981', soft: 'rgba(16,185,129,0.16)', border: 'rgba(16,185,129,0.52)', glow: 'rgba(16,185,129,0.24)', text: '#6ee7b7' },
+        subtitle: 'Conducto divino de sanación, fe y sabiduría ancestral.',
+        boon: '+2 PG curados al usar conjuros o habilidades de curación.',
+        proficiencies: '+Bono de Espíritu a pruebas/habilidades de SAB, Voluntad y Concentración.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Oleada Divina', desc: 'Obtienes espacios adicionales de conjuros divinos (lista Clérigo/Oráculo): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Canalizar Energía', desc: 'Canalizas energía positiva o negativa como un clérigo de tu nivel de Médium (1 + mod CAR veces/día).' },
+          { tier: 'Mayor', minLevel: 11, name: 'Sanación Inspirada', desc: 'Acepta 1 de Influencia para potenciar curaciones o eliminar estados perjudiciales.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Milagro Legendario', desc: 'Accedes a conjuros divinos de nivel 5 y 6 y efectos de sanación masiva.' }
+        ]
+      },
+      marshal: {
+        id: 'marshal', name: 'Mariscal', short: 'Mariscal', icon: '👑',
+        theme: { accent: '#a855f7', soft: 'rgba(168,85,247,0.16)', border: 'rgba(168,85,247,0.52)', glow: 'rgba(168,85,247,0.26)', text: '#d8b4fe' },
+        subtitle: 'Líder carismático que inspira grandeza y coordina la victoria.',
+        boon: '+1 adicional a todas las tiradas de Oleada Espiritual.',
+        proficiencies: '+Bono de Espíritu a pruebas/habilidades de CAR, Iniciativa, Voluntad y apoyo grupal con Oleada Espiritual.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Órdenes del Mariscal', desc: 'Puedes otorgar tu Oleada Espiritual a aliados a 30 pies como acción inmediata, sumando Bono de Espíritu + 1.' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Inspiración Decisiva', desc: 'Otorgas a tus aliados bonos de competencia a ataques, salvaciones o habilidades aceptando Influencia.' },
+          { tier: 'Mayor', minLevel: 11, name: 'Acción Coordinada', desc: 'Permites a un aliado realizar una acción de movimiento o ataque extra fuera de su turno aceptando Influencia.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Presencia Legendaria', desc: 'Tu Oleada Espiritual puede afectar a múltiples aliados a la vez y otorgar un turno decisivo.' }
+        ]
+      },
+      trickster: {
+        id: 'trickster', name: 'Embaucador', short: 'Embaucador', icon: '🎭',
+        theme: { accent: '#06b6d4', soft: 'rgba(6,182,212,0.16)', border: 'rgba(6,182,212,0.52)', glow: 'rgba(6,182,212,0.26)', text: '#67e8f9' },
+        subtitle: 'Maestro del engaño, la agilidad y el talento universal.',
+        boon: 'Elige 1 habilidad en Habilidades: obtiene +1 y se vuelve habilidad de clase.',
+        proficiencies: '+Bono de Espíritu a pruebas/habilidades de DES, Reflejos e Iniciativa. Todas las habilidades pueden usarse sin entrenar.',
+        powers: [
+          { tier: 'Menor', minLevel: 1, name: 'Filo del Embaucador (Trickster\'s Edge)', desc: 'Puedes usar cualquier habilidad sin entrenar. Además eliges 2 habilidades (en Habilidades) que ganan rangos máximos (= nivel) y son de clase.' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Ataque Furtivo / Sorpresa', desc: 'Obtienes Ataque Furtivo (+1d6 cada 3 niveles de Médium) y puedes distraer enemigos para negarles DES.' },
+          { tier: 'Mayor', minLevel: 11, name: 'Evasión / Esquiva Asombrosa', desc: 'Obtienes Evasión y puedes aceptar Influencia para repetir una tirada de habilidad o Reflejos fallida.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Maestría Legendaria', desc: 'Tiras dos veces y eliges el mejor resultado en tus pruebas de habilidades clave.' }
+        ]
+      }
+    };
+
+    // 35 Habilidades oficiales de PF1e (acp: true indica que aplica penalización de armadura)
+    const SKILLS_LIST = [
+      { id: 'acrobatics', name: 'Acrobacias', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'craft', name: 'Artesanía', ability: 'int', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'sense_motive', name: 'Averiguar Intenciones', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'spellcraft', name: 'Conocimiento de Conjuros', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'heal', name: 'Curar', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'diplomacy', name: 'Diplomacia', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'disguise', name: 'Disfrazarse', ability: 'cha', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'bluff', name: 'Engañar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'escape_artist', name: 'Escapismo', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'perform', name: 'Interpretar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'intimidate', name: 'Intimidar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'disable_device', name: 'Inutilizar Mecanismo', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
+      { id: 'sleight_of_hand', name: 'Juego de Manos', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
+      { id: 'linguistics', name: 'Lingüística', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'ride', name: 'Montar', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'swim', name: 'Nadar', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'perception', name: 'Percepción', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'profession', name: 'Profesión', ability: 'wis', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'know_arcana', name: 'Saber (Arcano)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'know_dungeoneering', name: 'Saber (Dungeons)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_geography', name: 'Saber (Geografía)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_history', name: 'Saber (Historia)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_engineering', name: 'Saber (Ingeniería)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_local', name: 'Saber (Local)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_nature', name: 'Saber (Naturaleza)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_nobility', name: 'Saber (Nobleza)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_planes', name: 'Saber (Planos)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'know_religion', name: 'Saber (Religión)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'stealth', name: 'Sigilo', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'survival', name: 'Supervivencia', ability: 'wis', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'appraise', name: 'Tasación', ability: 'int', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'handle_animal', name: 'Trato con Animales', ability: 'cha', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'climb', name: 'Trepar', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'use_magic_device', name: 'Usar Objeto Mágico', ability: 'cha', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'fly', name: 'Volar', ability: 'dex', classSkill: true, trainedOnly: false, acp: true }
+    ];
+
+    /* =====================================================================
+       2. ESTADO INICIAL (CON LAS 4 ARMAS PRECARGADAS)
+       ===================================================================== */
+    function createDefaultWeapons() {
+      return [
+        {
+          id: 'w_comp_bow',
+          name: 'Composite Longbow (Arco Compuesto)',
+          type: 'bow', // bow | crossbow | melee1h | melee2h
+          dice: '1d8',
+          critMin: 20,
+          critMult: 3,
+          damageType: 'Perforante',
+          enhancement: 1, // -1 = Masterwork (+1 Atk, 0 Dmg), 0..5 = mágico
+          strRating: 2,
+          weaponFocus: true,
+          rapidReload: true,
+          twoHandedGrip: false,
+          extraDice: '',
+          extraAtk: 0,
+          extraDmg: 0,
+          expanded: false
+        },
+        {
+          id: 'w_crossbow',
+          name: 'Crossbow (Heavy)',
+          type: 'crossbow',
+          dice: '1d10',
+          critMin: 19,
+          critMult: 2,
+          damageType: 'Perforante',
+          enhancement: 0,
+          strRating: 0,
+          weaponFocus: false,
+          rapidReload: true,
+          twoHandedGrip: false,
+          extraDice: '',
+          extraAtk: 0,
+          extraDmg: 0,
+          expanded: false
+        },
+        {
+          id: 'w_greatsword',
+          name: 'Greatsword (Espadón)',
+          type: 'melee2h',
+          dice: '2d6',
+          critMin: 19,
+          critMult: 2,
+          damageType: 'Cortante',
+          enhancement: 0,
+          strRating: 0,
+          weaponFocus: false,
+          rapidReload: false,
+          twoHandedGrip: true,
+          extraDice: '',
+          extraAtk: 0,
+          extraDmg: 0,
+          expanded: false
+        },
+        {
+          id: 'w_morningstar',
+          name: 'Morningstar',
+          type: 'melee1h',
+          dice: '1d8',
+          critMin: 20,
+          critMult: 2,
+          damageType: 'Contundente y Perforante (B & P)',
+          enhancement: 0,
+          strRating: 0,
+          weaponFocus: false,
+          rapidReload: false,
+          twoHandedGrip: false,
+          extraDice: '',
+          extraAtk: 0,
+          extraDmg: 0,
+          expanded: false
+        }
+      ];
+    }
+
+    function createDefaultState() {
+      const skillsObj = {};
+      SKILLS_LIST.forEach(s => {
+        skillsObj[s.id] = { ranks: 0, misc: 0, classOverride: s.classSkill };
+      });
+
+      return {
+        name: 'Vaelen el Médium',
+        race: 'Humano',
+        alignment: 'NB',
+        size: 'medium',
+        speed: '30 pies',
+        level: 6,
+        favoredClass: 'hp',
+        spirit: 'champion',
+        influence: 1,
+        tabooAccepted: false,
+        tabooUsesLeft: 2,
+        extraSkillRanks: 0,
+        spellDcMisc: 0,
+        tricksterEdgeSkill1: 'disable_device',
+        tricksterEdgeSkill2: 'perception',
+        tricksterBoonSkill: 'stealth',
+        abilities: {
+          str: { base: 14, misc: 0 },
+          dex: { base: 16, misc: 2 },
+          con: { base: 12, misc: 0 },
+          int: { base: 12, misc: 0 },
+          wis: { base: 10, misc: 0 },
+          cha: { base: 14, misc: 0 }
+        },
+        hp: { autoAvg: true, baseRolled: 33, misc: 0, current: 45 },
+        ac: { armor: 4, shield: 0, natural: 0, deflect: 1, misc: 0, acp: 0 },
+        saves: { fortMisc: 1, refMisc: 1, willMisc: 1 },
+        combat: { initMisc: 0, meleeMisc: 0, rangedMisc: 0, cmbMisc: 0, cmdMisc: 0 },
+        combatToggles: {
+          pointBlankShot: true,
+          hasPreciseShot: true,
+          targetInMelee: false,
+          rapidShot: true,
+          deadlyAim: true,
+          manyshot: false,
+          clusteredShots: false,
+          powerAttack: false,
+          haste: false,
+          suddenAttack: true,
+          tempAtk: 0,
+          tempDmg: 0
+        },
+        weapons: createDefaultWeapons(),
+        skills: skillsObj,
+        spellsUsed: { 1: 0, 2: 0, 3: 0, 4: 0 },
+        spiritSpellsUsed: { 1: 0, 2: 0, 3: 0, 4: 0 }
+      };
+    }
+
+    function loadState() {
+      const defaults = createDefaultState();
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaults;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return defaults;
+
+        const merged = {
+          ...defaults,
+          ...parsed,
+          abilities: { ...defaults.abilities, ...(parsed.abilities || {}) },
+          hp: { ...defaults.hp, ...(parsed.hp || {}) },
+          ac: { ...defaults.ac, ...(parsed.ac || {}) },
+          saves: { ...defaults.saves, ...(parsed.saves || {}) },
+          combat: { ...defaults.combat, ...(parsed.combat || {}) },
+          combatToggles: { ...defaults.combatToggles, ...(parsed.combatToggles || {}) },
+          spellsUsed: { ...defaults.spellsUsed, ...(parsed.spellsUsed || {}) },
+          spiritSpellsUsed: { ...defaults.spiritSpellsUsed, ...(parsed.spiritSpellsUsed || {}) },
+          skills: { ...defaults.skills }
+        };
+
+        if (parsed.skills && typeof parsed.skills === 'object') {
+          SKILLS_LIST.forEach(s => {
+            if (parsed.skills[s.id]) {
+              merged.skills[s.id] = { ...defaults.skills[s.id], ...parsed.skills[s.id] };
+            }
+          });
+        }
+
+        if (Array.isArray(parsed.weapons) && parsed.weapons.length > 0) {
+          merged.weapons = parsed.weapons;
+        }
+
+        return merged;
+      } catch (e) {
+        return defaults;
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Ignorar errores de cuota o modo privado en localStorage
+      }
+    }
+
+    let state = loadState();
+    let activeTab = 'summary';
+    // Cálculo completo de un Arma (Ataque estándar, Ataque Completo, Daño y Desglose con píldoras en vivo)
+    function calculateWeaponStats(w) {
+      const bab = getBAB(state.level);
+      const scale = 1 + Math.floor(bab / 4); // Para Deadly Aim y Power Attack
+      const strMod = getAbilityMod('str');
+      const dexMod = getAbilityMod('dex');
+      const sizeMod = (SIZE_MODS[state.size] || SIZE_MODS.medium).acAtk;
+      const sb = getActiveSpiritBonus();
+      const sp = state.spirit;
+      const t = state.combatToggles;
+
+      const isRanged = w.type === 'bow' || w.type === 'crossbow';
+      const isBow = w.type === 'bow';
+      const isCrossbow = w.type === 'crossbow';
+      const isTwoHanded = w.type === 'melee2h' || (w.type === 'melee1h' && !!w.twoHandedGrip);
+
+      // Mejora mágica (-1 = Masterwork: +1 Atk, +0 Dmg)
+      const enhVal = parseInt(w.enhancement) || 0;
+      const enhAtk = enhVal === -1 ? 1 : Math.max(0, enhVal);
+      const enhDmg = enhVal > 0 ? enhVal : 0;
+
+      // Desglose de Ataque (píldoras con tipo pos/neg/neutral)
+      const atkPills = [];
+      let stdAtk = bab;
+      atkPills.push({ label: `BAB ${fmtSign(bab)}`, type: 'neutral' });
+
+      const abMod = isRanged ? dexMod : strMod;
+      stdAtk += abMod;
+      atkPills.push({ label: `${isRanged ? 'DEX' : 'STR'} ${fmtSign(abMod)}`, type: abMod > 0 ? 'pos' : abMod < 0 ? 'neg' : 'neutral' });
+
+      if (sizeMod !== 0) {
+        stdAtk += sizeMod;
+        atkPills.push({ label: `Size ${fmtSign(sizeMod)}`, type: sizeMod > 0 ? 'pos' : 'neg' });
+      }
+      if (enhAtk > 0) {
+        stdAtk += enhAtk;
+        atkPills.push({ label: enhVal === -1 ? 'Masterwork +1' : `Magic +${enhAtk}`, type: 'pos' });
+      }
+      if (w.weaponFocus) {
+        stdAtk += 1;
+        atkPills.push({ label: 'Weapon Focus +1', type: 'pos' });
+      }
+      if (sp === 'champion' && sb > 0) {
+        stdAtk += sb;
+        atkPills.push({ label: `Spirit +${sb}`, type: 'pos' });
+      }
+      if (isRanged && t.pointBlankShot) {
+        stdAtk += 1;
+        atkPills.push({ label: 'Point-Blank Shot +1', type: 'pos' });
+      }
+      if (isRanged && t.targetInMelee) {
+        if (!t.hasPreciseShot) {
+          stdAtk -= 4;
+          atkPills.push({ label: 'Target in Melee -4', type: 'neg' });
+        } else {
+          atkPills.push({ label: 'Precise Shot (0)', type: 'neutral' });
+        }
+      }
+      if (isRanged && t.deadlyAim) {
+        stdAtk -= scale;
+        atkPills.push({ label: `Deadly Aim -${scale}`, type: 'neg' });
+      }
+      if (!isRanged && t.powerAttack) {
+        stdAtk -= scale;
+        atkPills.push({ label: `Power Attack -${scale}`, type: 'neg' });
+      }
+      if (isBow && strMod < (parseInt(w.strRating) || 0)) {
+        stdAtk -= 2;
+        atkPills.push({ label: 'STR < Rating -2', type: 'neg' });
+      }
+      if (t.haste) {
+        stdAtk += 1;
+        atkPills.push({ label: 'Haste +1', type: 'pos' });
+      }
+      const globalCombatMisc = isRanged ? (parseInt(state.combat.rangedMisc) || 0) : (parseInt(state.combat.meleeMisc) || 0);
+      if (globalCombatMisc !== 0) {
+        stdAtk += globalCombatMisc;
+        atkPills.push({ label: `Misc ${fmtSign(globalCombatMisc)}`, type: globalCombatMisc > 0 ? 'pos' : 'neg' });
+      }
+      if (t.tempAtk !== 0) {
+        stdAtk += t.tempAtk;
+        atkPills.push({ label: `Temp Atk ${fmtSign(t.tempAtk)}`, type: t.tempAtk > 0 ? 'pos' : 'neg' });
+      }
+      if (w.extraAtk) {
+        const wa = parseInt(w.extraAtk) || 0;
+        stdAtk += wa;
+        atkPills.push({ label: `Weapon ${fmtSign(wa)}`, type: wa > 0 ? 'pos' : 'neg' });
+      }
+
+      // Desglose de Daño
+      const dmgPills = [{ label: `${w.dice} Base`, type: 'neutral' }];
+      let flatDmg = 0;
+
+      if (isBow) {
+        const rating = Math.max(0, parseInt(w.strRating) || 0);
+        const bowStr = strMod < 0 ? strMod : Math.min(strMod, rating);
+        if (bowStr !== 0) {
+          flatDmg += bowStr;
+          dmgPills.push({ label: `STR ${fmtSign(bowStr)}`, type: bowStr > 0 ? 'pos' : 'neg' });
+        }
+      } else if (!isCrossbow) {
+        const meleeStr = isTwoHanded ? Math.floor(strMod * 1.5) : strMod;
+        if (meleeStr !== 0) {
+          flatDmg += meleeStr;
+          dmgPills.push({ label: `${isTwoHanded ? '1.5×STR' : 'STR'} ${fmtSign(meleeStr)}`, type: meleeStr > 0 ? 'pos' : 'neg' });
+        }
+      }
+
+      if (enhDmg > 0) {
+        flatDmg += enhDmg;
+        dmgPills.push({ label: `Magic +${enhDmg}`, type: 'pos' });
+      }
+      if (sp === 'champion') {
+        if (sb > 0) {
+          flatDmg += sb;
+          dmgPills.push({ label: `Spirit +${sb}`, type: 'pos' });
+        }
+        flatDmg += 2;
+        dmgPills.push({ label: 'Champion Boon +2', type: 'pos' });
+      }
+      if (isRanged && t.pointBlankShot) {
+        flatDmg += 1;
+        dmgPills.push({ label: 'Point-Blank Shot +1', type: 'pos' });
+      }
+      if (isRanged && t.deadlyAim) {
+        const daDmg = 2 * scale;
+        flatDmg += daDmg;
+        dmgPills.push({ label: `Deadly Aim +${daDmg}`, type: 'pos' });
+      }
+      if (!isRanged && t.powerAttack) {
+        const paDmg = (isTwoHanded ? 3 : 2) * scale;
+        flatDmg += paDmg;
+        dmgPills.push({ label: `Power Attack +${paDmg}`, type: 'pos' });
+      }
+      if (t.tempDmg !== 0) {
+        flatDmg += t.tempDmg;
+        dmgPills.push({ label: `Temp Dmg ${fmtSign(t.tempDmg)}`, type: t.tempDmg > 0 ? 'pos' : 'neg' });
+      }
+      if (w.extraDmg) {
+        const wd = parseInt(w.extraDmg) || 0;
+        flatDmg += wd;
+        dmgPills.push({ label: `Weapon ${fmtSign(wd)}`, type: wd > 0 ? 'pos' : 'neg' });
+      }
+      if (w.extraDice) {
+        dmgPills.push({ label: `+${w.extraDice}`, type: 'pos' });
+      }
+
+      // Secuencia de Ataque Completo
+      const isHeavyXbow = isCrossbow && (w.dice === '1d10' || w.name.toLowerCase().includes('heavy'));
+      const canIterative = !isCrossbow || (w.rapidReload && !isHeavyXbow);
+      const canRapidShot = isRanged && t.rapidShot && (isBow || (isCrossbow && w.rapidReload && !isHeavyXbow));
+      const rapidPen = canRapidShot ? -2 : 0;
+      const fullBaseAtk = stdAtk + rapidPen;
+
+      // Mostrar Rapid Shot -2 en las píldoras de ataque del preview si está activo
+      if (canRapidShot) {
+        atkPills.push({ label: 'Rapid Shot -2 (Full)', type: 'neg' });
+      }
+
+      const fullSequence = [];
+      const iterOffsets = canIterative ? getBABIteratives(bab).map(b => b - bab) : [0];
+
+      // 1. Ataque principal (con Manyshot si es Arco)
+      const isManyshotActive = isBow && t.manyshot;
+      fullSequence.push({
+        bonus: fullBaseAtk,
+        tag: isManyshotActive ? 'Manyshot (×2 flechas)' : 'Principal',
+        shortTag: isManyshotActive ? '×2' : '',
+        manyshot: isManyshotActive
+      });
+
+      // 2. Ataque extra por Rapid Shot
+      if (canRapidShot) {
+        fullSequence.push({ bonus: fullBaseAtk, tag: 'Rapid Shot', shortTag: 'RS', manyshot: false });
+      }
+
+      // 3. Ataque extra por Haste
+      if (t.haste && canIterative) {
+        fullSequence.push({ bonus: fullBaseAtk, tag: 'Haste', shortTag: 'Haste', manyshot: false });
+      }
+
+      // 4. Ataque extra por Sudden Attack (Campeón nivel 6+, +2 Atk en el ataque extra)
+      if (sp === 'champion' && state.level >= 6 && t.suddenAttack && canIterative) {
+        fullSequence.push({ bonus: fullBaseAtk + 2, tag: 'Sudden Attack (+2 Atk)', shortTag: 'SA+2', manyshot: false });
+        atkPills.push({ label: 'Sudden Attack +2 (Extra)', type: 'pos' });
+      }
+
+      // 5. Ataques iterativos adicionales (-5, -10...)
+      for (let i = 1; i < iterOffsets.length; i++) {
+        fullSequence.push({ bonus: fullBaseAtk + iterOffsets[i], tag: `Iterativo ${i + 1}`, shortTag: '', manyshot: false });
+      }
+
+      // Calcular rango min-max de daño
+      const parsedDice = parseDiceExpr(w.dice);
+      const parsedExtra = w.extraDice ? parseDiceExpr(w.extraDice) : null;
+      const minDmg = Math.max(1, parsedDice.count + flatDmg) + (parsedExtra ? parsedExtra.count : 0);
+      const maxDmg = Math.max(1, parsedDice.count * parsedDice.sides + flatDmg) + (parsedExtra ? parsedExtra.count * parsedExtra.sides : 0);
+
+      const dmgFormula = `${w.dice}${flatDmg !== 0 ? (flatDmg > 0 ? ` + ${flatDmg}` : ` - ${Math.abs(flatDmg)}`) : ''}${w.extraDice ? ` + ${w.extraDice}` : ''}`;
+
+      const reloadLabel = isCrossbow
+        ? (w.rapidReload ? (isHeavyXbow ? 'Recarga: Mov.' : 'Recarga: Libre') : (isHeavyXbow ? 'Recarga: Asalto Comp.' : 'Recarga: Mov.'))
+        : '';
+
+      return {
+        stdAtk,
+        atkPills,
+        flatDmg,
+        dmgPills,
+        dmgFormula,
+        minDmg,
+        maxDmg,
+        fullSequence,
+        canRapidShot,
+        isManyshotActive,
+        isRanged,
+        isBow,
+        isCrossbow,
+        isTwoHanded,
+        reloadLabel
+      };
+    }
+
+    function parseDiceExpr(expr) {
+      const m = String(expr || '1d6').trim().match(/(\d+)\s*[dD]\s*(\d+)/);
+      if (!m) return { count: 1, sides: 6 };
+      return { count: Math.max(1, parseInt(m[1])), sides: Math.max(2, parseInt(m[2])) };
+    }
+
+    /* =====================================================================
+       4. ACCIONES DEL USUARIO
+       ===================================================================== */
+    function fmtSign(num) {
+      return num >= 0 ? `+${num}` : `${num}`;
+    }
+
+    function getAbilityTotal(key) {
+      const a = state.abilities[key] || { base: 10, misc: 0 };
+      return (parseInt(a.base) || 0) + (parseInt(a.misc) || 0);
+    }
+
+    function getAbilityMod(key) {
+      return Math.floor((getAbilityTotal(key) - 10) / 2);
+    }
+
+    function getBAB(level) {
+      return Math.floor(level * 0.75);
+    }
+
+    function getBABIteratives(bab) {
+      const arr = [bab];
+      let next = bab - 5;
+      while (next > 0) {
+        arr.push(next);
+        next -= 5;
+      }
+      return arr;
+    }
+
+    function getSpiritBonusRaw(level) {
+      if (level >= 20) return 6;
+      if (level >= 16) return 5;
+      if (level >= 12) return 4;
+      if (level >= 8) return 3;
+      if (level >= 4) return 2;
+      return 1;
+    }
+
+    function getActiveSpiritBonus() {
+      return state.spirit === 'none' ? 0 : getSpiritBonusRaw(state.level);
+    }
+
+    function getSurgeDie(level) {
+      if (level >= 20) return { label: '1d10', max: 10 };
+      if (level >= 10) return { label: '1d8', max: 8 };
+      return { label: '1d6', max: 6 };
+    }
+
+    function getBaseSaves(level) {
+      return {
+        fort: Math.floor(level / 3),
+        ref: Math.floor(level / 3),
+        will: 2 + Math.floor(level / 2)
+      };
+    }
+
+    function getBonusSpellsByCha(spellLevel, chaMod) {
+      if (spellLevel < 1 || chaMod < spellLevel) return 0;
+      return Math.floor((chaMod - spellLevel) / 4) + 1;
+    }
+
+    function getMaxHP() {
+      const lvl = state.level;
+      const conMod = getAbilityMod('con');
+      const base = state.hp.autoAvg ? (8 + (lvl - 1) * 5) : (parseInt(state.hp.baseRolled) || 0);
+      const fav = state.favoredClass === 'hp' ? lvl : 0;
+      const misc = parseInt(state.hp.misc) || 0;
+      const total = Math.max(lvl, base + (conMod * lvl) + fav + misc);
+      return { total, base, conTotal: conMod * lvl, fav, misc };
+    }
+
+    function getSpiritAbilityBonusInfo(abilityKey) {
+      const sp = state.spirit;
+      const sb = getActiveSpiritBonus();
+      if (sb === 0) return null;
+      if (sp === 'archmage' && abilityKey === 'int') return { bonus: sb, label: 'Pruebas/Hab. INT' };
+      if (sp === 'champion' && abilityKey === 'str') return { bonus: sb, label: 'Pruebas/Hab. FUE' };
+      if (sp === 'guardian' && abilityKey === 'con') return { bonus: sb, label: 'Pruebas CON' };
+      if (sp === 'hierophant' && abilityKey === 'wis') return { bonus: sb, label: 'Pruebas/Hab. SAB' };
+      if (sp === 'marshal' && abilityKey === 'cha') return { bonus: sb, label: 'Pruebas/Hab. CAR' };
+      if (sp === 'trickster' && abilityKey === 'dex') return { bonus: sb, label: 'Pruebas/Hab. DES' };
+      return null;
+    }
+
+    function isTricksterEdge(skillId) {
+      return state.spirit === 'trickster' && (state.tricksterEdgeSkill1 === skillId || state.tricksterEdgeSkill2 === skillId);
+    }
+
+    function isSkillClassSkill(skill) {
+      if (state.skills[skill.id]?.classOverride) return true;
+      if (state.spirit === 'trickster') {
+        if (isTricksterEdge(skill.id) || state.tricksterBoonSkill === skill.id) return true;
+      }
+      return false;
+    }
+
+    function getSkillSpiritBonus(skill) {
+      const sb = getActiveSpiritBonus();
+      if (sb === 0) return { spirit: 0, boon: 0 };
+      let spiritBonus = 0;
+      let boonBonus = 0;
+
+      if (state.spirit === 'archmage' && skill.ability === 'int') spiritBonus = sb;
+      else if (state.spirit === 'champion' && skill.ability === 'str') spiritBonus = sb;
+      else if (state.spirit === 'hierophant' && skill.ability === 'wis') spiritBonus = sb;
+      else if (state.spirit === 'marshal' && skill.ability === 'cha') spiritBonus = sb;
+      else if (state.spirit === 'trickster') {
+        if (skill.ability === 'dex') spiritBonus = sb;
+        if (state.tricksterBoonSkill === skill.id) boonBonus = 1;
+      }
+      return { spirit: spiritBonus, boon: boonBonus };
+    }
+
+    function getSkillPointsSummary() {
+      const intMod = getAbilityMod('int');
+      const perLevel = Math.max(1, 4 + intMod);
+      const fav = state.favoredClass === 'skill' ? state.level : 0;
+      const extra = parseInt(state.extraSkillRanks) || 0;
+      const total = (perLevel * state.level) + fav + extra;
+
+      let spent = 0;
+      SKILLS_LIST.forEach(s => {
+        if (!isTricksterEdge(s.id)) {
+          spent += Math.min(state.level, parseInt(state.skills[s.id]?.ranks) || 0);
+        }
+      });
+      return { total, spent, remaining: total - spent, perLevel, fav, extra };
+    }
+
+    /* =====================================================================
+       5. ACCIONES DEL USUARIO
+       ===================================================================== */
+    function applyTheme() {
+      const sp = SPIRITS[state.spirit] || SPIRITS.none;
+      const root = document.documentElement;
+      root.style.setProperty('--accent', sp.theme.accent);
+      root.style.setProperty('--accent-soft', sp.theme.soft);
+      root.style.setProperty('--accent-border', sp.theme.border);
+      root.style.setProperty('--accent-glow', sp.theme.glow);
+      root.style.setProperty('--accent-text', sp.theme.text);
+    }
+
+    function switchTab(tabName) {
+      activeTab = tabName;
+      document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('accent-bg-soft', 'accent-text', 'border', 'accent-border');
+        btn.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60', 'border', 'border-transparent');
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60', 'border-transparent');
+      activeBtn.classList.add('accent-bg-soft', 'accent-text', 'border', 'accent-border');
+    }
+
+    function updateField(field, value) {
+      state[field] = value;
+      saveState();
+      renderAll();
+    }
+
+    function updateNested(section, key, value) {
+      state[section][key] = value;
+      saveState();
+      renderAll();
+    }
+
+    function updateAbility(key, field, value) {
+      state.abilities[key][field] = parseInt(value) || 0;
+      saveState();
+      renderAll();
+    }
+
+    function setLevel(val) {
+      const parsed = parseInt(val);
+      if (isNaN(parsed)) return;
+      state.level = Math.max(1, Math.min(20, parsed));
+      SKILLS_LIST.forEach(s => {
+        if (state.skills[s.id].ranks > state.level) state.skills[s.id].ranks = state.level;
+      });
+      saveState();
+      renderAll();
+    }
+
+    function changeLevel(delta) { setLevel(state.level + delta); }
+
+    function selectSpirit(spiritId) {
+      state.spirit = spiritId;
+      if (spiritId === 'none') state.influence = 0;
+      else if (state.influence === 0) state.influence = 1;
+      saveState();
+      renderAll();
+      showToast(`Espíritu canalizado: ${SPIRITS[spiritId].name}`);
+    }
+
+    function setInfluence(val) {
+      state.influence = Math.max(0, Math.min(5, val));
+      saveState();
+      renderAll();
+    }
+
+    function changeInfluence(delta) { setInfluence(state.influence + delta); }
+
+    function toggleTaboo(checked) {
+      state.tabooAccepted = checked;
+      if (checked && state.tabooUsesLeft === 0) state.tabooUsesLeft = 2;
+      saveState();
+      renderAll();
+    }
+
+    function useSpiritSurge(freeTaboo) {
+      if (state.spirit === 'none') {
+        showToast('Canaliza un espíritu primero.', 'warn');
+        return;
+      }
+      if (freeTaboo) {
+        if (!state.tabooAccepted || state.tabooUsesLeft <= 0) return;
+        state.tabooUsesLeft -= 1;
+      } else {
+        if (state.influence >= 5) {
+          showToast('Influencia en 5/5: el espíritu controla tu personaje.', 'danger');
+          return;
+        }
+        state.influence = Math.min(5, state.influence + 1);
+      }
+
+      const die = getSurgeDie(state.level);
+      const extra = state.spirit === 'marshal' ? (getActiveSpiritBonus() + 1) : 0;
+
+      saveState();
+      renderAll();
+
+      const resBox = document.getElementById('surge-roll-result');
+      const resText = document.getElementById('surge-roll-text');
+      resBox.classList.remove('hidden');
+      resText.innerHTML = `⚡ <strong>Oleada Espiritual activada ${freeTaboo ? '(Tabú Gratis)' : '(+1 Influencia)'}:</strong> tira <span class="accent-text font-bold text-sm">+${die.label}${extra ? ` + ${extra}` : ''}</span> en físico y súmalo a tu tirada.`;
+
+      if (!freeTaboo && state.influence === 5) showToast('¡Influencia 5! El espíritu toma el control (PNJ).', 'danger');
+      else if (!freeTaboo && state.influence >= 3) showToast(`Influencia en ${state.influence}/5: penalización activa.`, 'warn');
+    }
+
+    function newSeance() {
+      state.influence = state.spirit === 'none' ? 0 : 1;
+      state.tabooUsesLeft = 2;
+      state.spellsUsed = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      state.spiritSpellsUsed = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      state.hp.current = getMaxHP().total;
+      saveState();
+      renderAll();
+      showToast('Nueva Sesión completada. Influencia, espacios y PG restaurados.');
+    }
+
+    function adjustCurrentHp(delta) {
+      state.hp.current = (parseInt(state.hp.current) || 0) + delta;
+      saveState();
+      renderAll();
+    }
+
+    function healFullHp() {
+      state.hp.current = getMaxHP().total;
+      saveState();
+      renderAll();
+    }
+
+    function toggleCombatOption(key) {
+      state.combatToggles[key] = !state.combatToggles[key];
+      saveState();
+      renderWeaponsTab();
+    }
+
+    function adjustTempCombat(key, delta) {
+      state.combatToggles[key] = (parseInt(state.combatToggles[key]) || 0) + delta;
+      saveState();
+      renderWeaponsTab();
+    }
+
+    // Gestión de Armas
+    function updateWeapon(id, field, value) {
+      const w = state.weapons.find(x => x.id === id);
+      if (!w) return;
+      w[field] = value;
+      saveState();
+      renderWeaponsTab();
+    }
+
+    function applyWeaponPreset(id, preset) {
+      const w = state.weapons.find(x => x.id === id);
+      if (!w) return;
+      if (preset === 'heavy_xbow') {
+        w.name = 'Crossbow (Heavy)'; w.type = 'crossbow'; w.dice = '1d10'; w.critMin = 19; w.critMult = 2; w.damageType = 'Perforante';
+      } else if (preset === 'light_xbow') {
+        w.name = 'Crossbow (Light)'; w.type = 'crossbow'; w.dice = '1d8'; w.critMin = 19; w.critMult = 2; w.damageType = 'Perforante';
+      }
+      saveState();
+      renderWeaponsTab();
+    }
+
+    function toggleWeaponExpand(id) {
+      const w = state.weapons.find(x => x.id === id);
+      if (!w) return;
+      w.expanded = !w.expanded;
+      saveState();
+      renderWeaponsTab();
+    }
+
+    function addCustomWeapon() {
+      state.weapons.push({
+        id: 'w_' + Date.now(),
+        name: 'Nueva Arma',
+        type: 'bow',
+        dice: '1d8',
+        critMin: 20,
+        critMult: 2,
+        damageType: 'Perforante',
+        enhancement: 0,
+        strRating: 0,
+        weaponFocus: false,
+        rapidReload: true,
+        extraDice: '',
+        extraAtk: 0,
+        extraDmg: 0,
+        expanded: true
+      });
+      saveState();
+      renderWeaponsTab();
+      showToast('Arma personalizada añadida.');
+    }
+
+    function deleteWeapon(id) {
+      state.weapons = state.weapons.filter(w => w.id !== id);
+      saveState();
+      renderWeaponsTab();
+      showToast('Arma eliminada.');
+    }
+
+    // Gestión de Habilidades
+    function setSkillRank(skillId, newRank) {
+      state.skills[skillId].ranks = Math.max(0, Math.min(state.level, parseInt(newRank) || 0));
+      saveState();
+      renderAll();
+    }
+
+    function changeSkillRank(skillId, delta) {
+      setSkillRank(skillId, (parseInt(state.skills[skillId].ranks) || 0) + delta);
+    }
+
+    function setSkillMisc(skillId, val) {
+      state.skills[skillId].misc = parseInt(val) || 0;
+      saveState();
+      renderAll();
+    }
+
+    function toggleSkillClass(skillId, checked) {
+      state.skills[skillId].classOverride = checked;
+      saveState();
+      renderSkills();
+    }
+
+    // Conjuros
+    function toggleSpellSlot(level, slotIndex, isSpiritSlot) {
+      const store = isSpiritSlot ? state.spiritSpellsUsed : state.spellsUsed;
+      const currentUsed = store[level] || 0;
+      store[level] = slotIndex < currentUsed ? slotIndex : slotIndex + 1;
+      saveState();
+      renderSpells();
+    }
+
+    function restoreAllSpellSlots() {
+      state.spellsUsed = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      state.spiritSpellsUsed = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      saveState();
+      renderSpells();
+      showToast('Espacios de conjuro recuperados.');
+    }
+
+    /* =====================================================================
+       6. RENDERIZADO DE TODAS LAS PESTAÑAS
+       ===================================================================== */
+    function renderAll() {
+      applyTheme();
+      renderHeader();
+      renderSpiritSelector();
+      renderInfluencePanel();
+      renderAbilities();
+      renderCombatAndSurvival();
+      renderWeaponsTab();
+      renderSkills();
+      renderSpells();
+      renderPowersTab();
+      syncStaticInputs();
+    }
+
+    function syncStaticInputs() {
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && document.activeElement !== el) el.value = val;
+      };
+      setVal('input-name', state.name);
+      setVal('input-level', state.level);
+      setVal('input-favored', state.favoredClass);
+      setVal('input-race', state.race);
+      setVal('input-alignment', state.alignment || '');
+      setVal('input-size', state.size);
+      setVal('input-speed', state.speed);
+      setVal('input-extra-skill-ranks', state.extraSkillRanks);
+      setVal('input-spell-dc-misc', state.spellDcMisc);
+
+      document.getElementById('input-taboo').checked = state.tabooAccepted;
+      document.getElementById('input-hp-auto').checked = state.hp.autoAvg;
+      document.getElementById('input-hp-base').disabled = state.hp.autoAvg;
+      setVal('input-hp-base', state.hp.autoAvg ? (8 + (state.level - 1) * 5) : state.hp.baseRolled);
+      setVal('input-hp-misc', state.hp.misc);
+      setVal('input-hp-current', state.hp.current);
+
+      setVal('input-ac-armor', state.ac.armor);
+      setVal('input-ac-shield', state.ac.shield);
+      setVal('input-ac-natural', state.ac.natural);
+      setVal('input-ac-deflect', state.ac.deflect);
+      setVal('input-ac-misc', state.ac.misc);
+      setVal('input-ac-acp', state.ac.acp);
+
+      setVal('input-save-fort', state.saves.fortMisc);
+      setVal('input-save-ref', state.saves.refMisc);
+      setVal('input-save-will', state.saves.willMisc);
+
+      setVal('input-init-misc', state.combat.initMisc);
+      setVal('input-melee-misc', state.combat.meleeMisc);
+      setVal('input-ranged-misc', state.combat.rangedMisc);
+      setVal('input-cmb-misc', state.combat.cmbMisc);
+      setVal('input-cmd-misc', state.combat.cmdMisc);
+
+      setVal('input-temp-atk', state.combatToggles.tempAtk);
+      setVal('input-temp-dmg', state.combatToggles.tempDmg);
+    }
+
+    function renderHeader() {
+      const sp = SPIRITS[state.spirit];
+      const sb = getActiveSpiritBonus();
+      const die = getSurgeDie(state.level);
+      const bab = getBAB(state.level);
+      const babStr = getBABIteratives(bab).map(fmtSign).join('/');
+
+      document.getElementById('header-char-name').textContent = state.name.trim() || 'Médium Sin Nombre';
+      document.getElementById('header-level').textContent = state.level;
+      document.getElementById('header-spirit-icon').textContent = sp.icon;
+      document.getElementById('header-spirit-name').textContent = sp.name;
+      document.getElementById('header-spirit-bonus').textContent = fmtSign(sb);
+      document.getElementById('header-surge-die').textContent = die.label;
+      document.getElementById('header-bab').textContent = babStr;
+
+      document.getElementById('stat-bab-summary').textContent = babStr;
+      document.getElementById('stat-spirit-bonus-summary').textContent = fmtSign(getSpiritBonusRaw(state.level));
+      document.getElementById('stat-surge-summary').textContent = die.label;
+
+      const headerDots = document.getElementById('header-influence-dots');
+      headerDots.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const active = i <= state.influence;
+        let colorClass = 'bg-slate-800 border-slate-700';
+        if (active) {
+          if (state.influence >= 5) colorClass = 'bg-rose-500 border-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.8)]';
+          else if (state.influence >= 3) colorClass = 'bg-amber-400 border-amber-200';
+          else colorClass = 'accent-bg border-white/40';
+        }
+        const btn = document.createElement('button');
+        btn.className = `w-3.5 h-3.5 rounded-full border transition-all ${colorClass}`;
+        btn.onclick = () => setInfluence(i === state.influence ? i - 1 : i);
+        headerDots.appendChild(btn);
+      }
+
+      const infBadge = document.getElementById('header-influence-badge');
+      infBadge.textContent = `${state.influence}/5`;
+      infBadge.className = `text-xs font-bold tabular-nums ml-0.5 ${
+        state.influence >= 5 ? 'text-rose-400' : state.influence >= 3 ? 'text-amber-300' : 'text-slate-300'
+      }`;
+
+      const alertBox = document.getElementById('global-influence-alert');
+      const alertText = document.getElementById('global-influence-alert-text');
+      if (state.influence >= 5) {
+        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 bg-rose-950/90 border border-rose-500/70 text-rose-200';
+        alertText.textContent = `🚨 INFLUENCIA 5/5: ¡${sp.name} ha tomado el control de tu personaje! Pasas a ser PNJ durante 24 horas.`;
+      } else if (state.influence >= 3) {
+        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between gap-2 bg-amber-950/70 border border-amber-500/50 text-amber-200';
+        alertText.textContent = `⚠️ INFLUENCIA ALTA (${state.influence}/5): Sufres la penalización de influencia de ${sp.name}.`;
+      } else {
+        alertBox.className = 'hidden';
+      }
+    }
+
+    function renderSpiritSelector() {
+      const container = document.getElementById('spirit-selector-grid');
+      container.innerHTML = '';
+      Object.values(SPIRITS).forEach(sp => {
+        const isSelected = state.spirit === sp.id;
+        const btn = document.createElement('button');
+        btn.onclick = () => selectSpirit(sp.id);
+        btn.className = `flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all ${
+          isSelected
+            ? 'accent-bg-soft accent-border text-white shadow-md scale-[1.02]'
+            : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
+        }`;
+        btn.innerHTML = `
+          <span class="text-lg mb-0.5">${sp.icon}</span>
+          <span class="text-[11px] font-semibold leading-tight truncate w-full">${sp.short}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderInfluencePanel() {
+      const dots = document.getElementById('panel-influence-dots');
+      dots.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const active = i <= state.influence;
+        let cls = 'bg-slate-800 border-slate-700 text-slate-500';
+        if (active) {
+          if (state.influence >= 5) cls = 'bg-rose-600 border-rose-400 text-white';
+          else if (state.influence >= 3) cls = 'bg-amber-500 border-amber-300 text-slate-950';
+          else cls = 'accent-bg border-white/30 text-slate-950';
+        }
+        const b = document.createElement('button');
+        b.onclick = () => setInfluence(i === state.influence ? i - 1 : i);
+        b.className = `w-7 h-7 rounded-lg border text-xs font-bold tabular-nums transition ${cls}`;
+        b.textContent = i;
+        dots.appendChild(b);
+      }
+
+      const pill = document.getElementById('influence-status-pill');
+      if (state.spirit === 'none') {
+        pill.textContent = 'Sin espíritu';
+        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-400';
+      } else if (state.influence >= 5) {
+        pill.textContent = '¡POSEÍDO (PNJ)!';
+        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-rose-600 text-white font-bold animate-pulse';
+      } else if (state.influence >= 3) {
+        pill.textContent = 'Influencia Fuerte (3+)';
+        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold';
+      } else {
+        pill.textContent = 'Bajo control';
+        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+      }
+
+      document.getElementById('btn-spirit-surge').disabled = state.spirit === 'none' || state.influence >= 5;
+
+      const tabooBox = document.getElementById('taboo-uses-container');
+      const btnTabooSurge = document.getElementById('btn-taboo-surge');
+      if (state.tabooAccepted) {
+        tabooBox.classList.remove('hidden');
+        tabooBox.classList.add('flex');
+        document.getElementById('taboo-uses-count').textContent = `${state.tabooUsesLeft}/2`;
+        btnTabooSurge.classList.toggle('hidden', state.spirit === 'none' || state.tabooUsesLeft <= 0);
+      } else {
+        tabooBox.classList.add('hidden');
+        tabooBox.classList.remove('flex');
+        btnTabooSurge.classList.add('hidden');
+      }
+    }
+
+    function renderAbilities() {
+      const grid = document.getElementById('abilities-grid');
+      grid.innerHTML = '';
+      ABILITIES.forEach(ab => {
+        const total = getAbilityTotal(ab.key);
+        const mod = getAbilityMod(ab.key);
+        const spiritInfo = getSpiritAbilityBonusInfo(ab.key);
+        const card = document.createElement('div');
+        card.className = `rounded-xl p-3 border transition ${spiritInfo ? 'bg-slate-900/95 accent-border' : 'bg-slate-900/70 border-slate-800'}`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <div>
+              <div class="text-xs font-bold tracking-wider ${spiritInfo ? 'accent-text' : 'text-slate-300'}">${ab.label}</div>
+              <div class="text-[10px] text-slate-500">${ab.name}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xl font-bold text-white tabular-nums leading-none">${fmtSign(mod)}</div>
+              <div class="text-[11px] text-slate-400 tabular-nums mt-0.5">Tot: ${total}</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5 mt-2">
+            <div>
+              <label class="block text-[10px] text-slate-500 mb-0.5">Base</label>
+              <input type="number" value="${state.abilities[ab.key].base}" onchange="updateAbility('${ab.key}', 'base', this.value)"
+                class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-white tabular-nums accent-ring" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-500 mb-0.5">Bonos</label>
+              <input type="number" value="${state.abilities[ab.key].misc}" onchange="updateAbility('${ab.key}', 'misc', this.value)"
+                class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-slate-200 tabular-nums accent-ring" />
+            </div>
+          </div>
+          ${spiritInfo
+            ? `<div class="mt-2 text-[10px] font-semibold accent-text accent-bg-soft rounded-md px-2 py-0.5 text-center truncate">+${spiritInfo.bonus} ${spiritInfo.label}</div>`
+            : `<div class="mt-2 h-[19px]"></div>`
+          }
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCombatAndSurvival() {
+      const sb = getActiveSpiritBonus();
+      const sp = state.spirit;
+      const bab = getBAB(state.level);
+      const strMod = getAbilityMod('str');
+      const dexMod = getAbilityMod('dex');
+      const conMod = getAbilityMod('con');
+      const wisMod = getAbilityMod('wis');
+      const sizeObj = SIZE_MODS[state.size] || SIZE_MODS.medium;
+
+      // PG
+      const hpData = getMaxHP();
+      document.getElementById('stat-hp-max').textContent = hpData.total;
+      const hpParts = [`${hpData.base} base`, `${fmtSign(hpData.conTotal)} CON`];
+      if (hpData.fav) hpParts.push(`+${hpData.fav} Pred.`);
+      if (hpData.misc) hpParts.push(`${fmtSign(hpData.misc)} otros`);
+      document.getElementById('stat-hp-breakdown').textContent = hpParts.join(' · ');
+
+      // CA
+      const acSpirit = sp === 'guardian' ? sb : 0;
+      const acTotal = 10 + state.ac.armor + state.ac.shield + dexMod + sizeObj.acAtk + state.ac.natural + state.ac.deflect + state.ac.misc + acSpirit;
+      const acTouch = 10 + dexMod + sizeObj.acAtk + state.ac.deflect + state.ac.misc + acSpirit;
+      const acFlat = 10 + state.ac.armor + state.ac.shield + Math.min(0, dexMod) + sizeObj.acAtk + state.ac.natural + state.ac.deflect + state.ac.misc + acSpirit;
+
+      document.getElementById('stat-ac-total').textContent = acTotal;
+      document.getElementById('stat-ac-touch').textContent = acTouch;
+      document.getElementById('stat-ac-flat').textContent = acFlat;
+      const acTag = document.getElementById('ac-spirit-tag');
+      acTag.textContent = `+${acSpirit} Guardián`;
+      acTag.classList.toggle('hidden', acSpirit === 0);
+      document.getElementById('stat-ac-breakdown').textContent =
+        `10 + ${state.ac.armor} Arm + ${state.ac.shield} Esc + ${dexMod} DES${sizeObj.acAtk ? ` ${fmtSign(sizeObj.acAtk)} Tam` : ''} + ${state.ac.natural} Nat + ${state.ac.deflect} Desv + ${state.ac.misc} Otros` +
+        (acSpirit ? ` + ${acSpirit} Guardián` : '');
+
+      // Salvaciones
+      const baseSaves = getBaseSaves(state.level);
+      const fortSpirit = (sp === 'champion' || sp === 'guardian') ? sb : 0;
+      const refSpirit = (sp === 'guardian' || sp === 'trickster') ? sb : 0;
+      const willSpirit = (sp === 'hierophant' || sp === 'marshal') ? sb : 0;
+
+      document.getElementById('save-fort-total').textContent = fmtSign(baseSaves.fort + conMod + state.saves.fortMisc + fortSpirit);
+      document.getElementById('save-fort-breakdown').innerHTML = `Base ${baseSaves.fort} + CON ${fmtSign(conMod)}${fortSpirit ? ` + <span class="accent-text font-semibold">${fortSpirit} Esp.</span>` : ''}`;
+
+      document.getElementById('save-ref-total').textContent = fmtSign(baseSaves.ref + dexMod + state.saves.refMisc + refSpirit);
+      document.getElementById('save-ref-breakdown').innerHTML = `Base ${baseSaves.ref} + DES ${fmtSign(dexMod)}${refSpirit ? ` + <span class="accent-text font-semibold">${refSpirit} Esp.</span>` : ''}`;
+
+      document.getElementById('save-will-total').textContent = fmtSign(baseSaves.will + wisMod + state.saves.willMisc + willSpirit);
+      document.getElementById('save-will-breakdown').innerHTML = `Base ${baseSaves.will} + SAB ${fmtSign(wisMod)}${willSpirit ? ` + <span class="accent-text font-semibold">${willSpirit} Esp.</span>` : ''}`;
+
+      // Iniciativa, Ataques y Maniobras
+      const initSpirit = (sp === 'trickster' || sp === 'marshal') ? sb : 0;
+      document.getElementById('stat-init-total').textContent = fmtSign(dexMod + state.combat.initMisc + initSpirit);
+      document.getElementById('stat-init-breakdown').innerHTML = `DES ${fmtSign(dexMod)}${initSpirit ? ` + <span class="accent-text font-semibold">${initSpirit} Esp.</span>` : ''}`;
+
+      const atkSpirit = sp === 'champion' ? sb : 0;
+      document.getElementById('stat-melee-total').textContent = fmtSign(bab + strMod + sizeObj.acAtk + state.combat.meleeMisc + atkSpirit);
+      document.getElementById('stat-melee-breakdown').innerHTML = `BAB ${bab} + FUE ${fmtSign(strMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+
+      document.getElementById('stat-ranged-total').textContent = fmtSign(bab + dexMod + sizeObj.acAtk + state.combat.rangedMisc + atkSpirit);
+      document.getElementById('stat-ranged-breakdown').innerHTML = `BAB ${bab} + DES ${fmtSign(dexMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+
+      document.getElementById('stat-cmb-total').textContent = fmtSign(bab + strMod + sizeObj.cmbCmd + state.combat.cmbMisc + atkSpirit);
+      document.getElementById('stat-cmb-breakdown').innerHTML = `BAB ${bab} + FUE ${fmtSign(strMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+
+      const cmdGuardBonus = sp === 'guardian' ? (sb + 1) : 0;
+      document.getElementById('stat-cmd-total').textContent = 10 + bab + strMod + dexMod + sizeObj.cmbCmd + state.ac.deflect + state.combat.cmdMisc + cmdGuardBonus;
+      document.getElementById('stat-cmd-breakdown').innerHTML = `10 + BAB ${bab} + FUE ${fmtSign(strMod)} + DES ${fmtSign(dexMod)}${cmdGuardBonus ? ` + <span class="accent-text font-semibold">${cmdGuardBonus} Guard.</span>` : ''}`;
+
+      const seanceEl = document.getElementById('combat-seance-summary');
+      if (sp === 'champion') seanceEl.innerHTML = `<strong class="text-white">+${sb + 2} al daño de armas</strong> (+${sb} Esp. + 2 Don).${state.level >= 6 ? ' <span class="accent-text font-semibold">Ataque Súbito activo.</span>' : ''}`;
+      else if (sp === 'archmage') seanceEl.innerHTML = `<strong class="text-white">+2 daño con conjuros</strong>. Concentración y NL +${sb}.`;
+      else if (sp === 'hierophant') seanceEl.innerHTML = `<strong class="text-white">+2 a curaciones</strong>. Voluntad y Concentración +${sb}.`;
+      else if (sp === 'guardian') seanceEl.innerHTML = `<strong class="text-white">+${sb} CA</strong> y <strong class="text-white">+${sb + 1} DMC</strong> (+${sb} Esp. + 1 Don).`;
+      else if (sp === 'marshal') seanceEl.innerHTML = `Oleada Espiritual a aliados con <strong class="text-white">+${sb + 1} extra</strong>.`;
+      else if (sp === 'trickster') seanceEl.innerHTML = `Todas las habilidades sin entrenar. 2 habilidades con rangos máximos (Filo).`;
+      else seanceEl.textContent = 'Sin espíritu canalizado.';
+    }
+
+    /* =====================================================================
+       RENDERIZADO DE LA PESTAÑA 2: ARMAS Y COMBATE (DADOS FÍSICOS)
+       ===================================================================== */
+    function renderWeaponsTab() {
+      const bab = getBAB(state.level);
+      const scale = 1 + Math.floor(bab / 4);
+      const t = state.combatToggles;
+      const isChamp6 = state.spirit === 'champion' && state.level >= 6;
+      const surgeDie = getSurgeDie(state.level);
+      const marshalExtra = state.spirit === 'marshal' ? (getActiveSpiritBonus() + 1) : 0;
+
+      document.getElementById('weapons-bab-label').textContent = fmtSign(bab);
+      document.getElementById('weapons-scale-label').textContent = `-${scale} Atk / +${2 * scale} (+${3 * scale} 2H) Dmg`;
+
+      const preciseWarn = document.getElementById('precise-shot-warning');
+      preciseWarn.classList.toggle('hidden', !(t.targetInMelee && !t.hasPreciseShot));
+
+      // 1. Ranged Feats (en inglés + badge en tiempo real)
+      const rangedToggles = [
+        { key: 'pointBlankShot', title: 'Point-Blank Shot', badge: '+1 Atk / +1 Dmg', badgeTone: 'pos', active: t.pointBlankShot },
+        { key: 'hasPreciseShot', title: 'Precise Shot', badge: 'Negates -4', badgeTone: 'pos', active: t.hasPreciseShot },
+        { key: 'targetInMelee', title: 'Target in Melee', badge: t.hasPreciseShot ? '0 (Negated)' : '-4 Atk', badgeTone: t.hasPreciseShot ? 'neutral' : 'neg', active: t.targetInMelee, warn: t.targetInMelee && !t.hasPreciseShot },
+        { key: 'rapidShot', title: 'Rapid Shot', badge: '-2 Atk / +1 Shot', badgeTone: 'neg', active: t.rapidShot },
+        { key: 'deadlyAim', title: 'Deadly Aim', badge: `-${scale} Atk / +${2 * scale} Dmg`, badgeTone: 'neg', active: t.deadlyAim },
+        { key: 'manyshot', title: 'Manyshot', badge: '1st Shot ×2 Dmg', badgeTone: 'pos', active: t.manyshot },
+        { key: 'clusteredShots', title: 'Clustered Shots', badge: 'DR once', badgeTone: 'neutral', active: t.clusteredShots }
+      ];
+
+      const renderBadge = (text, tone, active) => {
+        if (!active) return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-semibold tabular-nums">${text}</span>`;
+        if (tone === 'neg') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold tabular-nums">${text}</span>`;
+        if (tone === 'pos') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold tabular-nums">${text}</span>`;
+        return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 border border-sky-500/40 font-bold tabular-nums">${text}</span>`;
+      };
+
+      const rangedEl = document.getElementById('ranged-toggles-container');
+      rangedEl.innerHTML = rangedToggles.map(item => `
+        <button onclick="toggleCombatOption('${item.key}')"
+          class="text-left p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+            item.warn
+              ? 'bg-rose-950/60 border-rose-500/70 text-rose-100'
+              : item.active
+                ? 'accent-bg-soft accent-border text-white shadow-sm'
+                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+          }">
+          <div class="min-w-0 space-y-1">
+            <div class="text-xs font-bold truncate">${item.title}</div>
+            <div>${renderBadge(item.badge, item.badgeTone, item.active)}</div>
+          </div>
+          <span class="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center text-[10px] ${
+            item.warn ? 'bg-rose-500 border-rose-300 text-white' : item.active ? 'accent-bg border-white/40 text-slate-950 font-bold' : 'border-slate-600'
+          }">${item.active ? '✓' : ''}</span>
+        </button>
+      `).join('');
+
+      // 2. Melee & Buffs (en inglés + badge en tiempo real)
+      const globalToggles = [
+        { key: 'powerAttack', title: 'Power Attack', badge: `-${scale} Atk / +${2 * scale} (1H) · +${3 * scale} (2H)`, badgeTone: 'neg', active: t.powerAttack, disabled: false },
+        { key: 'haste', title: 'Haste', badge: '+1 Atk / +1 Extra Atk', badgeTone: 'pos', active: t.haste, disabled: false },
+        { key: 'suddenAttack', title: 'Sudden Attack', badge: isChamp6 ? '+2 Atk / +1 Extra Atk' : 'Champion Lv. 6+', badgeTone: 'pos', active: isChamp6 && t.suddenAttack, disabled: !isChamp6 }
+      ];
+
+      const globalEl = document.getElementById('global-toggles-container');
+      globalEl.innerHTML = globalToggles.map(item => `
+        <button onclick="${item.disabled ? '' : `toggleCombatOption('${item.key}')`}" ${item.disabled ? 'disabled' : ''}
+          class="text-left p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+            item.disabled
+              ? 'bg-slate-950/40 border-slate-800/60 text-slate-600 cursor-not-allowed opacity-60'
+              : item.active
+                ? 'accent-bg-soft accent-border text-white'
+                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+          }">
+          <div class="min-w-0 space-y-1">
+            <div class="text-xs font-bold truncate">${item.title}</div>
+            <div>${renderBadge(item.badge, item.badgeTone, item.active)}</div>
+          </div>
+          <span class="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center text-[10px] ${
+            item.active ? 'accent-bg border-white/40 text-slate-950 font-bold' : 'border-slate-600'
+          }">${item.active ? '✓' : ''}</span>
+        </button>
+      `).join('');
+
+      // Helper para píldoras de desglose
+      const pillClass = (type) => {
+        if (type === 'neg') return 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold';
+        if (type === 'pos') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35 font-semibold';
+        return 'bg-slate-900 text-slate-300 border-slate-700/80';
+      };
+
+      // 3. Tarjetas de Armas (Sin botones de tirar dados)
+      const grid = document.getElementById('weapons-grid');
+      grid.innerHTML = '';
+
+      state.weapons.forEach(w => {
+        const calc = calculateWeaponStats(w);
+        const typeLabels = { bow: 'A distancia (Arco)', crossbow: 'A distancia (Ballesta)', melee1h: calc.isTwoHanded ? 'Cuerpo a cuerpo (2M Grip)' : 'Cuerpo a cuerpo (1M)', melee2h: 'Cuerpo a cuerpo (2M)' };
+        const typeIcons = { bow: '🏹', crossbow: '🎯', melee1h: '✴️', melee2h: '⚔️' };
+        const critStr = `${w.critMin < 20 ? `${w.critMin}–20` : '20'}/×${w.critMult}`;
+        const enhLabel = w.enhancement === -1 ? 'Masterwork' : (w.enhancement > 0 ? `+${w.enhancement}` : 'Normal');
+
+        const fullAtkHtml = calc.fullSequence.map(atk => `
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-sm font-extrabold tabular-nums ${
+            atk.manyshot ? 'bg-sky-500/20 text-sky-200 border border-sky-400/50' : 'bg-slate-950 text-white border border-slate-700'
+          }" title="${atk.tag}">
+            ${fmtSign(atk.bonus)}
+            ${atk.shortTag ? `<span class="text-[9px] uppercase ${atk.manyshot ? 'text-sky-300' : atk.shortTag === 'RS' ? 'text-rose-300' : 'text-amber-300'}">${atk.shortTag}</span>` : ''}
+          </span>
+        `).join('<span class="text-slate-600 text-xs font-bold">/</span>');
+
+        const atkPillsHtml = calc.atkPills.map(p => `<span class="px-1.5 py-0.5 rounded-md border text-[10px] tabular-nums ${pillClass(p.type)}">${p.label}</span>`).join('');
+        const dmgPillsHtml = calc.dmgPills.map(p => `<span class="px-1.5 py-0.5 rounded-md border text-[10px] tabular-nums ${pillClass(p.type)}">${p.label}</span>`).join('');
+
+        const card = document.createElement('div');
+        card.className = 'card-occult rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5';
+        card.innerHTML = `
+          <div class="space-y-3">
+            <!-- Cabecera del Arma -->
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl accent-bg-soft border accent-border flex items-center justify-center text-lg shrink-0">
+                  ${typeIcons[w.type] || '⚔️'}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <h3 class="font-display font-bold text-base text-white truncate">${w.name}</h3>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">${enhLabel}</span>
+                    ${w.weaponFocus ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 font-semibold">Weapon Focus +1</span>` : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">
+                    ${typeLabels[w.type]} · Crít. <strong class="text-slate-200">${critStr}</strong> · ${w.damageType}
+                    ${w.type === 'bow' ? ` · STR Rating +${w.strRating}` : ''}
+                    ${calc.reloadLabel ? ` · <span class="text-sky-300">${calc.reloadLabel}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+              <button onclick="toggleWeaponExpand('${w.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-xs font-medium shrink-0 transition">
+                ${w.expanded ? 'Ocultar ▲' : 'Editar ⚙️'}
+              </button>
+            </div>
+
+            <!-- Controles rápidos por arma (Morningstar Two-Handed Grip / Crossbow Heavy-Light) -->
+            ${w.type === 'melee1h' ? `
+              <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-1.5">
+                <label class="inline-flex items-center gap-2 text-xs text-slate-200 cursor-pointer select-none">
+                  <input type="checkbox" ${w.twoHandedGrip ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'twoHandedGrip', this.checked)" class="rounded bg-slate-800 border-slate-600 accent-amber-400" />
+                  <span class="font-semibold">Two-Handed Grip</span>
+                  <span class="text-[11px] text-slate-400">(1.5×STR y Power Attack 2H)</span>
+                </label>
+              </div>
+            ` : ''}
+
+            ${w.type === 'crossbow' ? `
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-1.5">
+                <div class="flex items-center gap-1.5">
+                  <button onclick="applyWeaponPreset('${w.id}', 'heavy_xbow')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${w.dice === '1d10' ? 'accent-bg text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Heavy (1d10)</button>
+                  <button onclick="applyWeaponPreset('${w.id}', 'light_xbow')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${w.dice === '1d8' ? 'accent-bg text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Light (1d8)</button>
+                </div>
+                <label class="inline-flex items-center gap-1.5 text-xs text-slate-200 cursor-pointer select-none">
+                  <input type="checkbox" ${w.rapidReload ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'rapidReload', this.checked)" class="rounded bg-slate-800 border-slate-600" />
+                  <span>Rapid Reload</span>
+                </label>
+              </div>
+            ` : ''}
+
+            <!-- Bloques Principales de Vista Previa en Vivo -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+              <div class="sm:col-span-3 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-center">
+                <div class="text-[10px] uppercase tracking-wider text-slate-400">Ataque Estándar</div>
+                <div class="text-2xl font-extrabold text-white tabular-nums mt-0.5">${fmtSign(calc.stdAtk)}</div>
+              </div>
+              <div class="sm:col-span-5 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-center">
+                <div class="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+                  Ataque Completo ${calc.isManyshotActive ? '<span class="text-sky-300 normal-case">(×2 flechas en 1º)</span>' : ''}
+                </div>
+                <div class="flex flex-wrap items-center gap-1">${fullAtkHtml}</div>
+              </div>
+              <div class="sm:col-span-4 bg-slate-900/90 border accent-border rounded-xl p-2.5 text-center">
+                <div class="text-[10px] uppercase tracking-wider accent-text">Daño (${calc.minDmg}–${calc.maxDmg})</div>
+                <div class="text-lg font-extrabold text-white tabular-nums mt-0.5">${calc.dmgFormula}</div>
+              </div>
+            </div>
+
+            <!-- Desglose Transparente en Vivo (Píldoras de Bonos y Penalizadores) -->
+            <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2.5 space-y-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 w-10 shrink-0">Atk:</span>
+                ${atkPillsHtml}
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 w-10 shrink-0">Dmg:</span>
+                ${dmgPillsHtml}
+              </div>
+              ${calc.isRanged && state.combatToggles.clusteredShots ? `<div class="text-[11px] text-sky-300 pt-0.5">🎯 <strong>Clustered Shots:</strong> Suma el daño de todos los impactos antes de aplicar RD.</div>` : ''}
+            </div>
+
+            <!-- Panel de Edición Desplegable -->
+            ${w.expanded ? `
+              <div class="bg-slate-950/90 border border-slate-700/80 rounded-xl p-3.5 space-y-3 animate-fade">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-[10px] text-slate-400 mb-1">Nombre</label>
+                    <input type="text" value="${w.name}" onchange="updateWeapon('${w.id}', 'name', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Tipo de Arma</label>
+                    <select onchange="updateWeapon('${w.id}', 'type', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring">
+                      <option value="bow" ${w.type === 'bow' ? 'selected' : ''}>Arco (A distancia)</option>
+                      <option value="crossbow" ${w.type === 'crossbow' ? 'selected' : ''}>Ballesta (A distancia)</option>
+                      <option value="melee1h" ${w.type === 'melee1h' ? 'selected' : ''}>Melé 1 Mano</option>
+                      <option value="melee2h" ${w.type === 'melee2h' ? 'selected' : ''}>Melé 2 Manos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Bono Mágico / Calidad</label>
+                    <select onchange="updateWeapon('${w.id}', 'enhancement', parseInt(this.value))"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring">
+                      <option value="0" ${w.enhancement === 0 ? 'selected' : ''}>Normal (+0)</option>
+                      <option value="-1" ${w.enhancement === -1 ? 'selected' : ''}>Masterwork (+1 Atk)</option>
+                      <option value="1" ${w.enhancement === 1 ? 'selected' : ''}>Mágica +1</option>
+                      <option value="2" ${w.enhancement === 2 ? 'selected' : ''}>Mágica +2</option>
+                      <option value="3" ${w.enhancement === 3 ? 'selected' : ''}>Mágica +3</option>
+                      <option value="4" ${w.enhancement === 4 ? 'selected' : ''}>Mágica +4</option>
+                      <option value="5" ${w.enhancement === 5 ? 'selected' : ''}>Mágica +5</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dado Base (ej. 1d8, 2d6)</label>
+                    <input type="text" value="${w.dice}" onchange="updateWeapon('${w.id}', 'dice', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <div>
+                      <label class="block text-[10px] text-slate-400 mb-1">Crít. Min</label>
+                      <input type="number" min="15" max="20" value="${w.critMin}" onchange="updateWeapon('${w.id}', 'critMin', Math.max(15, Math.min(20, parseInt(this.value) || 20)))"
+                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] text-slate-400 mb-1">Mult (×)</label>
+                      <input type="number" min="2" max="4" value="${w.critMult}" onchange="updateWeapon('${w.id}', 'critMult', Math.max(2, Math.min(4, parseInt(this.value) || 2)))"
+                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dado Extra (ej. 1d6)</label>
+                    <input type="text" value="${w.extraDice || ''}" placeholder="1d6" onchange="updateWeapon('${w.id}', 'extraDice', this.value)"
+                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
+                  </div>
+
+                  ${w.type === 'bow' ? `
+                    <div>
+                      <label class="block text-[10px] text-slate-400 mb-1">STR Rating (+0..+10)</label>
+                      <input type="number" min="0" max="10" value="${w.strRating}" onchange="updateWeapon('${w.id}', 'strRating', Math.max(0, parseInt(this.value) || 0))"
+                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                    </div>
+                  ` : ''}
+
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Atk Extra Arma</label>
+                    <input type="number" value="${w.extraAtk || 0}" onchange="updateWeapon('${w.id}', 'extraAtk', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dmg Extra Arma</label>
+                    <input type="number" value="${w.extraDmg || 0}" onchange="updateWeapon('${w.id}', 'extraDmg', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800">
+                  <label class="inline-flex items-center gap-1.5 text-xs text-slate-200 cursor-pointer">
+                    <input type="checkbox" ${w.weaponFocus ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'weaponFocus', this.checked)" class="rounded bg-slate-800 border-slate-600" />
+                    <span>Weapon Focus (+1 Atk)</span>
+                  </label>
+                  <button onclick="deleteWeapon('${w.id}')" class="px-2.5 py-1 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-300 text-xs font-medium border border-rose-800/50">
+                    Eliminar Arma
+                  </button>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Recordatorio compacto de Oleada Espiritual física -->
+          <div class="flex items-center justify-between pt-2.5 border-t border-slate-800/80 text-[11px]">
+            <span class="text-slate-400">
+              ⚡ Spirit Surge disponible:
+              <strong class="accent-text ml-1">${state.spirit === 'none' ? 'Sin espíritu' : `+${surgeDie.label}${marshalExtra ? ` + ${marshalExtra}` : ''} físico`}</strong>
+            </span>
+            <span class="text-slate-500 tabular-nums">Inf: ${state.influence}/5</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* =====================================================================
+       RENDERIZADO DE HABILIDADES, CONJUROS Y PODERES
+       ===================================================================== */
+    function renderSkills() {
+      const summary = getSkillPointsSummary();
+      document.getElementById('skills-spent').textContent = summary.spent;
+      document.getElementById('skills-total').textContent = summary.total;
+      document.getElementById('tab-skills-pill').textContent = `${summary.spent}/${summary.total}`;
+
+      const remBadge = document.getElementById('skills-remaining-badge');
+      if (summary.remaining < 0) {
+        remBadge.textContent = `¡${Math.abs(summary.remaining)} excedidos!`;
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-semibold';
+      } else if (summary.remaining === 0) {
+        remBadge.textContent = 'Completo';
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-medium';
+      } else {
+        remBadge.textContent = `${summary.remaining} restantes`;
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium';
+      }
+
+      document.getElementById('skills-formula-note').textContent =
+        `${summary.perLevel}/niv × ${state.level}` +
+        (summary.fav ? ` + ${summary.fav} Clase Pred.` : '') +
+        (summary.extra ? ` + ${summary.extra} extra` : '');
+
+      // Panel del Embaucador (2 Filo + 1 Don)
+      const trickPanel = document.getElementById('trickster-skills-panel');
+      if (state.spirit === 'trickster') {
+        trickPanel.classList.remove('hidden');
+        const sel1 = document.getElementById('select-trickster-edge-1');
+        const sel2 = document.getElementById('select-trickster-edge-2');
+        const selBoon = document.getElementById('select-trickster-boon');
+        if (sel1.options.length === 0) {
+          SKILLS_LIST.forEach(s => {
+            const txt = `${s.name} (${s.ability.toUpperCase()})`;
+            sel1.add(new Option(txt, s.id));
+            sel2.add(new Option(txt, s.id));
+            selBoon.add(new Option(txt, s.id));
+          });
+        }
+        sel1.value = state.tricksterEdgeSkill1;
+        sel2.value = state.tricksterEdgeSkill2;
+        selBoon.value = state.tricksterBoonSkill;
+      } else {
+        trickPanel.classList.add('hidden');
+      }
+
+      const search = (document.getElementById('skills-search').value || '').toLowerCase().trim();
+      const onlyTrained = document.getElementById('skills-filter-trained').checked;
+      const acpVal = Math.min(0, parseInt(state.ac.acp) || 0);
+      const sizeStealth = (SIZE_MODS[state.size] || SIZE_MODS.medium).stealth;
+
+      const tbody = document.getElementById('skills-table-body');
+      tbody.innerHTML = '';
+
+      SKILLS_LIST.forEach(skill => {
+        const isEdge = isTricksterEdge(skill.id);
+        const isBoon = state.spirit === 'trickster' && state.tricksterBoonSkill === skill.id;
+        const rawRanks = parseInt(state.skills[skill.id]?.ranks) || 0;
+        const effectiveRanks = isEdge ? state.level : rawRanks;
+
+        if (search && !skill.name.toLowerCase().includes(search)) return;
+        if (onlyTrained && effectiveRanks === 0) return;
+
+        const isClass = isSkillClassSkill(skill);
+        const abMod = getAbilityMod(skill.ability);
+        const classBonus = (isClass && effectiveRanks >= 1) ? 3 : 0;
+        const { spirit: spBonus, boon: boonBonus } = getSkillSpiritBonus(skill);
+        const totalSpirit = spBonus + boonBonus;
+        const skillAcp = skill.acp ? acpVal : 0;
+        const misc = (parseInt(state.skills[skill.id]?.misc) || 0) + (skill.id === 'stealth' ? sizeStealth : 0);
+
+        const canUse = !skill.trainedOnly || state.spirit === 'trickster' || effectiveRanks >= 1;
+        const total = abMod + effectiveRanks + classBonus + totalSpirit + skillAcp + misc;
+        const abLabel = ABILITIES.find(a => a.key === skill.ability)?.label || skill.ability;
+
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-slate-800/40 transition ${isEdge ? 'bg-cyan-950/20' : ''}`;
+        tr.innerHTML = `
+          <td class="py-2.5 px-2.5 text-center">
+            <input type="checkbox" ${isClass ? 'checked' : ''} ${isEdge || isBoon ? 'disabled' : ''}
+              onchange="toggleSkillClass('${skill.id}', this.checked)"
+              class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-600 accent-sky-400 cursor-pointer" title="Habilidad de clase (+3 si ≥1 rango)" />
+          </td>
+          <td class="py-2.5 px-3">
+            <div class="font-medium text-slate-200 text-xs sm:text-sm flex flex-wrap items-center gap-1.5">
+              <span>${skill.name}</span>
+              ${skill.trainedOnly && state.spirit !== 'trickster' ? `<span class="text-[10px] text-slate-500">(Ent.)</span>` : ''}
+              ${isEdge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">Filo</span>` : ''}
+              ${isBoon ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-200 border border-cyan-500/30">+1 Don</span>` : ''}
+            </div>
+          </td>
+          <td class="py-2.5 px-2 text-center text-[11px] font-semibold text-slate-400">${abLabel}</td>
+          <td class="py-2.5 px-2 text-center">
+            ${isEdge
+              ? `<span class="inline-block px-2 py-1 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-xs font-bold text-cyan-300 tabular-nums">${state.level} ★</span>`
+              : `<div class="inline-flex items-center gap-1">
+                  <button onclick="changeSkillRank('${skill.id}', -1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">−</button>
+                  <input type="number" min="0" max="${state.level}" value="${rawRanks}" onchange="setSkillRank('${skill.id}', this.value)"
+                    class="w-10 text-center bg-slate-950 border border-slate-700 rounded-md py-0.5 text-xs font-bold text-white tabular-nums accent-ring" />
+                  <button onclick="changeSkillRank('${skill.id}', 1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">+</button>
+                </div>`
+            }
+          </td>
+          <td class="py-2.5 px-2 text-center text-xs text-slate-300 tabular-nums hidden md:table-cell">${fmtSign(abMod)}</td>
+          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${totalSpirit ? 'accent-text font-semibold' : 'text-slate-600'}">${totalSpirit ? `+${totalSpirit}` : '—'}</td>
+          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden lg:table-cell ${skillAcp ? 'text-rose-400 font-semibold' : 'text-slate-600'}">${skillAcp ? skillAcp : '—'}</td>
+          <td class="py-2.5 px-2 text-center">
+            <input type="number" value="${state.skills[skill.id]?.misc || 0}" onchange="setSkillMisc('${skill.id}', this.value)"
+              class="w-12 text-center bg-slate-950 border border-slate-800 rounded-md py-0.5 text-xs text-slate-300 tabular-nums accent-ring" />
+          </td>
+          <td class="py-2.5 px-3 sm:px-4 text-right">
+            <span class="inline-block min-w-[2.5rem] text-center px-2 py-1 rounded-lg font-bold text-sm tabular-nums ${
+              !canUse
+                ? 'bg-slate-900/60 text-slate-600 border border-slate-800'
+                : effectiveRanks > 0
+                  ? 'accent-bg-soft accent-text border accent-border'
+                  : 'bg-slate-900 text-slate-300 border border-slate-800'
+            }">${canUse ? fmtSign(total) : '—'}</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSpells() {
+      const sp = state.spirit;
+      const sb = getActiveSpiritBonus();
+      const chaMod = getAbilityMod('cha');
+      const cl = state.level;
+      const dcMisc = parseInt(state.spellDcMisc) || 0;
+
+      const clBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
+      const concBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
+      const dcSpiritBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
+
+      document.getElementById('spell-cl').textContent = cl;
+      document.getElementById('spell-cl-note').textContent = clBonus ? `Pruebas NL: +${cl + clBonus} (+${clBonus} Esp.)` : `Pruebas NL: +${cl}`;
+      document.getElementById('spell-conc').textContent = fmtSign(cl + chaMod + concBonus);
+      document.getElementById('spell-conc-note').textContent = concBonus ? `Niv ${cl} + CAR ${fmtSign(chaMod)} + ${concBonus} Esp.` : `Niv ${cl} + CAR ${fmtSign(chaMod)}`;
+
+      const dcList = document.getElementById('spell-dc-list');
+      dcList.innerHTML = '';
+      for (let lvl = 0; lvl <= 4; lvl++) {
+        dcList.innerHTML += `
+          <div class="bg-slate-950 border border-slate-800 rounded-lg py-1.5">
+            <div class="text-[10px] text-slate-500">Niv ${lvl}</div>
+            <div class="text-sm font-bold text-white tabular-nums">${10 + lvl + chaMod + dcMisc + dcSpiritBonus}</div>
+          </div>
+        `;
+      }
+
+      const bonusBox = document.getElementById('spell-spirit-bonus-box');
+      if (sp === 'archmage') {
+        bonusBox.classList.remove('hidden');
+        bonusBox.innerHTML = `<strong class="accent-text">🔮 Archimago:</strong> Espacios arcanos extra (Hechicero/Mago), <strong>+${sb}</strong> Concentración y pruebas NL, y <strong>+2</strong> al daño de conjuros.`;
+      } else if (sp === 'hierophant') {
+        bonusBox.classList.remove('hidden');
+        bonusBox.innerHTML = `<strong class="accent-text">🌿 Hierofante:</strong> Espacios divinos extra (Clérigo/Oráculo), <strong>+${sb}</strong> Concentración, y <strong>+2</strong> a toda curación.`;
+      } else {
+        bonusBox.classList.add('hidden');
+      }
+
+      const slotsContainer = document.getElementById('spell-slots-container');
+      slotsContainer.innerHTML = `
+        <div class="flex items-center justify-between bg-slate-900/70 border border-slate-800 rounded-xl px-3.5 py-2.5">
+          <div>
+            <span class="text-xs font-bold text-slate-200">Nivel 0 (Trucos Psíquicos)</span>
+            <span class="text-[11px] text-slate-400 ml-2">CD ${10 + chaMod + dcMisc}</span>
+          </div>
+          <span class="text-xs font-semibold accent-text px-2.5 py-1 rounded-lg accent-bg-soft border accent-border">A voluntad</span>
+        </div>
+      `;
+
+      const basePerDay = MEDIUM_SPELLS_PER_DAY[state.level];
+      const chaTotal = getAbilityTotal('cha');
+
+      for (let sLvl = 1; sLvl <= 4; sLvl++) {
+        const baseSlots = basePerDay[sLvl - 1];
+        const canCast = chaTotal >= (10 + sLvl);
+        const bonusSlots = baseSlots > 0 ? getBonusSpellsByCha(sLvl, chaMod) : 0;
+        const totalSlots = (baseSlots > 0 && canCast) ? (baseSlots + bonusSlots) : 0;
+        const used = Math.min(totalSlots, state.spellsUsed[sLvl] || 0);
+
+        let bubblesHtml = '';
+        if (totalSlots === 0) {
+          bubblesHtml = `<span class="text-xs text-slate-500">${!canCast && baseSlots > 0 ? `Requiere CAR ${10 + sLvl}` : 'Bloqueado en este nivel'}</span>`;
+        } else {
+          for (let i = 0; i < totalSlots; i++) {
+            const isUsed = i < used;
+            bubblesHtml += `
+              <button onclick="toggleSpellSlot(${sLvl}, ${i}, false)"
+                class="w-7 h-7 rounded-lg border text-xs font-bold transition flex items-center justify-center ${
+                  isUsed ? 'bg-slate-950 border-slate-700 text-slate-600 line-through' : 'accent-bg-soft accent-border accent-text hover:brightness-125'
+                }">${isUsed ? '✕' : '✦'}</button>
+            `;
+          }
+        }
+
+        slotsContainer.innerHTML += `
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/70 border border-slate-800 rounded-xl px-3.5 py-2.5">
+            <div>
+              <div class="text-xs font-bold text-slate-200">Nivel ${sLvl} <span class="text-slate-500 font-normal ml-1">CD ${10 + sLvl + chaMod + dcMisc}</span></div>
+              <div class="text-[11px] text-slate-400">
+                ${totalSlots > 0 ? `Base ${baseSlots} + CAR ${bonusSlots} = <strong class="text-slate-200">${totalSlots - used}/${totalSlots}</strong> disp.` : '0 espacios base'}
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5">${bubblesHtml}</div>
+          </div>
+        `;
+      }
+
+      const spiritSection = document.getElementById('spirit-bonus-spells-section');
+      const spiritSlotsEl = document.getElementById('spirit-bonus-slots-container');
+      if (sp === 'archmage' || sp === 'hierophant') {
+        spiritSection.classList.remove('hidden');
+        document.getElementById('spirit-bonus-spells-title').textContent =
+          sp === 'archmage' ? '🔮 Espacios Arcanos Adicionales (Archimago)' : '🌿 Espacios Divinos Adicionales (Hierofante)';
+        spiritSlotsEl.innerHTML = '';
+        for (let sLvl = 1; sLvl <= 4; sLvl++) {
+          const unlocked = (sLvl === 1) || (basePerDay[sLvl - 1] > 0);
+          if (!unlocked) continue;
+          const canCast = chaTotal >= (10 + sLvl);
+          const used = Math.min(1, state.spiritSpellsUsed[sLvl] || 0);
+          spiritSlotsEl.innerHTML += `
+            <div class="flex items-center justify-between bg-slate-950/70 border accent-border rounded-xl px-3.5 py-2">
+              <span class="text-xs font-semibold text-slate-200">
+                ${sp === 'archmage' ? 'Arcano' : 'Divino'} Nivel ${sLvl}
+                <span class="text-slate-400 font-normal ml-1">(CD ${10 + sLvl + chaMod + dcMisc})</span>
+              </span>
+              ${!canCast
+                ? `<span class="text-xs text-slate-500">Requiere CAR ${10 + sLvl}</span>`
+                : `<button onclick="toggleSpellSlot(${sLvl}, 0, true)" class="px-3 py-1 rounded-lg border text-xs font-bold transition ${
+                    used > 0 ? 'bg-slate-950 border-slate-700 text-slate-500 line-through' : 'accent-bg text-slate-950 border-transparent hover:brightness-110'
+                  }">${used > 0 ? 'Gastado' : '1 Disponible'}</button>`
+              }
+            </div>
+          `;
+        }
+      } else {
+        spiritSection.classList.add('hidden');
+      }
+    }
+
+    function renderPowersTab() {
+      const spObj = SPIRITS[state.spirit];
+      const sb = getActiveSpiritBonus();
+
+      document.getElementById('spirit-detail-icon').textContent = spObj.icon;
+      document.getElementById('spirit-detail-name').textContent = spObj.name;
+      document.getElementById('spirit-detail-subtitle').textContent = spObj.subtitle;
+      document.getElementById('spirit-detail-bonus').textContent = fmtSign(sb);
+      document.getElementById('spirit-detail-boon').textContent = spObj.boon;
+      document.getElementById('spirit-detail-proficiencies').textContent = spObj.proficiencies;
+
+      const powersGrid = document.getElementById('spirit-powers-grid');
+      powersGrid.innerHTML = spObj.powers.map(p => {
+        const unlocked = state.spirit !== 'none' && state.level >= p.minLevel;
+        return `
+          <div class="rounded-xl p-3.5 border transition ${unlocked ? 'bg-slate-900/90 accent-border' : 'bg-slate-950/60 border-slate-800/80 opacity-60'}">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-xs font-bold uppercase tracking-wider ${unlocked ? 'accent-text' : 'text-slate-500'}">Poder ${p.tier} (Niv. ${p.minLevel})</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${unlocked ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                ${unlocked ? 'ACTIVO' : 'BLOQUEADO'}
+              </span>
+            </div>
+            <div class="text-sm font-bold text-white mb-1">${p.name}</div>
+            <p class="text-xs text-slate-300 leading-relaxed">${p.desc}</p>
+          </div>
+        `;
+      }).join('');
+
+      // Tabla de Progresión 1-20
+      const progBody = document.getElementById('progression-table-body');
+      const milestones = { 1: 'Poder Menor', 4: 'Conjuros Niv 1', 6: 'Poder Intermedio', 10: 'Oleada 1d8', 11: 'Poder Mayor', 17: 'Poder Supremo', 20: 'Oleada 1d10' };
+      progBody.innerHTML = '';
+      for (let lvl = 1; lvl <= 20; lvl++) {
+        const isCurr = lvl === state.level;
+        const sv = getBaseSaves(lvl);
+        progBody.innerHTML += `
+          <tr class="${isCurr ? 'accent-bg-soft text-white font-bold' : 'text-slate-400'}">
+            <td class="py-1.5 px-2">${lvl}</td>
+            <td class="py-1.5 px-2">${getBABIteratives(getBAB(lvl)).map(fmtSign).join('/')}</td>
+            <td class="py-1.5 px-2">+${sv.fort}/+${sv.ref}/+${sv.will}</td>
+            <td class="py-1.5 px-2 ${isCurr ? 'accent-text' : ''}">+${getSpiritBonusRaw(lvl)}</td>
+            <td class="py-1.5 px-2">${getSurgeDie(lvl).label}</td>
+            <td class="py-1.5 px-2">${milestones[lvl] || '—'}</td>
+          </tr>
+        `;
+      }
+    }
+
+    /* =====================================================================
+       7. EXPORTAR, IMPORTAR, REINICIAR Y TOASTS
+       ===================================================================== */
+    function openExportModal() {
+      document.getElementById('export-json-text').value = JSON.stringify(state, null, 2);
+      document.getElementById('modal-export').classList.remove('hidden');
+    }
+
+    function copyExportJson() {
+      const ta = document.getElementById('export-json-text');
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('JSON copiado al portapapeles.');
+      } catch (e) {
+        showToast('Copia el texto manualmente.', 'warn');
+      }
+    }
+
+    function downloadExportJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(state.name || 'medium_pf1e').toLowerCase().replace(/[^a-z0-9]+/g, '_')}_niv${state.level}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Archivo JSON descargado.');
+    }
+
+    function openImportModal() {
+      document.getElementById('import-json-text').value = '';
+      document.getElementById('import-file-input').value = '';
+      document.getElementById('modal-import').classList.remove('hidden');
+    }
+
+    function handleImportFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => { document.getElementById('import-json-text').value = e.target.result; };
+      reader.readAsText(file);
+    }
+
+    function confirmImportJson() {
+      const text = document.getElementById('import-json-text').value.trim();
+      if (!text) return showToast('Pega un JSON válido o sube un archivo.', 'warn');
+      try {
+        JSON.parse(text);
+        localStorage.setItem(STORAGE_KEY, text);
+        state = loadState();
+        saveState();
+        renderAll();
+        closeModal('modal-import');
+        showToast('Ficha importada correctamente.');
+      } catch (e) {
+        showToast('El texto no es un JSON válido.', 'danger');
+      }
+    }
+
+    function openResetModal() { document.getElementById('modal-reset').classList.remove('hidden'); }
+
+    function confirmResetSheet() {
+      state = createDefaultState();
+      saveState();
+      renderAll();
+      closeModal('modal-reset');
+      showToast('Ficha reiniciada.');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      let colors = 'bg-slate-900 border-slate-700 text-slate-100';
+      if (type === 'warn') colors = 'bg-amber-950/95 border-amber-500/60 text-amber-100';
+      if (type === 'danger') colors = 'bg-rose-950/95 border-rose-500/70 text-rose-100';
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-xl text-xs font-medium animate-fade ${colors}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /* =====================================================================
+       8. INICIALIZACIÓN
+       ===================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      switchTab('weapons');
+      renderAll();
+    });
+  </script>
+</body>
+</html>
