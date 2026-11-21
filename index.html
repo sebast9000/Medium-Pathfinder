@@ -873,10 +873,48 @@
           </div>
         </div>
 
+        <!-- Penalizador de Influencia Alta (3+ Influencia) según Espíritu -->
+        <div id="spirit-influence-penalty-card" class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2 transition">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+              <span>⚠️</span> Penalizador de Influencia Alta (3+ Influencia)
+            </div>
+            <span id="spirit-influence-penalty-badge" class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-400">
+              Inactivo (Inf. &lt; 3)
+            </span>
+          </div>
+          <p id="spirit-detail-influence-penalty" class="text-xs sm:text-sm text-slate-200 leading-relaxed">—</p>
+          <div class="text-[11px] text-slate-400 pt-1.5 border-t border-slate-800/80 flex flex-wrap gap-x-3 gap-y-1">
+            <span><strong class="text-amber-300/90">Efecto general (3+ Inf.):</strong> −2 a Iniciativa</span>
+            <span>•</span>
+            <span><strong class="text-emerald-300/90">Ventaja mental:</strong> +4 vs. Posesión y +2 a salvaciones vs. efectos enajenadores (<em>mind-affecting</em>)</span>
+          </div>
+        </div>
+
         <div>
           <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Poderes del Espíritu (Escalado por Nivel)</h3>
           <div id="spirit-powers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         </div>
+      </div>
+
+      <!-- Habilidades de Clase del Médium (Desbloqueo por Nivel) -->
+      <div class="card-occult rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="font-display text-sm sm:text-base uppercase tracking-wider text-slate-200 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
+              Habilidades de Clase del Médium
+              <span id="class-features-count" class="text-[11px] font-sans font-semibold px-2 py-0.5 rounded-full accent-bg-soft accent-text border accent-border tabular-nums">0/13</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Rasgos propios de la clase que se activan y escalan automáticamente según tu nivel de Médium.</p>
+          </div>
+          <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="filter-unlocked-features" onchange="renderPowersTab()" class="rounded bg-slate-800 border-slate-600" />
+            <span>Solo desbloqueadas</span>
+          </label>
+        </div>
+
+        <div id="class-features-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
 
       <!-- Referencia Rápida de Reglas del Médium -->
@@ -1012,6 +1050,7 @@
         subtitle: 'Aún no has realizado una sesión de espiritismo hoy.',
         boon: 'Ninguno activo.',
         proficiencies: 'Competencias base de Médium: armas sencillas, armaduras ligeras y medias.',
+        influencePenalty: 'Canaliza un espíritu para ver su penalizador específico al alcanzar 3 o más puntos de Influencia.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Sin espíritu', desc: 'Canaliza uno de los seis espíritus legendarios para obtener poderes y bonos automáticos.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Sin espíritu', desc: 'Se desbloquea a nivel 6 de Médium.' },
@@ -1025,6 +1064,7 @@
         subtitle: 'Leyenda arcana de intelecto supremo y maestría mágica.',
         boon: '+2 al daño con conjuros que inflijan daño (una vez por conjuro).',
         proficiencies: '+Bono de Espíritu a pruebas/skills de INT, Concentración y pruebas de Nivel de Lanzador.',
+        influencePenalty: 'Tu cuerpo responde como el de un erudito anciano y frágil. Sufres un penalizador de -{sb} (= Bono de Espíritu) a pruebas de STR, skills de STR, pruebas de CON, tiradas de ataque y tiradas de daño no mágico.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Arcano del Archimago', desc: 'Obtienes espacios adicionales de conjuros arcanos (lista Hechicero/Mago): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
           { tier: 'Intermedio', minLevel: 6, name: 'Oleada Arcana', desc: 'Acepta 1 de Influencia para lanzar un conjuro arcano conocido con +2 al Nivel de Lanzador y +2 a la CD.' },
@@ -1038,6 +1078,7 @@
         subtitle: 'Guerrero mítico de precisión letal y poderío físico.',
         boon: '+2 a todas las tiradas de daño no mágico (armas cuerpo a cuerpo y a distancia).',
         proficiencies: 'Competencia con todas las armas marciales y 1 arma exótica. +Bono de Espíritu a Ataque, Daño no mágico, Fortaleza y pruebas/skills de STR.',
+        influencePenalty: 'Eres impulsivo hacia la violencia y rechazas la magia o la contemplación. Sufres un penalizador de -{sb} (= Bono de Espíritu) a pruebas de INT, skills de INT y a tu Nivel de Lanzador (mín. NL 0, pudiendo impedirte lanzar conjuros). Tampoco puedes beneficiarte de efectos que aumenten tu Nivel de Lanzador.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Destreza del Campeón', desc: 'Competencia con todas las armas marciales y 1 arma exótica elegida en la sesión.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Ataque Súbito (Sudden Attack)', desc: 'Al realizar un ataque completo puedes hacer 1 ataque adicional con tu bonificador máximo de ataque (disponible como toggle en Armas y Combate).' },
@@ -1051,6 +1092,7 @@
         subtitle: 'Baluarte inquebrantable que protege a sus aliados.',
         boon: '+1 a la Defensa contra Maniobras de Combate (DMC / CMD).',
         proficiencies: 'Competencia con armaduras pesadas y todos los escudos. +Bono de Espíritu a CA, DMC, pruebas de CON, Fortaleza y Reflejos.',
+        influencePenalty: 'Tu cautela extrema interfiere con tus ataques. Siempre que ataques debes combatir a la defensiva (Fight Defensively) y siempre que lances un conjuro debes hacerlo a la defensiva (Cast Defensively). Además, sufres un penalizador de -{sb} (= Bono de Espíritu) a todas tus tiradas de daño.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Armadura del Guardián', desc: 'Competencia con armaduras pesadas y todos los escudos (incluido pavés).' },
           { tier: 'Intermedio', minLevel: 6, name: 'Absorber Golpe', desc: 'Como acción inmediata aceptando Influencia, rediriges daño de un aliado adyacente hacia ti con RD temporal.' },
@@ -1064,6 +1106,7 @@
         subtitle: 'Conducto divino de sanación, fe y sabiduría ancestral.',
         boon: '+2 PG curados al usar conjuros o habilidades de curación.',
         proficiencies: '+Bono de Espíritu a pruebas/skills de WIS, Voluntad y Concentración.',
+        influencePenalty: 'Debes golpear para infligir daño no letal en combate siempre que sea posible. Además, sufres un penalizador de -{sb} (= Bono de Espíritu) en pruebas de CHA y skills de CHA que involucren a fieles de otras religiones (excepto pruebas para intentar convertirlos a la fe del espíritu).',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Oleada Divina', desc: 'Obtienes espacios adicionales de conjuros divinos (lista Clérigo/Oráculo): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
           { tier: 'Intermedio', minLevel: 6, name: 'Canalizar Energía', desc: 'Canalizas energía positiva o negativa como un clérigo de tu nivel de Médium (1 + mod CAR veces/día).' },
@@ -1077,6 +1120,7 @@
         subtitle: 'Líder carismático que inspira grandeza y coordina la victoria.',
         boon: '+1 adicional a todas las tiradas de Oleada Espiritual.',
         proficiencies: '+Bono de Espíritu a pruebas/skills de CHA, Iniciativa, Voluntad y apoyo grupal con Oleada Espiritual.',
+        influencePenalty: 'Concentrarte constantemente en dirigir a tus aliados te impide atender otros asuntos. Sufres un penalizador de -{sb} (= Bono de Espíritu) a pruebas de WIS y skills de WIS. Además, si no estás al menos nominalmente al mando de tus aliados presentes, pierdes el Bono de Espíritu y el Don de Sesión del Mariscal.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Órdenes del Mariscal', desc: 'Puedes otorgar tu Oleada Espiritual a aliados a 30 pies como acción inmediata, sumando Bono de Espíritu + 1.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Inspiración Decisiva', desc: 'Otorgas a tus aliados bonos de competencia a ataques, salvaciones o skills aceptando Influencia.' },
@@ -1090,6 +1134,7 @@
         subtitle: 'Maestro del engaño, la agilidad y el talento universal.',
         boon: 'Elige 1 skill en Skills: obtiene +1 y se vuelve class skill.',
         proficiencies: '+Bono de Espíritu a pruebas/skills de DEX, Reflejos e Iniciativa. Todas las skills pueden usarse sin entrenar.',
+        influencePenalty: 'Sospechas que todos a tu alrededor tienen segundas intenciones. Nunca cuentas como aliado para beneficiarte de habilidades de otras criaturas ni como objetivo voluntario de conjuros (incluso conjuros beneficiosos de toque requieren un ataque de toque CaC, aunque no necesitas salvar contra conjuros inofensivos). Tampoco te beneficias de Aid Another.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: "Filo del Embaucador (Trickster's Edge)", desc: 'Puedes usar cualquier skill sin entrenar. Además eliges 2 skills (en Skills) que ganan rangos máximos (= nivel) y son class skills.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Ataque Furtivo / Sorpresa', desc: 'Obtienes Ataque Furtivo (+1d6 cada 3 niveles de Médium) y puedes distraer enemigos para negarles DES.' },
@@ -1098,6 +1143,108 @@
         ]
       }
     };
+
+    // Rasgos de clase del Médium (Occult Adventures) que se desbloquean por nivel
+    const MEDIUM_CLASS_FEATURES = [
+      {
+        id: 'spirit_surge_base',
+        name: 'Spirit, Spirit Bonus & Spirit Surge',
+        tag: 'Su',
+        minLevel: 1,
+        getDesc: (lvl) => `Realizas una sesión de 1 hora al día para canalizar 1 espíritu legendario por 24 h (inicia con 1 de Influencia). Bono de Espíritu actual: +${getSpiritBonusRaw(lvl)}. Tras fallar una tirada modificada por tu Bono de Espíritu, puedes aceptar +1 Influencia (sin acción, 1/asalto) para sumar ${getSurgeDie(lvl).label}.`
+      },
+      {
+        id: 'shared_seance',
+        name: 'Shared Seance',
+        tag: 'Su',
+        minLevel: 2,
+        getDesc: () => 'Puedes invitar a tus aliados (INT ≥ 3) a participar en tu sesión diaria manteniendo contacto físico; todos los participantes reciben el Don de Sesión (Seance Boon) del espíritu durante 24 horas.'
+      },
+      {
+        id: 'taboo',
+        name: 'Taboo',
+        tag: 'Ex',
+        minLevel: 2,
+        getDesc: () => 'Durante la sesión puedes aceptar 1 tabú del espíritu para ganar 2 usos gratuitos de Spirit Surge sin sumar Influencia. Romper el tabú impone -2 a ataques, daño, pruebas, skills y salvaciones por 1 hora y +1 Influencia (llegar a 5 por romperlo destierra a esa leyenda por 1 semana).'
+      },
+      {
+        id: 'haunt_channeler',
+        name: 'Haunt Channeler',
+        tag: 'Su',
+        minLevel: 3,
+        getDesc: (lvl) => {
+          const dice = Math.max(1, Math.floor(lvl / 2));
+          const dc = 20 + Math.floor(lvl / 2);
+          return `Siempre actúas en el asalto de sorpresa contra apariciones (haunts). Tu toque inflige ${dice}d6 de daño a la aparición (como energía positiva) y te permite hacerle 1 pregunta. También puedes fallar voluntariamente tu salvación para absorberla en tu cuerpo (protegiendo a los demás); controla tu cuerpo hasta superar Voluntad CD ${dc} (1 intento/minuto).`;
+        }
+      },
+      {
+        id: 'location_channel',
+        name: 'Location Channel',
+        tag: 'Sp',
+        minLevel: 5,
+        getDesc: (lvl) => {
+          const dc = 20 + Math.floor(lvl / 2);
+          return `En el lugar de la muerte (o un sitio preciado) de un difunto, realizas una sesión especial para llamar a su espíritu a tu cuerpo (como call spirit, duración ${lvl} asaltos) y que tus aliados le hagan preguntas (1 intento cada 24 h por espíritu). Voluntad CD ${dc} cada asalto para terminar antes.`;
+        }
+      },
+      {
+        id: 'connection_channel',
+        name: 'Connection Channel',
+        tag: 'Sp',
+        minLevel: 7,
+        getDesc: () => 'Puedes usar Location Channel desde cualquier lugar siempre que poseas una conexión física o personal con el difunto, usando la familiaridad más alta entre todos los participantes de la sesión.'
+      },
+      {
+        id: 'propitiation',
+        name: 'Propitiation',
+        tag: 'Su',
+        minLevel: 9,
+        getDesc: () => 'Una vez al día, mediante un ritual de 10 minutos para apaciguar al espíritu canalizado, reduces su Influencia sobre ti en 1 punto (hasta un mínimo de 1).'
+      },
+      {
+        id: 'ask_the_spirits',
+        name: 'Ask the Spirits',
+        tag: 'Sp',
+        minLevel: 13,
+        getDesc: () => 'Envías tu consciencia al Plano Astral para consultar a los espíritus como el conjuro contact other plane (sin sufrir riesgo de disminución de INT/CAR por fallar la prueba).'
+      },
+      {
+        id: 'astral_journey',
+        name: 'Astral Journey',
+        tag: 'Sp',
+        minLevel: 14,
+        getDesc: () => 'Puedes entrar en trance profundo para proyectar tu cuerpo astral como el conjuro lesser astral projection sin necesidad de componente material.'
+      },
+      {
+        id: 'trance_of_three',
+        name: 'Trance of Three',
+        tag: 'Su',
+        minLevel: 15,
+        getDesc: (lvl) => `Aceptando +2 de Influencia (acción de asalto completo), puedes canalizar temporalmente un espíritu de otra leyenda adicional durante ${lvl} asaltos, obteniendo sus poderes y bonos. Puedes terminar el trance antes como acción gratuita.`
+      },
+      {
+        id: 'spacious_soul',
+        name: 'Spacious Soul',
+        tag: 'Su',
+        minLevel: 18,
+        getDesc: () => 'Tu alma se vuelve lo bastante amplia para albergar la consciencia de un aliado voluntario dentro de tu cuerpo (protegiéndolo o permitiéndole lanzar conjuros desde tu interior, renunciando temporalmente a espíritus legendarios).'
+      },
+      {
+        id: 'spirit_mastery',
+        name: 'Spirit Mastery',
+        tag: 'Ex',
+        minLevel: 19,
+        getDesc: () => 'Te conviertes en una leyenda entre los médiums: obtienes 2 usos gratuitos adicionales de Spirit Surge al día sin ganar Influencia (sin necesidad de sacrificar poderes ni aceptar tabúes).'
+      },
+      {
+        id: 'astral_beacon',
+        name: 'Astral Beacon',
+        tag: 'Su',
+        minLevel: 20,
+        getDesc: () => 'Eres un faro abierto hacia el Plano Astral: puedes canalizar espíritus de cualquier leyenda sin requerir ubicación favorita y llevar el registro de Influencia por separado para cada espíritu canalizado.'
+      }
+    ];
 
     // 35 Skills oficiales de PF1e en inglés (ordenadas alfabéticamente)
     const SKILLS_LIST = [
@@ -2773,6 +2920,27 @@
       document.getElementById('spirit-detail-boon').textContent = spObj.boon;
       document.getElementById('spirit-detail-proficiencies').textContent = spObj.proficiencies;
 
+      // Penalizador de Influencia Alta (3+ Influencia)
+      const penaltyCard = document.getElementById('spirit-influence-penalty-card');
+      const penaltyBadge = document.getElementById('spirit-influence-penalty-badge');
+      const penaltyText = document.getElementById('spirit-detail-influence-penalty');
+      const displaySb = state.spirit === 'none' ? getSpiritBonusRaw(state.level) : sb;
+      const isPenaltyActive = state.spirit !== 'none' && state.influence >= 3;
+
+      penaltyText.textContent = (spObj.influencePenalty || '—').replace(/\{sb\}/g, displaySb);
+      if (isPenaltyActive) {
+        penaltyCard.className = 'bg-amber-950/35 border border-amber-500/60 rounded-xl p-3.5 space-y-2 transition shadow-[0_0_16px_-6px_rgba(245,158,11,0.4)]';
+        penaltyBadge.textContent = state.influence >= 5 ? 'POSEÍDO (5/5)' : `ACTIVO (Inf. ${state.influence}/5)`;
+        penaltyBadge.className = state.influence >= 5
+          ? 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-600 text-white animate-pulse'
+          : 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/25 text-amber-200 border border-amber-400/50';
+      } else {
+        penaltyCard.className = 'bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2 transition';
+        penaltyBadge.textContent = state.spirit === 'none' ? 'Sin espíritu' : 'Se activa en Inf. 3+';
+        penaltyBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-400';
+      }
+
+      // Poderes del Espíritu (Menor / Intermedio / Mayor / Supremo)
       const powersGrid = document.getElementById('spirit-powers-grid');
       powersGrid.innerHTML = spObj.powers.map(p => {
         const unlocked = state.spirit !== 'none' && state.level >= p.minLevel;
@@ -2790,8 +2958,56 @@
         `;
       }).join('');
 
+      // Habilidades de Clase del Médium (Desbloqueo por Nivel)
+      const onlyUnlocked = document.getElementById('filter-unlocked-features')?.checked;
+      const unlockedCount = MEDIUM_CLASS_FEATURES.filter(f => state.level >= f.minLevel).length;
+      document.getElementById('class-features-count').textContent = `${unlockedCount}/${MEDIUM_CLASS_FEATURES.length} activas`;
+
+      const featuresGrid = document.getElementById('class-features-grid');
+      featuresGrid.innerHTML = MEDIUM_CLASS_FEATURES
+        .filter(f => !onlyUnlocked || state.level >= f.minLevel)
+        .map(f => {
+          const unlocked = state.level >= f.minLevel;
+          return `
+            <div class="rounded-xl p-3.5 border transition flex flex-col justify-between gap-2 ${unlocked ? 'bg-slate-900/90 accent-border' : 'bg-slate-950/55 border-slate-800/70 opacity-55'}">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <span class="text-[11px] font-bold uppercase tracking-wider ${unlocked ? 'accent-text' : 'text-slate-500'}">Nivel ${f.minLevel} · (${f.tag})</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${unlocked ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                    ${unlocked ? 'ACTIVA' : 'BLOQUEADA'}
+                  </span>
+                </div>
+                <div class="text-sm font-bold text-white mb-1">${f.name}</div>
+                <p class="text-xs text-slate-300 leading-relaxed">${f.getDesc(state.level)}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      // Tabla de Progresión 1–20 con todos los hitos de clase
       const progBody = document.getElementById('progression-table-body');
-      const milestones = { 1: 'Poder Menor', 4: 'Conjuros Niv 1', 6: 'Poder Intermedio', 10: 'Oleada 1d8', 11: 'Poder Mayor', 17: 'Poder Supremo', 20: 'Oleada 1d10' };
+      const milestones = {
+        1: 'Knacks, Spirit, Poder Menor',
+        2: 'Shared Seance, Taboo',
+        3: 'Haunt Channeler',
+        4: 'Conjuros Niv. 1',
+        5: 'Location Channel',
+        6: 'Poder Intermedio',
+        7: 'Connection Channel',
+        8: 'Bono Esp. +3',
+        9: 'Propitiation',
+        10: 'Spirit Surge 1d8',
+        11: 'Poder Mayor',
+        12: 'Bono Esp. +4',
+        13: 'Ask the Spirits',
+        14: 'Astral Journey',
+        15: 'Trance of Three',
+        16: 'Bono Esp. +5',
+        17: 'Poder Supremo',
+        18: 'Spacious Soul',
+        19: 'Spirit Mastery',
+        20: 'Astral Beacon, 1d10'
+      };
       progBody.innerHTML = '';
       for (let lvl = 1; lvl <= 20; lvl++) {
         const isCurr = lvl === state.level;
