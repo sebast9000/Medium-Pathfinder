@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#090b10" />
   <title>Médium PF1e — Ficha, Espíritus y Calculador de Armas</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -162,7 +165,7 @@
           <span>🏹</span> Armas y Combate
         </button>
         <button onclick="switchTab('skills')" id="tab-btn-skills" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
-          <span>📜</span> Habilidades (35)
+          <span>📜</span> Skills (35)
           <span id="tab-skills-pill" class="text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 tabular-nums">0/0</span>
         </button>
         <button onclick="switchTab('spells')" id="tab-btn-spells" role="tab" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5">
@@ -217,7 +220,7 @@
                 <select id="input-favored" onchange="updateField('favoredClass', this.value)"
                   class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-sm text-white accent-ring">
                   <option value="hp">+1 PG por nivel</option>
-                  <option value="skill">+1 Rango habilidad/niv</option>
+                  <option value="skill">+1 Skill Rank/niv</option>
                   <option value="none">Ninguno / Otro</option>
                 </select>
               </div>
@@ -446,7 +449,7 @@
                   class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
               </div>
               <div>
-                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Penalización de armadura (negativo, aplica a habilidades de FUE/DES)">Pen. Arm.</label>
+                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty (negativo, aplica a skills de STR/DEX)">ACP</label>
                 <input type="number" id="input-ac-acp" max="0" oninput="updateNested('ac', 'acp', Math.min(0, parseInt(this.value) || 0))"
                   class="w-full text-center bg-slate-900 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
               </div>
@@ -685,14 +688,14 @@
     </section>
 
     <!-- =======================================================
-         PESTAÑA 3: HABILIDADES (35)
+         PESTAÑA 3: SKILLS (35 - EN INGLÉS)
          ======================================================= -->
     <section id="tab-skills" class="tab-panel hidden space-y-5 animate-fade">
       <div class="card-occult rounded-2xl p-4 sm:p-5 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="flex flex-wrap items-center gap-4">
             <div>
-              <div class="text-xs text-slate-400 uppercase tracking-wider">Rangos Gastados / Disponibles</div>
+              <div class="text-xs text-slate-400 uppercase tracking-wider">Skill Ranks (Gastados / Disponibles)</div>
               <div class="flex items-baseline gap-2 mt-0.5">
                 <span id="skills-spent" class="text-2xl font-bold text-white tabular-nums">0</span>
                 <span class="text-slate-500">/</span>
@@ -703,7 +706,7 @@
             </div>
 
             <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800">
-              <label class="text-xs text-slate-400 whitespace-nowrap">Rangos extra (Humano/Dote):</label>
+              <label class="text-xs text-slate-400 whitespace-nowrap">Rangos extra (Human/Feat):</label>
               <input type="number" id="input-extra-skill-ranks" min="0" oninput="updateField('extraSkillRanks', Math.max(0, parseInt(this.value) || 0))"
                 class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-sm font-bold text-white tabular-nums accent-ring" />
             </div>
@@ -711,7 +714,7 @@
 
           <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
             <div class="relative flex-1 sm:w-60">
-              <input type="text" id="skills-search" oninput="renderSkills()" placeholder="Buscar habilidad..."
+              <input type="text" id="skills-search" oninput="renderSkills()" placeholder="Buscar skill (ej. Perception)..."
                 class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm text-white accent-ring" />
               <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
@@ -728,21 +731,21 @@
             <span>🎭</span> Opciones del Espíritu Embaucador (Trickster)
           </div>
           <p class="text-xs text-slate-300">
-            Todas las habilidades pueden usarse <strong>sin entrenar</strong> y reciben tu bono de Embaucador. Elige tus habilidades de <strong>Filo del Embaucador</strong> (rangos gratis = nivel + de clase) y tu <strong>Don de Sesión</strong> (+1 y de clase):
+            Todas las skills pueden usarse <strong>untrained</strong> y reciben tu bono de Embaucador. Elige tus skills de <strong>Trickster's Edge</strong> (rangos gratis = nivel + class skill) y tu <strong>Seance Boon</strong> (+1 y class skill):
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-cyan-200 mb-1">Filo del Embaucador #1</label>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Trickster's Edge #1</label>
               <select id="select-trickster-edge-1" onchange="updateField('tricksterEdgeSkill1', this.value)"
                 class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-cyan-200 mb-1">Filo del Embaucador #2</label>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Trickster's Edge #2</label>
               <select id="select-trickster-edge-2" onchange="updateField('tricksterEdgeSkill2', this.value)"
                 class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-cyan-200 mb-1">Don de Sesión (+1 y de clase)</label>
+              <label class="block text-xs font-semibold text-cyan-200 mb-1">Seance Boon (+1 &amp; Class Skill)</label>
               <select id="select-trickster-boon" onchange="updateField('tricksterBoonSkill', this.value)"
                 class="w-full bg-slate-900 border border-cyan-700/60 rounded-xl px-3 py-2 text-xs text-white accent-ring"></select>
             </div>
@@ -750,20 +753,20 @@
         </div>
       </div>
 
-      <!-- Tabla de 35 Habilidades -->
+      <!-- Tabla de 35 Skills -->
       <div class="card-occult rounded-2xl overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-slate-900/90 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
-                <th class="py-3 px-2.5 text-center w-10" title="Habilidad de clase (+3 si tiene ≥1 rango)">Cl.</th>
-                <th class="py-3 px-3">Habilidad</th>
-                <th class="py-3 px-2 text-center">Atrib.</th>
-                <th class="py-3 px-2 text-center">Rangos</th>
+                <th class="py-3 px-2.5 text-center w-10" title="Class Skill (+3 si tiene ≥1 rango)">CS</th>
+                <th class="py-3 px-3">Skill</th>
+                <th class="py-3 px-2 text-center">Stat</th>
+                <th class="py-3 px-2 text-center">Ranks</th>
                 <th class="py-3 px-2 text-center hidden md:table-cell">Mod</th>
-                <th class="py-3 px-2 text-center hidden sm:table-cell">Espíritu</th>
-                <th class="py-3 px-2 text-center hidden lg:table-cell">Pen.Arm</th>
-                <th class="py-3 px-2 text-center">Otros</th>
+                <th class="py-3 px-2 text-center hidden sm:table-cell">Spirit</th>
+                <th class="py-3 px-2 text-center hidden lg:table-cell">ACP</th>
+                <th class="py-3 px-2 text-center">Misc</th>
                 <th class="py-3 px-3 sm:px-4 text-right">Total</th>
               </tr>
             </thead>
@@ -885,7 +888,7 @@
           </h3>
           <ul class="text-xs text-slate-300 space-y-2 leading-relaxed list-disc pl-4">
             <li><strong>Sesión de Espiritismo:</strong> Dura 1 hora y te vincula a un espíritu legendario durante 24 horas comenzando con <strong>1 punto de Influencia</strong>.</li>
-            <li><strong>Oleada Espiritual (Spirit Surge):</strong> Como acción inmediata tras fallar una tirada (ataque, salvación, habilidad o prueba de atributo), aceptas +1 Influencia para sumar el dado de Oleada (1d6 / 1d8 a niv 10 / 1d10 a niv 20).</li>
+            <li><strong>Oleada Espiritual (Spirit Surge):</strong> Como acción inmediata tras fallar una tirada (ataque, salvación, skill o prueba de atributo), aceptas +1 Influencia para sumar el dado de Oleada (1d6 / 1d8 a niv 10 / 1d10 a niv 20).</li>
             <li><strong>Influencia 3+:</strong> La personalidad del espíritu te domina y sufres su penalización de influencia.</li>
             <li><strong>Influencia 5:</strong> El espíritu toma el control completo de tu cuerpo durante 24 horas (pasas a ser un PNJ controlado por el DJ).</li>
             <li><strong>Tabú:</strong> Si aceptas el tabú del espíritu en la sesión, obtienes <strong>2 usos gratuitos</strong> de Oleada Espiritual sin ganar Influencia.</li>
@@ -959,7 +962,7 @@
     <div class="card-occult rounded-2xl max-w-md w-full p-5 space-y-4 border-rose-900/60">
       <h3 class="font-display text-base font-bold text-rose-300">¿Reiniciar toda la ficha?</h3>
       <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-        Se restaurarán todos los atributos, armas precargadas, rangos de habilidades y conjuros al estado inicial de nivel 1.
+        Se restaurarán todos los atributos, armas precargadas, rangos de skills y conjuros al estado inicial.
       </p>
       <div class="flex justify-end gap-2">
         <button onclick="closeModal('modal-reset')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">Cancelar</button>
@@ -988,12 +991,12 @@
     };
 
     const ABILITIES = [
-      { key: 'str', label: 'FUE', name: 'Fuerza' },
-      { key: 'dex', label: 'DES', name: 'Destreza' },
-      { key: 'con', label: 'CON', name: 'Constitución' },
-      { key: 'int', label: 'INT', name: 'Inteligencia' },
-      { key: 'wis', label: 'SAB', name: 'Sabiduría' },
-      { key: 'cha', label: 'CAR', name: 'Carisma' }
+      { key: 'str', label: 'FUE', shortEn: 'STR', name: 'Fuerza' },
+      { key: 'dex', label: 'DES', shortEn: 'DEX', name: 'Destreza' },
+      { key: 'con', label: 'CON', shortEn: 'CON', name: 'Constitución' },
+      { key: 'int', label: 'INT', shortEn: 'INT', name: 'Inteligencia' },
+      { key: 'wis', label: 'SAB', shortEn: 'WIS', name: 'Sabiduría' },
+      { key: 'cha', label: 'CAR', shortEn: 'CHA', name: 'Carisma' }
     ];
 
     const SIZE_MODS = {
@@ -1002,7 +1005,6 @@
       large: { acAtk: -1, cmbCmd: 1, stealth: -4, label: 'Grande' }
     };
 
-    // Paleta exacta solicitada por espíritu
     const SPIRITS = {
       none: {
         id: 'none', name: 'Sin Espíritu', short: 'Ninguno', icon: '✦',
@@ -1022,7 +1024,7 @@
         theme: { accent: '#3b82f6', soft: 'rgba(59,130,246,0.16)', border: 'rgba(59,130,246,0.52)', glow: 'rgba(59,130,246,0.26)', text: '#93c5fd' },
         subtitle: 'Leyenda arcana de intelecto supremo y maestría mágica.',
         boon: '+2 al daño con conjuros que inflijan daño (una vez por conjuro).',
-        proficiencies: '+Bono de Espíritu a pruebas/habilidades de INT, Concentración y pruebas de Nivel de Lanzador.',
+        proficiencies: '+Bono de Espíritu a pruebas/skills de INT, Concentración y pruebas de Nivel de Lanzador.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Arcano del Archimago', desc: 'Obtienes espacios adicionales de conjuros arcanos (lista Hechicero/Mago): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
           { tier: 'Intermedio', minLevel: 6, name: 'Oleada Arcana', desc: 'Acepta 1 de Influencia para lanzar un conjuro arcano conocido con +2 al Nivel de Lanzador y +2 a la CD.' },
@@ -1035,7 +1037,7 @@
         theme: { accent: '#ef4444', soft: 'rgba(239,68,68,0.16)', border: 'rgba(239,68,68,0.52)', glow: 'rgba(239,68,68,0.26)', text: '#fca5a5' },
         subtitle: 'Guerrero mítico de precisión letal y poderío físico.',
         boon: '+2 a todas las tiradas de daño no mágico (armas cuerpo a cuerpo y a distancia).',
-        proficiencies: 'Competencia con todas las armas marciales y 1 arma exótica. +Bono de Espíritu a Ataque, Daño no mágico, Fortaleza y pruebas/habilidades de FUE.',
+        proficiencies: 'Competencia con todas las armas marciales y 1 arma exótica. +Bono de Espíritu a Ataque, Daño no mágico, Fortaleza y pruebas/skills de STR.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Destreza del Campeón', desc: 'Competencia con todas las armas marciales y 1 arma exótica elegida en la sesión.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Ataque Súbito (Sudden Attack)', desc: 'Al realizar un ataque completo puedes hacer 1 ataque adicional con tu bonificador máximo de ataque (disponible como toggle en Armas y Combate).' },
@@ -1061,7 +1063,7 @@
         theme: { accent: '#10b981', soft: 'rgba(16,185,129,0.16)', border: 'rgba(16,185,129,0.52)', glow: 'rgba(16,185,129,0.24)', text: '#6ee7b7' },
         subtitle: 'Conducto divino de sanación, fe y sabiduría ancestral.',
         boon: '+2 PG curados al usar conjuros o habilidades de curación.',
-        proficiencies: '+Bono de Espíritu a pruebas/habilidades de SAB, Voluntad y Concentración.',
+        proficiencies: '+Bono de Espíritu a pruebas/skills de WIS, Voluntad y Concentración.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Oleada Divina', desc: 'Obtienes espacios adicionales de conjuros divinos (lista Clérigo/Oráculo): 1 por nivel lanzable (1 de niv. 1 en niveles 1–3).' },
           { tier: 'Intermedio', minLevel: 6, name: 'Canalizar Energía', desc: 'Canalizas energía positiva o negativa como un clérigo de tu nivel de Médium (1 + mod CAR veces/día).' },
@@ -1074,10 +1076,10 @@
         theme: { accent: '#a855f7', soft: 'rgba(168,85,247,0.16)', border: 'rgba(168,85,247,0.52)', glow: 'rgba(168,85,247,0.26)', text: '#d8b4fe' },
         subtitle: 'Líder carismático que inspira grandeza y coordina la victoria.',
         boon: '+1 adicional a todas las tiradas de Oleada Espiritual.',
-        proficiencies: '+Bono de Espíritu a pruebas/habilidades de CAR, Iniciativa, Voluntad y apoyo grupal con Oleada Espiritual.',
+        proficiencies: '+Bono de Espíritu a pruebas/skills de CHA, Iniciativa, Voluntad y apoyo grupal con Oleada Espiritual.',
         powers: [
           { tier: 'Menor', minLevel: 1, name: 'Órdenes del Mariscal', desc: 'Puedes otorgar tu Oleada Espiritual a aliados a 30 pies como acción inmediata, sumando Bono de Espíritu + 1.' },
-          { tier: 'Intermedio', minLevel: 6, name: 'Inspiración Decisiva', desc: 'Otorgas a tus aliados bonos de competencia a ataques, salvaciones o habilidades aceptando Influencia.' },
+          { tier: 'Intermedio', minLevel: 6, name: 'Inspiración Decisiva', desc: 'Otorgas a tus aliados bonos de competencia a ataques, salvaciones o skills aceptando Influencia.' },
           { tier: 'Mayor', minLevel: 11, name: 'Acción Coordinada', desc: 'Permites a un aliado realizar una acción de movimiento o ataque extra fuera de su turno aceptando Influencia.' },
           { tier: 'Supremo', minLevel: 17, name: 'Presencia Legendaria', desc: 'Tu Oleada Espiritual puede afectar a múltiples aliados a la vez y otorgar un turno decisivo.' }
         ]
@@ -1086,54 +1088,54 @@
         id: 'trickster', name: 'Embaucador', short: 'Embaucador', icon: '🎭',
         theme: { accent: '#06b6d4', soft: 'rgba(6,182,212,0.16)', border: 'rgba(6,182,212,0.52)', glow: 'rgba(6,182,212,0.26)', text: '#67e8f9' },
         subtitle: 'Maestro del engaño, la agilidad y el talento universal.',
-        boon: 'Elige 1 habilidad en Habilidades: obtiene +1 y se vuelve habilidad de clase.',
-        proficiencies: '+Bono de Espíritu a pruebas/habilidades de DES, Reflejos e Iniciativa. Todas las habilidades pueden usarse sin entrenar.',
+        boon: 'Elige 1 skill en Skills: obtiene +1 y se vuelve class skill.',
+        proficiencies: '+Bono de Espíritu a pruebas/skills de DEX, Reflejos e Iniciativa. Todas las skills pueden usarse sin entrenar.',
         powers: [
-          { tier: 'Menor', minLevel: 1, name: 'Filo del Embaucador (Trickster\'s Edge)', desc: 'Puedes usar cualquier habilidad sin entrenar. Además eliges 2 habilidades (en Habilidades) que ganan rangos máximos (= nivel) y son de clase.' },
+          { tier: 'Menor', minLevel: 1, name: "Filo del Embaucador (Trickster's Edge)", desc: 'Puedes usar cualquier skill sin entrenar. Además eliges 2 skills (en Skills) que ganan rangos máximos (= nivel) y son class skills.' },
           { tier: 'Intermedio', minLevel: 6, name: 'Ataque Furtivo / Sorpresa', desc: 'Obtienes Ataque Furtivo (+1d6 cada 3 niveles de Médium) y puedes distraer enemigos para negarles DES.' },
-          { tier: 'Mayor', minLevel: 11, name: 'Evasión / Esquiva Asombrosa', desc: 'Obtienes Evasión y puedes aceptar Influencia para repetir una tirada de habilidad o Reflejos fallida.' },
-          { tier: 'Supremo', minLevel: 17, name: 'Maestría Legendaria', desc: 'Tiras dos veces y eliges el mejor resultado en tus pruebas de habilidades clave.' }
+          { tier: 'Mayor', minLevel: 11, name: 'Evasión / Esquiva Asombrosa', desc: 'Obtienes Evasión y puedes aceptar Influencia para repetir una tirada de skill o Reflejos fallida.' },
+          { tier: 'Supremo', minLevel: 17, name: 'Maestría Legendaria', desc: 'Tiras dos veces y eliges el mejor resultado en tus pruebas de skills clave.' }
         ]
       }
     };
 
-    // 35 Habilidades oficiales de PF1e (acp: true indica que aplica penalización de armadura)
+    // 35 Skills oficiales de PF1e en inglés (ordenadas alfabéticamente)
     const SKILLS_LIST = [
-      { id: 'acrobatics', name: 'Acrobacias', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'craft', name: 'Artesanía', ability: 'int', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'sense_motive', name: 'Averiguar Intenciones', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'spellcraft', name: 'Conocimiento de Conjuros', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'heal', name: 'Curar', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'diplomacy', name: 'Diplomacia', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'disguise', name: 'Disfrazarse', ability: 'cha', classSkill: false, trainedOnly: false, acp: false },
-      { id: 'bluff', name: 'Engañar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'escape_artist', name: 'Escapismo', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'perform', name: 'Interpretar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'intimidate', name: 'Intimidar', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'disable_device', name: 'Inutilizar Mecanismo', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
-      { id: 'sleight_of_hand', name: 'Juego de Manos', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
-      { id: 'linguistics', name: 'Lingüística', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'ride', name: 'Montar', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'swim', name: 'Nadar', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'perception', name: 'Percepción', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
-      { id: 'profession', name: 'Profesión', ability: 'wis', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'know_arcana', name: 'Saber (Arcano)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'know_dungeoneering', name: 'Saber (Dungeons)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_geography', name: 'Saber (Geografía)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_history', name: 'Saber (Historia)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_engineering', name: 'Saber (Ingeniería)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_local', name: 'Saber (Local)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_nature', name: 'Saber (Naturaleza)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_nobility', name: 'Saber (Nobleza)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'know_planes', name: 'Saber (Planos)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'know_religion', name: 'Saber (Religión)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'stealth', name: 'Sigilo', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'survival', name: 'Supervivencia', ability: 'wis', classSkill: false, trainedOnly: false, acp: false },
-      { id: 'appraise', name: 'Tasación', ability: 'int', classSkill: false, trainedOnly: false, acp: false },
-      { id: 'handle_animal', name: 'Trato con Animales', ability: 'cha', classSkill: false, trainedOnly: true, acp: false },
-      { id: 'climb', name: 'Trepar', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
-      { id: 'use_magic_device', name: 'Usar Objeto Mágico', ability: 'cha', classSkill: true, trainedOnly: true, acp: false },
-      { id: 'fly', name: 'Volar', ability: 'dex', classSkill: true, trainedOnly: false, acp: true }
+      { id: 'acrobatics', name: 'Acrobatics', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'appraise', name: 'Appraise', ability: 'int', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'bluff', name: 'Bluff', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'climb', name: 'Climb', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'craft', name: 'Craft', ability: 'int', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'diplomacy', name: 'Diplomacy', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'disable_device', name: 'Disable Device', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
+      { id: 'disguise', name: 'Disguise', ability: 'cha', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'escape_artist', name: 'Escape Artist', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'fly', name: 'Fly', ability: 'dex', classSkill: true, trainedOnly: false, acp: true },
+      { id: 'handle_animal', name: 'Handle Animal', ability: 'cha', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'heal', name: 'Heal', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'intimidate', name: 'Intimidate', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'know_arcana', name: 'Knowledge (Arcana)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'know_dungeoneering', name: 'Knowledge (Dungeoneering)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_engineering', name: 'Knowledge (Engineering)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_geography', name: 'Knowledge (Geography)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_history', name: 'Knowledge (History)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_local', name: 'Knowledge (Local)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_nature', name: 'Knowledge (Nature)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_nobility', name: 'Knowledge (Nobility)', ability: 'int', classSkill: false, trainedOnly: true, acp: false },
+      { id: 'know_planes', name: 'Knowledge (Planes)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'know_religion', name: 'Knowledge (Religion)', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'linguistics', name: 'Linguistics', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'perception', name: 'Perception', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'perform', name: 'Perform', ability: 'cha', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'profession', name: 'Profession', ability: 'wis', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'ride', name: 'Ride', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'sense_motive', name: 'Sense Motive', ability: 'wis', classSkill: true, trainedOnly: false, acp: false },
+      { id: 'sleight_of_hand', name: 'Sleight of Hand', ability: 'dex', classSkill: false, trainedOnly: true, acp: true },
+      { id: 'spellcraft', name: 'Spellcraft', ability: 'int', classSkill: true, trainedOnly: true, acp: false },
+      { id: 'stealth', name: 'Stealth', ability: 'dex', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'survival', name: 'Survival', ability: 'wis', classSkill: false, trainedOnly: false, acp: false },
+      { id: 'swim', name: 'Swim', ability: 'str', classSkill: false, trainedOnly: false, acp: true },
+      { id: 'use_magic_device', name: 'Use Magic Device', ability: 'cha', classSkill: true, trainedOnly: true, acp: false }
     ];
 
     /* =====================================================================
@@ -1144,12 +1146,12 @@
         {
           id: 'w_comp_bow',
           name: 'Composite Longbow (Arco Compuesto)',
-          type: 'bow', // bow | crossbow | melee1h | melee2h
+          type: 'bow',
           dice: '1d8',
           critMin: 20,
           critMult: 3,
           damageType: 'Perforante',
-          enhancement: 1, // -1 = Masterwork (+1 Atk, 0 Dmg), 0..5 = mágico
+          enhancement: 1,
           strRating: 2,
           weaponFocus: true,
           rapidReload: true,
@@ -1322,10 +1324,13 @@
 
     let state = loadState();
     let activeTab = 'summary';
-    // Cálculo completo de un Arma (Ataque estándar, Ataque Completo, Daño y Desglose con píldoras en vivo)
+
+    /* =====================================================================
+       3. CÁLCULO DE ARMAS Y FÓRMULAS PF1E
+       ===================================================================== */
     function calculateWeaponStats(w) {
       const bab = getBAB(state.level);
-      const scale = 1 + Math.floor(bab / 4); // Para Deadly Aim y Power Attack
+      const scale = 1 + Math.floor(bab / 4);
       const strMod = getAbilityMod('str');
       const dexMod = getAbilityMod('dex');
       const sizeMod = (SIZE_MODS[state.size] || SIZE_MODS.medium).acAtk;
@@ -1338,12 +1343,10 @@
       const isCrossbow = w.type === 'crossbow';
       const isTwoHanded = w.type === 'melee2h' || (w.type === 'melee1h' && !!w.twoHandedGrip);
 
-      // Mejora mágica (-1 = Masterwork: +1 Atk, +0 Dmg)
       const enhVal = parseInt(w.enhancement) || 0;
       const enhAtk = enhVal === -1 ? 1 : Math.max(0, enhVal);
       const enhDmg = enhVal > 0 ? enhVal : 0;
 
-      // Desglose de Ataque (píldoras con tipo pos/neg/neutral)
       const atkPills = [];
       let stdAtk = bab;
       atkPills.push({ label: `BAB ${fmtSign(bab)}`, type: 'neutral' });
@@ -1411,7 +1414,6 @@
         atkPills.push({ label: `Weapon ${fmtSign(wa)}`, type: wa > 0 ? 'pos' : 'neg' });
       }
 
-      // Desglose de Daño
       const dmgPills = [{ label: `${w.dice} Base`, type: 'neutral' }];
       let flatDmg = 0;
 
@@ -1469,14 +1471,12 @@
         dmgPills.push({ label: `+${w.extraDice}`, type: 'pos' });
       }
 
-      // Secuencia de Ataque Completo
       const isHeavyXbow = isCrossbow && (w.dice === '1d10' || w.name.toLowerCase().includes('heavy'));
       const canIterative = !isCrossbow || (w.rapidReload && !isHeavyXbow);
       const canRapidShot = isRanged && t.rapidShot && (isBow || (isCrossbow && w.rapidReload && !isHeavyXbow));
       const rapidPen = canRapidShot ? -2 : 0;
       const fullBaseAtk = stdAtk + rapidPen;
 
-      // Mostrar Rapid Shot -2 en las píldoras de ataque del preview si está activo
       if (canRapidShot) {
         atkPills.push({ label: 'Rapid Shot -2 (Full)', type: 'neg' });
       }
@@ -1484,7 +1484,6 @@
       const fullSequence = [];
       const iterOffsets = canIterative ? getBABIteratives(bab).map(b => b - bab) : [0];
 
-      // 1. Ataque principal (con Manyshot si es Arco)
       const isManyshotActive = isBow && t.manyshot;
       fullSequence.push({
         bonus: fullBaseAtk,
@@ -1493,28 +1492,23 @@
         manyshot: isManyshotActive
       });
 
-      // 2. Ataque extra por Rapid Shot
       if (canRapidShot) {
         fullSequence.push({ bonus: fullBaseAtk, tag: 'Rapid Shot', shortTag: 'RS', manyshot: false });
       }
 
-      // 3. Ataque extra por Haste
       if (t.haste && canIterative) {
         fullSequence.push({ bonus: fullBaseAtk, tag: 'Haste', shortTag: 'Haste', manyshot: false });
       }
 
-      // 4. Ataque extra por Sudden Attack (Campeón nivel 6+, +2 Atk en el ataque extra)
       if (sp === 'champion' && state.level >= 6 && t.suddenAttack && canIterative) {
         fullSequence.push({ bonus: fullBaseAtk + 2, tag: 'Sudden Attack (+2 Atk)', shortTag: 'SA+2', manyshot: false });
         atkPills.push({ label: 'Sudden Attack +2 (Extra)', type: 'pos' });
       }
 
-      // 5. Ataques iterativos adicionales (-5, -10...)
       for (let i = 1; i < iterOffsets.length; i++) {
         fullSequence.push({ bonus: fullBaseAtk + iterOffsets[i], tag: `Iterativo ${i + 1}`, shortTag: '', manyshot: false });
       }
 
-      // Calcular rango min-max de daño
       const parsedDice = parseDiceExpr(w.dice);
       const parsedExtra = w.extraDice ? parseDiceExpr(w.extraDice) : null;
       const minDmg = Math.max(1, parsedDice.count + flatDmg) + (parsedExtra ? parsedExtra.count : 0);
@@ -1552,7 +1546,7 @@
     }
 
     /* =====================================================================
-       4. ACCIONES DEL USUARIO
+       4. UTILIDADES Y CÁLCULOS BASE
        ===================================================================== */
     function fmtSign(num) {
       return num >= 0 ? `+${num}` : `${num}`;
@@ -1627,12 +1621,12 @@
       const sp = state.spirit;
       const sb = getActiveSpiritBonus();
       if (sb === 0) return null;
-      if (sp === 'archmage' && abilityKey === 'int') return { bonus: sb, label: 'Pruebas/Hab. INT' };
-      if (sp === 'champion' && abilityKey === 'str') return { bonus: sb, label: 'Pruebas/Hab. FUE' };
-      if (sp === 'guardian' && abilityKey === 'con') return { bonus: sb, label: 'Pruebas CON' };
-      if (sp === 'hierophant' && abilityKey === 'wis') return { bonus: sb, label: 'Pruebas/Hab. SAB' };
-      if (sp === 'marshal' && abilityKey === 'cha') return { bonus: sb, label: 'Pruebas/Hab. CAR' };
-      if (sp === 'trickster' && abilityKey === 'dex') return { bonus: sb, label: 'Pruebas/Hab. DES' };
+      if (sp === 'archmage' && abilityKey === 'int') return { bonus: sb, label: 'INT Checks/Skills' };
+      if (sp === 'champion' && abilityKey === 'str') return { bonus: sb, label: 'STR Checks/Skills' };
+      if (sp === 'guardian' && abilityKey === 'con') return { bonus: sb, label: 'CON Checks' };
+      if (sp === 'hierophant' && abilityKey === 'wis') return { bonus: sb, label: 'WIS Checks/Skills' };
+      if (sp === 'marshal' && abilityKey === 'cha') return { bonus: sb, label: 'CHA Checks/Skills' };
+      if (sp === 'trickster' && abilityKey === 'dex') return { bonus: sb, label: 'DEX Checks/Skills' };
       return null;
     }
 
@@ -1888,7 +1882,7 @@
       showToast('Arma eliminada.');
     }
 
-    // Gestión de Habilidades
+    // Gestión de Skills
     function setSkillRank(skillId, newRank) {
       state.skills[skillId].ranks = Math.max(0, Math.min(state.level, parseInt(newRank) || 0));
       saveState();
@@ -2221,12 +2215,12 @@
       document.getElementById('stat-cmd-breakdown').innerHTML = `10 + BAB ${bab} + FUE ${fmtSign(strMod)} + DES ${fmtSign(dexMod)}${cmdGuardBonus ? ` + <span class="accent-text font-semibold">${cmdGuardBonus} Guard.</span>` : ''}`;
 
       const seanceEl = document.getElementById('combat-seance-summary');
-      if (sp === 'champion') seanceEl.innerHTML = `<strong class="text-white">+${sb + 2} al daño de armas</strong> (+${sb} Esp. + 2 Don).${state.level >= 6 ? ' <span class="accent-text font-semibold">Ataque Súbito activo.</span>' : ''}`;
+      if (sp === 'champion') seanceEl.innerHTML = `<strong class="text-white">+${sb + 2} al daño de armas</strong> (+${sb} Esp. + 2 Don).${state.level >= 6 ? ' <span class="accent-text font-semibold">Sudden Attack activo.</span>' : ''}`;
       else if (sp === 'archmage') seanceEl.innerHTML = `<strong class="text-white">+2 daño con conjuros</strong>. Concentración y NL +${sb}.`;
       else if (sp === 'hierophant') seanceEl.innerHTML = `<strong class="text-white">+2 a curaciones</strong>. Voluntad y Concentración +${sb}.`;
       else if (sp === 'guardian') seanceEl.innerHTML = `<strong class="text-white">+${sb} CA</strong> y <strong class="text-white">+${sb + 1} DMC</strong> (+${sb} Esp. + 1 Don).`;
       else if (sp === 'marshal') seanceEl.innerHTML = `Oleada Espiritual a aliados con <strong class="text-white">+${sb + 1} extra</strong>.`;
-      else if (sp === 'trickster') seanceEl.innerHTML = `Todas las habilidades sin entrenar. 2 habilidades con rangos máximos (Filo).`;
+      else if (sp === 'trickster') seanceEl.innerHTML = `Todas las skills sin entrenar. 2 skills con rangos máximos (Trickster's Edge).`;
       else seanceEl.textContent = 'Sin espíritu canalizado.';
     }
 
@@ -2247,7 +2241,6 @@
       const preciseWarn = document.getElementById('precise-shot-warning');
       preciseWarn.classList.toggle('hidden', !(t.targetInMelee && !t.hasPreciseShot));
 
-      // 1. Ranged Feats (en inglés + badge en tiempo real)
       const rangedToggles = [
         { key: 'pointBlankShot', title: 'Point-Blank Shot', badge: '+1 Atk / +1 Dmg', badgeTone: 'pos', active: t.pointBlankShot },
         { key: 'hasPreciseShot', title: 'Precise Shot', badge: 'Negates -4', badgeTone: 'pos', active: t.hasPreciseShot },
@@ -2261,7 +2254,7 @@
       const renderBadge = (text, tone, active) => {
         if (!active) return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-semibold tabular-nums">${text}</span>`;
         if (tone === 'neg') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold tabular-nums">${text}</span>`;
-        if (tone === 'pos') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold tabular-nums">${text}</span>`;
+        if (tone === 'pos') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold tabular-nums">${text}</span>`;
         return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 border border-sky-500/40 font-bold tabular-nums">${text}</span>`;
       };
 
@@ -2285,7 +2278,6 @@
         </button>
       `).join('');
 
-      // 2. Melee & Buffs (en inglés + badge en tiempo real)
       const globalToggles = [
         { key: 'powerAttack', title: 'Power Attack', badge: `-${scale} Atk / +${2 * scale} (1H) · +${3 * scale} (2H)`, badgeTone: 'neg', active: t.powerAttack, disabled: false },
         { key: 'haste', title: 'Haste', badge: '+1 Atk / +1 Extra Atk', badgeTone: 'pos', active: t.haste, disabled: false },
@@ -2312,14 +2304,12 @@
         </button>
       `).join('');
 
-      // Helper para píldoras de desglose
       const pillClass = (type) => {
         if (type === 'neg') return 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold';
         if (type === 'pos') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35 font-semibold';
         return 'bg-slate-900 text-slate-300 border-slate-700/80';
       };
 
-      // 3. Tarjetas de Armas (Sin botones de tirar dados)
       const grid = document.getElementById('weapons-grid');
       grid.innerHTML = '';
 
@@ -2370,7 +2360,7 @@
               </button>
             </div>
 
-            <!-- Controles rápidos por arma (Morningstar Two-Handed Grip / Crossbow Heavy-Light) -->
+            <!-- Controles rápidos por arma -->
             ${w.type === 'melee1h' ? `
               <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-1.5">
                 <label class="inline-flex items-center gap-2 text-xs text-slate-200 cursor-pointer select-none">
@@ -2412,7 +2402,7 @@
               </div>
             </div>
 
-            <!-- Desglose Transparente en Vivo (Píldoras de Bonos y Penalizadores) -->
+            <!-- Desglose Transparente en Vivo -->
             <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2.5 space-y-2">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 w-10 shrink-0">Atk:</span>
@@ -2528,7 +2518,7 @@
     }
 
     /* =====================================================================
-       RENDERIZADO DE HABILIDADES, CONJUROS Y PODERES
+       RENDERIZADO DE SKILLS, CONJUROS Y PODERES
        ===================================================================== */
     function renderSkills() {
       const summary = getSkillPointsSummary();
@@ -2602,7 +2592,7 @@
 
         const canUse = !skill.trainedOnly || state.spirit === 'trickster' || effectiveRanks >= 1;
         const total = abMod + effectiveRanks + classBonus + totalSpirit + skillAcp + misc;
-        const abLabel = ABILITIES.find(a => a.key === skill.ability)?.label || skill.ability;
+        const abLabel = ABILITIES.find(a => a.key === skill.ability)?.shortEn || skill.ability.toUpperCase();
 
         const tr = document.createElement('tr');
         tr.className = `hover:bg-slate-800/40 transition ${isEdge ? 'bg-cyan-950/20' : ''}`;
@@ -2610,14 +2600,14 @@
           <td class="py-2.5 px-2.5 text-center">
             <input type="checkbox" ${isClass ? 'checked' : ''} ${isEdge || isBoon ? 'disabled' : ''}
               onchange="toggleSkillClass('${skill.id}', this.checked)"
-              class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-600 accent-sky-400 cursor-pointer" title="Habilidad de clase (+3 si ≥1 rango)" />
+              class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-600 accent-sky-400 cursor-pointer" title="Class Skill (+3 si ≥1 rango)" />
           </td>
           <td class="py-2.5 px-3">
             <div class="font-medium text-slate-200 text-xs sm:text-sm flex flex-wrap items-center gap-1.5">
               <span>${skill.name}</span>
-              ${skill.trainedOnly && state.spirit !== 'trickster' ? `<span class="text-[10px] text-slate-500">(Ent.)</span>` : ''}
-              ${isEdge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">Filo</span>` : ''}
-              ${isBoon ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-200 border border-cyan-500/30">+1 Don</span>` : ''}
+              ${skill.trainedOnly && state.spirit !== 'trickster' ? `<span class="text-[10px] text-slate-500">(Trained)</span>` : ''}
+              ${isEdge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">Edge</span>` : ''}
+              ${isBoon ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-200 border border-cyan-500/30">+1 Boon</span>` : ''}
             </div>
           </td>
           <td class="py-2.5 px-2 text-center text-[11px] font-semibold text-slate-400">${abLabel}</td>
@@ -2800,7 +2790,6 @@
         `;
       }).join('');
 
-      // Tabla de Progresión 1-20
       const progBody = document.getElementById('progression-table-body');
       const milestones = { 1: 'Poder Menor', 4: 'Conjuros Niv 1', 6: 'Poder Intermedio', 10: 'Oleada 1d8', 11: 'Poder Mayor', 17: 'Poder Supremo', 20: 'Oleada 1d10' };
       progBody.innerHTML = '';
