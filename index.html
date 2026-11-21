@@ -449,8 +449,8 @@
                   class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
               </div>
               <div>
-                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty (negativo, aplica a skills de STR/DEX)">ACP</label>
-                <input type="number" id="input-ac-acp" max="0" oninput="updateNested('ac', 'acp', Math.min(0, parseInt(this.value) || 0))"
+                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty (aplica como penalizador a skills físicas; puedes escribir ej. 3 o -3)">ACP</label>
+                <input type="number" id="input-ac-acp" oninput="setAcp(this.value)" onblur="this.value = state.ac.acp"
                   class="w-full text-center bg-slate-900 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
               </div>
             </div>
@@ -705,10 +705,28 @@
               <p id="skills-formula-note" class="text-[11px] text-slate-400 mt-0.5">Base: máx(1, 4 + mod INT) × Nivel</p>
             </div>
 
-            <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800">
-              <label class="text-xs text-slate-400 whitespace-nowrap">Rangos extra (Human/Feat):</label>
-              <input type="number" id="input-extra-skill-ranks" min="0" oninput="updateField('extraSkillRanks', Math.max(0, parseInt(this.value) || 0))"
-                class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-sm font-bold text-white tabular-nums accent-ring" />
+            <div class="flex flex-wrap items-center gap-2.5">
+              <!-- Toggle Humano (+1 Skill Rank por nivel) -->
+              <button type="button" id="btn-human-skills" onclick="toggleHumanSkillBonus()"
+                class="px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-600"
+                title="Rasgo Skilled de Humano: +1 skill rank por cada nivel de personaje">
+                <span id="human-skills-check" class="w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[10px] font-bold"></span>
+                <span>Humano (+1/niv)</span>
+                <span id="human-skills-bonus" class="text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 tabular-nums">+0</span>
+              </button>
+
+              <!-- Rangos extra únicos (Feats / Traits) -->
+              <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800" title="Bonos únicos de rangos (ej. Feats o Traits)">
+                <label class="text-xs text-slate-400 whitespace-nowrap">Rangos extra (Feats/Traits):</label>
+                <input type="number" id="input-extra-skill-ranks" min="0" oninput="updateField('extraSkillRanks', Math.max(0, parseInt(this.value) || 0))"
+                  class="w-16 text-center bg-slate-950 border border-slate-700 rounded-lg py-1 text-sm font-bold text-white tabular-nums accent-ring" />
+              </div>
+
+              <!-- Indicador en vivo de ACP activo -->
+              <div id="skills-acp-badge" class="hidden items-center gap-1.5 px-2.5 py-2 rounded-xl bg-rose-950/50 border border-rose-700/50 text-xs text-rose-200 font-semibold tabular-nums" title="Armor Check Penalty aplicado a Acrobatics, Climb, Disable Device, Escape Artist, Fly, Ride, Sleight of Hand, Stealth y Swim">
+                <span>🛡️</span>
+                <span id="skills-acp-badge-text">ACP 0</span>
+              </div>
             </div>
           </div>
 
@@ -718,6 +736,10 @@
                 class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm text-white accent-ring" />
               <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
+            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 cursor-pointer select-none" title="Muestra skills utilizables sin entrenar y skills Trained Only que ya tengan rangos">
+              <input type="checkbox" id="skills-filter-usable" onchange="renderSkills()" class="rounded bg-slate-800 border-slate-600" />
+              <span>Solo usables</span>
+            </label>
             <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 cursor-pointer select-none">
               <input type="checkbox" id="skills-filter-trained" onchange="renderSkills()" class="rounded bg-slate-800 border-slate-600" />
               <span>Solo entrenadas</span>
@@ -765,7 +787,7 @@
                 <th class="py-3 px-2 text-center">Ranks</th>
                 <th class="py-3 px-2 text-center hidden md:table-cell">Mod</th>
                 <th class="py-3 px-2 text-center hidden sm:table-cell">Spirit</th>
-                <th class="py-3 px-2 text-center hidden lg:table-cell">ACP</th>
+                <th class="py-3 px-2 text-center hidden sm:table-cell" title="Armor Check Penalty">ACP</th>
                 <th class="py-3 px-2 text-center">Misc</th>
                 <th class="py-3 px-3 sm:px-4 text-right">Total</th>
               </tr>
@@ -1383,6 +1405,7 @@
         influence: 1,
         tabooAccepted: false,
         tabooUsesLeft: 2,
+        humanSkillBonus: false,
         extraSkillRanks: 0,
         spellDcMisc: 0,
         tricksterEdgeSkill1: 'disable_device',
@@ -1429,10 +1452,15 @@
         const parsed = JSON.parse(raw);
         if (!parsed || typeof parsed !== 'object') return defaults;
 
+        const mergedAbilities = {};
+        ABILITIES.forEach(a => {
+          mergedAbilities[a.key] = { ...defaults.abilities[a.key], ...(parsed.abilities?.[a.key] || {}) };
+        });
+
         const merged = {
           ...defaults,
           ...parsed,
-          abilities: { ...defaults.abilities, ...(parsed.abilities || {}) },
+          abilities: mergedAbilities,
           hp: { ...defaults.hp, ...(parsed.hp || {}) },
           ac: { ...defaults.ac, ...(parsed.ac || {}) },
           saves: { ...defaults.saves, ...(parsed.saves || {}) },
@@ -1475,6 +1503,14 @@
     /* =====================================================================
        3. CÁLCULO DE ARMAS Y FÓRMULAS PF1E
        ===================================================================== */
+    function escapeAttr(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
     function calculateWeaponStats(w) {
       const bab = getBAB(state.level);
       const scale = 1 + Math.floor(bab / 4);
@@ -1810,8 +1846,9 @@
       const intMod = getAbilityMod('int');
       const perLevel = Math.max(1, 4 + intMod);
       const fav = state.favoredClass === 'skill' ? state.level : 0;
+      const humanBonus = state.humanSkillBonus ? state.level : 0;
       const extra = parseInt(state.extraSkillRanks) || 0;
-      const total = (perLevel * state.level) + fav + extra;
+      const total = (perLevel * state.level) + fav + humanBonus + extra;
 
       let spent = 0;
       SKILLS_LIST.forEach(s => {
@@ -1819,7 +1856,7 @@
           spent += Math.min(state.level, parseInt(state.skills[s.id]?.ranks) || 0);
         }
       });
-      return { total, spent, remaining: total - spent, perLevel, fav, extra };
+      return { total, spent, remaining: total - spent, perLevel, fav, humanBonus, extra };
     }
 
     /* =====================================================================
@@ -1862,7 +1899,27 @@
     }
 
     function updateAbility(key, field, value) {
-      state.abilities[key][field] = parseInt(value) || 0;
+      if (!state.abilities[key]) return;
+      state.abilities[key][field] = parseInt(value, 10) || 0;
+      saveState();
+      renderAll();
+    }
+
+    function setAcp(rawVal) {
+      const str = String(rawVal ?? '').trim();
+      if (str === '' || str === '-') {
+        state.ac.acp = 0;
+      } else {
+        const num = parseInt(str, 10);
+        // En PF1e el Armor Check Penalty siempre es negativo (0 o menor)
+        state.ac.acp = isNaN(num) ? 0 : -Math.abs(num);
+      }
+      saveState();
+      renderAll();
+    }
+
+    function toggleHumanSkillBonus() {
+      state.humanSkillBonus = !state.humanSkillBonus;
       saveState();
       renderAll();
     }
@@ -2012,6 +2069,7 @@
         strRating: 0,
         weaponFocus: false,
         rapidReload: true,
+        twoHandedGrip: false,
         extraDice: '',
         extraAtk: 0,
         extraDmg: 0,
@@ -2491,12 +2549,12 @@
                 </div>
                 <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <h3 class="font-display font-bold text-base text-white truncate">${w.name}</h3>
+                    <h3 class="font-display font-bold text-base text-white truncate">${escapeAttr(w.name)}</h3>
                     <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">${enhLabel}</span>
                     ${w.weaponFocus ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 font-semibold">Weapon Focus +1</span>` : ''}
                   </div>
                   <div class="text-[11px] text-slate-400 mt-0.5">
-                    ${typeLabels[w.type]} · Crít. <strong class="text-slate-200">${critStr}</strong> · ${w.damageType}
+                    ${typeLabels[w.type]} · Crít. <strong class="text-slate-200">${critStr}</strong> · ${escapeAttr(w.damageType)}
                     ${w.type === 'bow' ? ` · STR Rating +${w.strRating}` : ''}
                     ${calc.reloadLabel ? ` · <span class="text-sky-300">${calc.reloadLabel}</span>` : ''}
                   </div>
@@ -2568,7 +2626,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                   <div class="col-span-2 sm:col-span-1">
                     <label class="block text-[10px] text-slate-400 mb-1">Nombre</label>
-                    <input type="text" value="${w.name}" onchange="updateWeapon('${w.id}', 'name', this.value)"
+                    <input type="text" value="${escapeAttr(w.name)}" onchange="updateWeapon('${w.id}', 'name', this.value)"
                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
                   </div>
                   <div>
@@ -2597,7 +2655,7 @@
 
                   <div>
                     <label class="block text-[10px] text-slate-400 mb-1">Dado Base (ej. 1d8, 2d6)</label>
-                    <input type="text" value="${w.dice}" onchange="updateWeapon('${w.id}', 'dice', this.value)"
+                    <input type="text" value="${escapeAttr(w.dice)}" onchange="updateWeapon('${w.id}', 'dice', this.value)"
                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
                   </div>
                   <div class="grid grid-cols-2 gap-1.5">
@@ -2614,7 +2672,7 @@
                   </div>
                   <div>
                     <label class="block text-[10px] text-slate-400 mb-1">Dado Extra (ej. 1d6)</label>
-                    <input type="text" value="${w.extraDice || ''}" placeholder="1d6" onchange="updateWeapon('${w.id}', 'extraDice', this.value)"
+                    <input type="text" value="${escapeAttr(w.extraDice || '')}" placeholder="1d6" onchange="updateWeapon('${w.id}', 'extraDice', this.value)"
                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
                   </div>
 
@@ -2687,8 +2745,29 @@
 
       document.getElementById('skills-formula-note').textContent =
         `${summary.perLevel}/niv × ${state.level}` +
+        (summary.humanBonus ? ` + ${summary.humanBonus} Humano` : '') +
         (summary.fav ? ` + ${summary.fav} Clase Pred.` : '') +
         (summary.extra ? ` + ${summary.extra} extra` : '');
+
+      // Estado visual del toggle Humano (+1/niv)
+      const humanBtn = document.getElementById('btn-human-skills');
+      const humanCheck = document.getElementById('human-skills-check');
+      const humanBonusEl = document.getElementById('human-skills-bonus');
+      if (humanBtn && humanCheck && humanBonusEl) {
+        if (state.humanSkillBonus) {
+          humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 accent-bg-soft accent-border text-white shadow-sm';
+          humanCheck.className = 'w-4 h-4 rounded accent-bg border border-white/40 text-slate-950 flex items-center justify-center text-[10px] font-extrabold';
+          humanCheck.textContent = '✓';
+          humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md accent-bg text-slate-950 font-bold tabular-nums';
+          humanBonusEl.textContent = `+${state.level}`;
+        } else {
+          humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200';
+          humanCheck.className = 'w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[10px] font-bold';
+          humanCheck.textContent = '';
+          humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-500 tabular-nums';
+          humanBonusEl.textContent = '+0';
+        }
+      }
 
       // Panel del Embaucador (2 Filo + 1 Don)
       const trickPanel = document.getElementById('trickster-skills-panel');
@@ -2714,8 +2793,23 @@
 
       const search = (document.getElementById('skills-search').value || '').toLowerCase().trim();
       const onlyTrained = document.getElementById('skills-filter-trained').checked;
-      const acpVal = Math.min(0, parseInt(state.ac.acp) || 0);
+      const onlyUsable = document.getElementById('skills-filter-usable')?.checked;
+      const acpVal = -Math.abs(parseInt(state.ac.acp) || 0);
       const sizeStealth = (SIZE_MODS[state.size] || SIZE_MODS.medium).stealth;
+
+      // Badge informativo de ACP en la cabecera de Skills
+      const acpBadge = document.getElementById('skills-acp-badge');
+      const acpBadgeText = document.getElementById('skills-acp-badge-text');
+      if (acpBadge && acpBadgeText) {
+        if (acpVal < 0) {
+          acpBadge.classList.remove('hidden');
+          acpBadge.classList.add('flex');
+          acpBadgeText.textContent = `ACP ${acpVal}`;
+        } else {
+          acpBadge.classList.add('hidden');
+          acpBadge.classList.remove('flex');
+        }
+      }
 
       const tbody = document.getElementById('skills-table-body');
       tbody.innerHTML = '';
@@ -2725,9 +2819,11 @@
         const isBoon = state.spirit === 'trickster' && state.tricksterBoonSkill === skill.id;
         const rawRanks = parseInt(state.skills[skill.id]?.ranks) || 0;
         const effectiveRanks = isEdge ? state.level : rawRanks;
+        const canUse = !skill.trainedOnly || state.spirit === 'trickster' || effectiveRanks >= 1;
 
         if (search && !skill.name.toLowerCase().includes(search)) return;
         if (onlyTrained && effectiveRanks === 0) return;
+        if (onlyUsable && !canUse) return;
 
         const isClass = isSkillClassSkill(skill);
         const abMod = getAbilityMod(skill.ability);
@@ -2737,7 +2833,6 @@
         const skillAcp = skill.acp ? acpVal : 0;
         const misc = (parseInt(state.skills[skill.id]?.misc) || 0) + (skill.id === 'stealth' ? sizeStealth : 0);
 
-        const canUse = !skill.trainedOnly || state.spirit === 'trickster' || effectiveRanks >= 1;
         const total = abMod + effectiveRanks + classBonus + totalSpirit + skillAcp + misc;
         const abLabel = ABILITIES.find(a => a.key === skill.ability)?.shortEn || skill.ability.toUpperCase();
 
@@ -2745,13 +2840,22 @@
         tr.className = `hover:bg-slate-800/40 transition ${isEdge ? 'bg-cyan-950/20' : ''}`;
         tr.innerHTML = `
           <td class="py-2.5 px-2.5 text-center">
-            <input type="checkbox" ${isClass ? 'checked' : ''} ${isEdge || isBoon ? 'disabled' : ''}
-              onchange="toggleSkillClass('${skill.id}', this.checked)"
-              class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-600 accent-sky-400 cursor-pointer" title="Class Skill (+3 si ≥1 rango)" />
+            <button type="button"
+              ${isEdge || isBoon ? 'disabled' : `onclick="toggleSkillClass('${skill.id}', ${!isClass})"`}
+              title="${isClass ? 'Class Skill activa (+3 si ≥1 rango)' : 'Marcar como Class Skill'}"
+              class="w-7 h-7 rounded-lg border text-xs font-extrabold transition-all inline-flex items-center justify-center ${
+                isClass
+                  ? 'accent-bg text-slate-950 border-white/30 shadow-[0_0_12px_-2px_var(--accent-glow)]'
+                  : 'bg-slate-900/90 border-slate-700/80 text-slate-600 hover:border-slate-500 hover:text-slate-300'
+              } ${isEdge || isBoon ? 'cursor-default' : 'cursor-pointer hover:brightness-110 active:scale-95'}">
+              ${isClass ? (isEdge || isBoon ? '★' : '✓') : ''}
+            </button>
           </td>
           <td class="py-2.5 px-3">
             <div class="font-medium text-slate-200 text-xs sm:text-sm flex flex-wrap items-center gap-1.5">
               <span>${skill.name}</span>
+              ${classBonus > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded accent-bg-soft accent-text border accent-border font-semibold">+3 CS</span>` : ''}
+              ${skillAcp < 0 ? `<span class="sm:hidden text-[10px] px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold tabular-nums">ACP ${skillAcp}</span>` : ''}
               ${skill.trainedOnly && state.spirit !== 'trickster' ? `<span class="text-[10px] text-slate-500">(Trained)</span>` : ''}
               ${isEdge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">Edge</span>` : ''}
               ${isBoon ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-200 border border-cyan-500/30">+1 Boon</span>` : ''}
@@ -2771,7 +2875,7 @@
           </td>
           <td class="py-2.5 px-2 text-center text-xs text-slate-300 tabular-nums hidden md:table-cell">${fmtSign(abMod)}</td>
           <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${totalSpirit ? 'accent-text font-semibold' : 'text-slate-600'}">${totalSpirit ? `+${totalSpirit}` : '—'}</td>
-          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden lg:table-cell ${skillAcp ? 'text-rose-400 font-semibold' : 'text-slate-600'}">${skillAcp ? skillAcp : '—'}</td>
+          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${skillAcp ? 'text-rose-400 font-semibold' : 'text-slate-600'}">${skillAcp ? skillAcp : '—'}</td>
           <td class="py-2.5 px-2 text-center">
             <input type="number" value="${state.skills[skill.id]?.misc || 0}" onchange="setSkillMisc('${skill.id}', this.value)"
               class="w-12 text-center bg-slate-950 border border-slate-800 rounded-md py-0.5 text-xs text-slate-300 tabular-nums accent-ring" />
@@ -3117,7 +3221,7 @@
        8. INICIALIZACIÓN
        ===================================================================== */
     window.addEventListener('DOMContentLoaded', () => {
-      switchTab('weapons');
+      switchTab('summary');
       renderAll();
     });
   </script>
