@@ -422,36 +422,81 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <div>
-                <label class="block text-[10px] text-slate-400 mb-1 truncate">Armadura</label>
-                <input type="number" id="input-ac-armor" oninput="updateNested('ac', 'armor', parseInt(this.value) || 0)"
-                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+            <!-- 3 Líneas: Armadura, Escudo y Bonos Extra -->
+            <div class="space-y-2.5">
+              <!-- Línea 1: Armadura -->
+              <div id="ac-armor-row" class="bg-slate-900/75 border border-slate-800 rounded-xl p-2.5 transition">
+                <div class="grid grid-cols-12 gap-2 items-end">
+                  <div class="col-span-12 sm:col-span-4 flex items-center">
+                    <button type="button" id="btn-toggle-armor" onclick="toggleAcEquip('armorEnabled')"
+                      class="w-full py-1.5 px-2.5 rounded-lg border text-xs font-bold transition flex items-center justify-between gap-1.5">
+                      <span class="flex items-center gap-1.5"><span>🦺</span> Armadura</span>
+                      <span id="badge-toggle-armor" class="text-[10px] px-1.5 py-0.5 rounded font-extrabold">ON</span>
+                    </button>
+                  </div>
+                  <div class="col-span-4 sm:col-span-3">
+                    <label class="block text-[10px] text-slate-400 mb-1 truncate">CA Arm.</label>
+                    <input type="number" id="input-ac-armor" oninput="updateNested('ac', 'armor', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                  <div class="col-span-4 sm:col-span-2">
+                    <label class="block text-[10px] text-sky-300/90 mb-1 truncate" title="Máxima Destreza permitida por la armadura (vacío = sin límite)">Max DES</label>
+                    <input type="number" id="input-ac-armor-maxdex" min="0" placeholder="∞" oninput="setEquipmentMaxDex('armorMaxDex', this.value)"
+                      class="w-full text-center bg-slate-950 border border-sky-900/60 rounded-lg py-1.5 text-xs text-sky-200 placeholder:text-slate-600 tabular-nums accent-ring" />
+                  </div>
+                  <div class="col-span-4 sm:col-span-3">
+                    <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty de la armadura (ej. -2 o 2)">ACP Arm.</label>
+                    <input type="number" id="input-ac-armor-acp" oninput="setEquipmentAcp('armorAcp', this.value)" onblur="this.value = state.ac.armorAcp"
+                      class="w-full text-center bg-slate-950 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label class="block text-[10px] text-slate-400 mb-1 truncate">Escudo</label>
-                <input type="number" id="input-ac-shield" oninput="updateNested('ac', 'shield', parseInt(this.value) || 0)"
-                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+
+              <!-- Línea 2: Escudo -->
+              <div id="ac-shield-row" class="bg-slate-900/75 border border-slate-800 rounded-xl p-2.5 transition">
+                <div class="grid grid-cols-12 gap-2 items-end">
+                  <div class="col-span-12 sm:col-span-4 flex items-center">
+                    <button type="button" id="btn-toggle-shield" onclick="toggleAcEquip('shieldEnabled')"
+                      class="w-full py-1.5 px-2.5 rounded-lg border text-xs font-bold transition flex items-center justify-between gap-1.5">
+                      <span class="flex items-center gap-1.5"><span>🛡️</span> Escudo</span>
+                      <span id="badge-toggle-shield" class="text-[10px] px-1.5 py-0.5 rounded font-extrabold">OFF</span>
+                    </button>
+                  </div>
+                  <div class="col-span-4 sm:col-span-3">
+                    <label class="block text-[10px] text-slate-400 mb-1 truncate">CA Esc.</label>
+                    <input type="number" id="input-ac-shield" oninput="updateNested('ac', 'shield', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                  <div class="col-span-4 sm:col-span-2">
+                    <label class="block text-[10px] text-sky-300/90 mb-1 truncate" title="Máxima Destreza permitida por el escudo (ej. Pavés +2; vacío = sin límite)">Max DES</label>
+                    <input type="number" id="input-ac-shield-maxdex" min="0" placeholder="∞" oninput="setEquipmentMaxDex('shieldMaxDex', this.value)"
+                      class="w-full text-center bg-slate-950 border border-sky-900/60 rounded-lg py-1.5 text-xs text-sky-200 placeholder:text-slate-600 tabular-nums accent-ring" />
+                  </div>
+                  <div class="col-span-4 sm:col-span-3">
+                    <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty del escudo (ej. -2 o 2)">ACP Esc.</label>
+                    <input type="number" id="input-ac-shield-acp" oninput="setEquipmentAcp('shieldAcp', this.value)" onblur="this.value = state.ac.shieldAcp"
+                      class="w-full text-center bg-slate-950 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
+                  </div>
+                </div>
               </div>
-              <div>
-                <label class="block text-[10px] text-slate-400 mb-1 truncate">Natural</label>
-                <input type="number" id="input-ac-natural" oninput="updateNested('ac', 'natural', parseInt(this.value) || 0)"
-                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-400 mb-1 truncate">Desvío</label>
-                <input type="number" id="input-ac-deflect" oninput="updateNested('ac', 'deflect', parseInt(this.value) || 0)"
-                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
-              </div>
-              <div>
-                <label class="block text-[10px] text-slate-400 mb-1 truncate">Otros</label>
-                <input type="number" id="input-ac-misc" oninput="updateNested('ac', 'misc', parseInt(this.value) || 0)"
-                  class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
-              </div>
-              <div>
-                <label class="block text-[10px] text-rose-300/90 mb-1 truncate" title="Armor Check Penalty (aplica como penalizador a skills físicas; puedes escribir ej. 3 o -3)">ACP</label>
-                <input type="number" id="input-ac-acp" oninput="setAcp(this.value)" onblur="this.value = state.ac.acp"
-                  class="w-full text-center bg-slate-900 border border-rose-900/60 rounded-lg py-1.5 text-xs text-rose-200 tabular-nums accent-ring" />
+
+              <!-- Línea 3: Bonos Extra (Natural, Desvío, Otros) -->
+              <div class="grid grid-cols-3 gap-2 pt-0.5">
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1 truncate">Natural</label>
+                  <input type="number" id="input-ac-natural" oninput="updateNested('ac', 'natural', parseInt(this.value) || 0)"
+                    class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1 truncate">Desvío</label>
+                  <input type="number" id="input-ac-deflect" oninput="updateNested('ac', 'deflect', parseInt(this.value) || 0)"
+                    class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-1 truncate">Otros</label>
+                  <input type="number" id="input-ac-misc" oninput="updateNested('ac', 'misc', parseInt(this.value) || 0)"
+                    class="w-full text-center bg-slate-900 border border-slate-700/80 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                </div>
               </div>
             </div>
             <p id="stat-ac-breakdown" class="text-[11px] text-slate-400 mt-2.5"></p>
@@ -628,9 +673,7 @@
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5" id="ranged-toggles-container">
-            <!-- Generado por JS -->
-          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5" id="ranged-toggles-container"></div>
         </div>
 
         <!-- Grupo 2: Melee & Buffs + Temp Modifiers -->
@@ -639,9 +682,7 @@
             <div class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <span>⚔️</span> Melee &amp; Buffs
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="global-toggles-container">
-              <!-- Power Attack, Haste, Sudden Attack -->
-            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="global-toggles-container"></div>
           </div>
 
           <!-- Modificadores rápidos temporales -->
@@ -811,15 +852,22 @@
           </h2>
 
           <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-center">
               <div class="text-[11px] text-slate-400">Nivel Lanzador</div>
               <div id="spell-cl" class="text-2xl font-bold text-white tabular-nums">1</div>
               <div id="spell-cl-note" class="text-[10px] text-slate-400 mt-0.5">Pruebas NL: +1</div>
             </div>
-            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
-              <div class="text-[11px] text-slate-400">Concentración</div>
-              <div id="spell-conc" class="text-2xl font-bold accent-text tabular-nums">+1</div>
-              <div id="spell-conc-note" class="text-[10px] text-slate-400 mt-0.5">Niv + CAR</div>
+            <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-between">
+              <div>
+                <div class="text-[11px] text-slate-400">Concentración</div>
+                <div id="spell-conc" class="text-2xl font-bold accent-text tabular-nums">+1</div>
+                <div id="spell-conc-note" class="text-[10px] text-slate-400 mt-0.5">Niv + CAR</div>
+              </div>
+              <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-center gap-1.5">
+                <label for="input-spell-conc-misc" class="text-[10px] text-slate-400">Varios:</label>
+                <input type="number" id="input-spell-conc-misc" oninput="updateField('concMisc', parseInt(this.value) || 0)"
+                  class="w-12 text-center bg-slate-950 border border-slate-700 rounded-md py-0.5 text-xs text-white tabular-nums accent-ring" />
+              </div>
             </div>
           </div>
 
@@ -839,22 +887,22 @@
           <div id="spell-spirit-bonus-box" class="hidden bg-slate-900/90 border accent-border rounded-xl p-3 text-xs text-slate-300 leading-relaxed"></div>
         </div>
 
-        <!-- Espacios de Conjuro -->
+        <!-- Espacios de Conjuro y Conjuros Conocidos -->
         <div class="lg:col-span-8 card-occult rounded-2xl p-4 sm:p-5 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="font-display text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <span class="w-1.5 h-4 rounded-full accent-bg inline-block"></span>
-              Espacios de Conjuro Diarios
+              Espacios Diarios y Conjuros Conocidos
             </h2>
             <button onclick="restoreAllSpellSlots()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition">
               ✨ Recuperar todos los espacios
             </button>
           </div>
 
-          <div id="spell-slots-container" class="space-y-2.5"></div>
+          <div id="spell-slots-container" class="space-y-3"></div>
 
           <div id="spirit-bonus-spells-section" class="hidden pt-3 border-t border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-2">
               <h3 id="spirit-bonus-spells-title" class="text-xs font-bold uppercase tracking-wider accent-text">Espacios del Espíritu</h3>
               <span class="text-[11px] text-slate-400">Poder Menor (1 espacio extra por nivel lanzable)</span>
             </div>
@@ -1408,6 +1456,7 @@
         humanSkillBonus: false,
         extraSkillRanks: 0,
         spellDcMisc: 0,
+        concMisc: 0,
         tricksterEdgeSkill1: 'disable_device',
         tricksterEdgeSkill2: 'perception',
         tricksterBoonSkill: 'stealth',
@@ -1420,7 +1469,19 @@
           cha: { base: 14, misc: 0 }
         },
         hp: { autoAvg: true, baseRolled: 33, misc: 0, current: 45 },
-        ac: { armor: 4, shield: 0, natural: 0, deflect: 1, misc: 0, acp: 0 },
+        ac: {
+          armorEnabled: true,
+          armor: 4,
+          armorMaxDex: '',
+          armorAcp: 0,
+          shieldEnabled: false,
+          shield: 0,
+          shieldMaxDex: '',
+          shieldAcp: 0,
+          natural: 0,
+          deflect: 1,
+          misc: 0
+        },
         saves: { fortMisc: 1, refMisc: 1, willMisc: 1 },
         combat: { initMisc: 0, meleeMisc: 0, rangedMisc: 0, cmbMisc: 0, cmdMisc: 0 },
         combatToggles: {
@@ -1440,52 +1501,74 @@
         weapons: createDefaultWeapons(),
         skills: skillsObj,
         spellsUsed: { 1: 0, 2: 0, 3: 0, 4: 0 },
-        spiritSpellsUsed: { 1: 0, 2: 0, 3: 0, 4: 0 }
+        spiritSpellsUsed: { 1: 0, 2: 0, 3: 0, 4: 0 },
+        knownSpells: { 0: [], 1: [], 2: [], 3: [], 4: [] },
+        spiritKnownSpells: { 1: '', 2: '', 3: '', 4: '' }
       };
     }
 
-    function loadState() {
+    function mergeStateWithDefaults(parsed) {
       const defaults = createDefaultState();
+      if (!parsed || typeof parsed !== 'object') return defaults;
+
+      const mergedAbilities = {};
+      ABILITIES.forEach(a => {
+        mergedAbilities[a.key] = { ...defaults.abilities[a.key], ...(parsed.abilities?.[a.key] || {}) };
+      });
+
+      const mergedAc = { ...defaults.ac, ...(parsed.ac || {}) };
+      if (parsed.ac && parsed.ac.armorAcp === undefined && parsed.ac.acp !== undefined) {
+        mergedAc.armorAcp = -Math.abs(parseInt(parsed.ac.acp, 10) || 0);
+      }
+      if (parsed.ac && parsed.ac.shieldEnabled === undefined && (parseInt(parsed.ac.shield, 10) || 0) > 0) {
+        mergedAc.shieldEnabled = true;
+      }
+
+      const mergedKnownSpells = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+      for (let lvl = 0; lvl <= 4; lvl++) {
+        if (Array.isArray(parsed.knownSpells?.[lvl])) {
+          mergedKnownSpells[lvl] = parsed.knownSpells[lvl].map(s => String(s));
+        }
+      }
+
+      const merged = {
+        ...defaults,
+        ...parsed,
+        abilities: mergedAbilities,
+        hp: { ...defaults.hp, ...(parsed.hp || {}) },
+        ac: mergedAc,
+        saves: { ...defaults.saves, ...(parsed.saves || {}) },
+        combat: { ...defaults.combat, ...(parsed.combat || {}) },
+        combatToggles: { ...defaults.combatToggles, ...(parsed.combatToggles || {}) },
+        spellsUsed: { ...defaults.spellsUsed, ...(parsed.spellsUsed || {}) },
+        spiritSpellsUsed: { ...defaults.spiritSpellsUsed, ...(parsed.spiritSpellsUsed || {}) },
+        knownSpells: mergedKnownSpells,
+        spiritKnownSpells: { ...defaults.spiritKnownSpells, ...(parsed.spiritKnownSpells || {}) },
+        skills: { ...defaults.skills }
+      };
+
+      if (parsed.skills && typeof parsed.skills === 'object') {
+        SKILLS_LIST.forEach(s => {
+          if (parsed.skills[s.id]) {
+            merged.skills[s.id] = { ...defaults.skills[s.id], ...parsed.skills[s.id] };
+          }
+        });
+      }
+
+      if (Array.isArray(parsed.weapons) && parsed.weapons.length > 0) {
+        merged.weapons = parsed.weapons;
+      }
+
+      return merged;
+    }
+
+    function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return defaults;
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== 'object') return defaults;
-
-        const mergedAbilities = {};
-        ABILITIES.forEach(a => {
-          mergedAbilities[a.key] = { ...defaults.abilities[a.key], ...(parsed.abilities?.[a.key] || {}) };
-        });
-
-        const merged = {
-          ...defaults,
-          ...parsed,
-          abilities: mergedAbilities,
-          hp: { ...defaults.hp, ...(parsed.hp || {}) },
-          ac: { ...defaults.ac, ...(parsed.ac || {}) },
-          saves: { ...defaults.saves, ...(parsed.saves || {}) },
-          combat: { ...defaults.combat, ...(parsed.combat || {}) },
-          combatToggles: { ...defaults.combatToggles, ...(parsed.combatToggles || {}) },
-          spellsUsed: { ...defaults.spellsUsed, ...(parsed.spellsUsed || {}) },
-          spiritSpellsUsed: { ...defaults.spiritSpellsUsed, ...(parsed.spiritSpellsUsed || {}) },
-          skills: { ...defaults.skills }
-        };
-
-        if (parsed.skills && typeof parsed.skills === 'object') {
-          SKILLS_LIST.forEach(s => {
-            if (parsed.skills[s.id]) {
-              merged.skills[s.id] = { ...defaults.skills[s.id], ...parsed.skills[s.id] };
-            }
-          });
-        }
-
-        if (Array.isArray(parsed.weapons) && parsed.weapons.length > 0) {
-          merged.weapons = parsed.weapons;
-        }
-
-        return merged;
+        if (!raw) return createDefaultState();
+        return mergeStateWithDefaults(JSON.parse(raw));
       } catch (e) {
-        return defaults;
+        return createDefaultState();
       }
     }
 
@@ -1493,7 +1576,7 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {
-        // Ignorar errores de cuota o modo privado en localStorage
+        // Ignorar errores de almacenamiento privado
       }
     }
 
@@ -1507,6 +1590,13 @@
       return String(str ?? '')
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
     }
@@ -1526,7 +1616,7 @@
       const isCrossbow = w.type === 'crossbow';
       const isTwoHanded = w.type === 'melee2h' || (w.type === 'melee1h' && !!w.twoHandedGrip);
 
-      const enhVal = parseInt(w.enhancement) || 0;
+      const enhVal = parseInt(w.enhancement, 10) || 0;
       const enhAtk = enhVal === -1 ? 1 : Math.max(0, enhVal);
       const enhDmg = enhVal > 0 ? enhVal : 0;
 
@@ -1574,7 +1664,7 @@
         stdAtk -= scale;
         atkPills.push({ label: `Power Attack -${scale}`, type: 'neg' });
       }
-      if (isBow && strMod < (parseInt(w.strRating) || 0)) {
+      if (isBow && strMod < (parseInt(w.strRating, 10) || 0)) {
         stdAtk -= 2;
         atkPills.push({ label: 'STR < Rating -2', type: 'neg' });
       }
@@ -1582,7 +1672,7 @@
         stdAtk += 1;
         atkPills.push({ label: 'Haste +1', type: 'pos' });
       }
-      const globalCombatMisc = isRanged ? (parseInt(state.combat.rangedMisc) || 0) : (parseInt(state.combat.meleeMisc) || 0);
+      const globalCombatMisc = isRanged ? (parseInt(state.combat.rangedMisc, 10) || 0) : (parseInt(state.combat.meleeMisc, 10) || 0);
       if (globalCombatMisc !== 0) {
         stdAtk += globalCombatMisc;
         atkPills.push({ label: `Misc ${fmtSign(globalCombatMisc)}`, type: globalCombatMisc > 0 ? 'pos' : 'neg' });
@@ -1592,7 +1682,7 @@
         atkPills.push({ label: `Temp Atk ${fmtSign(t.tempAtk)}`, type: t.tempAtk > 0 ? 'pos' : 'neg' });
       }
       if (w.extraAtk) {
-        const wa = parseInt(w.extraAtk) || 0;
+        const wa = parseInt(w.extraAtk, 10) || 0;
         stdAtk += wa;
         atkPills.push({ label: `Weapon ${fmtSign(wa)}`, type: wa > 0 ? 'pos' : 'neg' });
       }
@@ -1601,7 +1691,7 @@
       let flatDmg = 0;
 
       if (isBow) {
-        const rating = Math.max(0, parseInt(w.strRating) || 0);
+        const rating = Math.max(0, parseInt(w.strRating, 10) || 0);
         const bowStr = strMod < 0 ? strMod : Math.min(strMod, rating);
         if (bowStr !== 0) {
           flatDmg += bowStr;
@@ -1646,7 +1736,7 @@
         dmgPills.push({ label: `Temp Dmg ${fmtSign(t.tempDmg)}`, type: t.tempDmg > 0 ? 'pos' : 'neg' });
       }
       if (w.extraDmg) {
-        const wd = parseInt(w.extraDmg) || 0;
+        const wd = parseInt(w.extraDmg, 10) || 0;
         flatDmg += wd;
         dmgPills.push({ label: `Weapon ${fmtSign(wd)}`, type: wd > 0 ? 'pos' : 'neg' });
       }
@@ -1725,7 +1815,7 @@
     function parseDiceExpr(expr) {
       const m = String(expr || '1d6').trim().match(/(\d+)\s*[dD]\s*(\d+)/);
       if (!m) return { count: 1, sides: 6 };
-      return { count: Math.max(1, parseInt(m[1])), sides: Math.max(2, parseInt(m[2])) };
+      return { count: Math.max(1, parseInt(m[1], 10)), sides: Math.max(2, parseInt(m[2], 10)) };
     }
 
     /* =====================================================================
@@ -1737,7 +1827,7 @@
 
     function getAbilityTotal(key) {
       const a = state.abilities[key] || { base: 10, misc: 0 };
-      return (parseInt(a.base) || 0) + (parseInt(a.misc) || 0);
+      return (parseInt(a.base, 10) || 0) + (parseInt(a.misc, 10) || 0);
     }
 
     function getAbilityMod(key) {
@@ -1793,24 +1883,30 @@
     function getMaxHP() {
       const lvl = state.level;
       const conMod = getAbilityMod('con');
-      const base = state.hp.autoAvg ? (8 + (lvl - 1) * 5) : (parseInt(state.hp.baseRolled) || 0);
+      const base = state.hp.autoAvg ? (8 + (lvl - 1) * 5) : (parseInt(state.hp.baseRolled, 10) || 0);
       const fav = state.favoredClass === 'hp' ? lvl : 0;
-      const misc = parseInt(state.hp.misc) || 0;
+      const misc = parseInt(state.hp.misc, 10) || 0;
       const total = Math.max(lvl, base + (conMod * lvl) + fav + misc);
       return { total, base, conTotal: conMod * lvl, fav, misc };
     }
 
-    function getSpiritAbilityBonusInfo(abilityKey) {
-      const sp = state.spirit;
-      const sb = getActiveSpiritBonus();
-      if (sb === 0) return null;
-      if (sp === 'archmage' && abilityKey === 'int') return { bonus: sb, label: 'INT Checks/Skills' };
-      if (sp === 'champion' && abilityKey === 'str') return { bonus: sb, label: 'STR Checks/Skills' };
-      if (sp === 'guardian' && abilityKey === 'con') return { bonus: sb, label: 'CON Checks' };
-      if (sp === 'hierophant' && abilityKey === 'wis') return { bonus: sb, label: 'WIS Checks/Skills' };
-      if (sp === 'marshal' && abilityKey === 'cha') return { bonus: sb, label: 'CHA Checks/Skills' };
-      if (sp === 'trickster' && abilityKey === 'dex') return { bonus: sb, label: 'DEX Checks/Skills' };
-      return null;
+    function getTotalAcp() {
+      const armorAcp = state.ac.armorEnabled ? -Math.abs(parseInt(state.ac.armorAcp, 10) || 0) : 0;
+      const shieldAcp = state.ac.shieldEnabled ? -Math.abs(parseInt(state.ac.shieldAcp, 10) || 0) : 0;
+      return armorAcp + shieldAcp;
+    }
+
+    function getEffectiveMaxDex() {
+      const caps = [];
+      if (state.ac.armorEnabled && state.ac.armorMaxDex !== '' && state.ac.armorMaxDex !== null && state.ac.armorMaxDex !== undefined) {
+        const val = parseInt(state.ac.armorMaxDex, 10);
+        if (!isNaN(val)) caps.push(Math.max(0, val));
+      }
+      if (state.ac.shieldEnabled && state.ac.shieldMaxDex !== '' && state.ac.shieldMaxDex !== null && state.ac.shieldMaxDex !== undefined) {
+        const val = parseInt(state.ac.shieldMaxDex, 10);
+        if (!isNaN(val)) caps.push(Math.max(0, val));
+      }
+      return caps.length > 0 ? Math.min(...caps) : null;
     }
 
     function isTricksterEdge(skillId) {
@@ -1847,13 +1943,13 @@
       const perLevel = Math.max(1, 4 + intMod);
       const fav = state.favoredClass === 'skill' ? state.level : 0;
       const humanBonus = state.humanSkillBonus ? state.level : 0;
-      const extra = parseInt(state.extraSkillRanks) || 0;
+      const extra = parseInt(state.extraSkillRanks, 10) || 0;
       const total = (perLevel * state.level) + fav + humanBonus + extra;
 
       let spent = 0;
       SKILLS_LIST.forEach(s => {
         if (!isTricksterEdge(s.id)) {
-          spent += Math.min(state.level, parseInt(state.skills[s.id]?.ranks) || 0);
+          spent += Math.min(state.level, parseInt(state.skills[s.id]?.ranks, 10) || 0);
         }
       });
       return { total, spent, remaining: total - spent, perLevel, fav, humanBonus, extra };
@@ -1875,15 +1971,18 @@
     function switchTab(tabName) {
       activeTab = tabName;
       document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const panel = document.getElementById(`tab-${tabName}`);
+      if (panel) panel.classList.remove('hidden');
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('accent-bg-soft', 'accent-text', 'border', 'accent-border');
         btn.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60', 'border', 'border-transparent');
       });
       const activeBtn = document.getElementById(`tab-btn-${tabName}`);
-      activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60', 'border-transparent');
-      activeBtn.classList.add('accent-bg-soft', 'accent-text', 'border', 'accent-border');
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60', 'border-transparent');
+        activeBtn.classList.add('accent-bg-soft', 'accent-text', 'border', 'accent-border');
+      }
     }
 
     function updateField(field, value) {
@@ -1905,14 +2004,31 @@
       renderAll();
     }
 
-    function setAcp(rawVal) {
+    function toggleAcEquip(field) {
+      state.ac[field] = !state.ac[field];
+      saveState();
+      renderAll();
+    }
+
+    function setEquipmentAcp(field, rawVal) {
       const str = String(rawVal ?? '').trim();
       if (str === '' || str === '-') {
-        state.ac.acp = 0;
+        state.ac[field] = 0;
       } else {
         const num = parseInt(str, 10);
-        // En PF1e el Armor Check Penalty siempre es negativo (0 o menor)
-        state.ac.acp = isNaN(num) ? 0 : -Math.abs(num);
+        state.ac[field] = isNaN(num) ? 0 : -Math.abs(num);
+      }
+      saveState();
+      renderAll();
+    }
+
+    function setEquipmentMaxDex(field, rawVal) {
+      const str = String(rawVal ?? '').trim();
+      if (str === '') {
+        state.ac[field] = '';
+      } else {
+        const num = parseInt(str, 10);
+        state.ac[field] = isNaN(num) ? '' : Math.max(0, num);
       }
       saveState();
       renderAll();
@@ -1925,7 +2041,7 @@
     }
 
     function setLevel(val) {
-      const parsed = parseInt(val);
+      const parsed = parseInt(val, 10);
       if (isNaN(parsed)) return;
       state.level = Math.max(1, Math.min(20, parsed));
       SKILLS_LIST.forEach(s => {
@@ -2004,7 +2120,7 @@
     }
 
     function adjustCurrentHp(delta) {
-      state.hp.current = (parseInt(state.hp.current) || 0) + delta;
+      state.hp.current = (parseInt(state.hp.current, 10) || 0) + delta;
       saveState();
       renderAll();
     }
@@ -2022,7 +2138,7 @@
     }
 
     function adjustTempCombat(key, delta) {
-      state.combatToggles[key] = (parseInt(state.combatToggles[key]) || 0) + delta;
+      state.combatToggles[key] = (parseInt(state.combatToggles[key], 10) || 0) + delta;
       saveState();
       renderWeaponsTab();
     }
@@ -2089,17 +2205,17 @@
 
     // Gestión de Skills
     function setSkillRank(skillId, newRank) {
-      state.skills[skillId].ranks = Math.max(0, Math.min(state.level, parseInt(newRank) || 0));
+      state.skills[skillId].ranks = Math.max(0, Math.min(state.level, parseInt(newRank, 10) || 0));
       saveState();
       renderAll();
     }
 
     function changeSkillRank(skillId, delta) {
-      setSkillRank(skillId, (parseInt(state.skills[skillId].ranks) || 0) + delta);
+      setSkillRank(skillId, (parseInt(state.skills[skillId].ranks, 10) || 0) + delta);
     }
 
     function setSkillMisc(skillId, val) {
-      state.skills[skillId].misc = parseInt(val) || 0;
+      state.skills[skillId].misc = parseInt(val, 10) || 0;
       saveState();
       renderAll();
     }
@@ -2127,11 +2243,70 @@
       showToast('Espacios de conjuro recuperados.');
     }
 
+    function addKnownSpell(level) {
+      const input = document.getElementById(`input-add-spell-${level}`);
+      if (!input) return;
+      const name = input.value.trim();
+      if (!name) return;
+      if (!Array.isArray(state.knownSpells[level])) state.knownSpells[level] = [];
+      state.knownSpells[level].push(name);
+      saveState();
+      renderSpells();
+      const nextInput = document.getElementById(`input-add-spell-${level}`);
+      if (nextInput) nextInput.focus();
+    }
+
+    function updateKnownSpell(level, index, value) {
+      if (!Array.isArray(state.knownSpells[level])) return;
+      state.knownSpells[level][index] = value;
+      saveState();
+    }
+
+    function removeKnownSpell(level, index) {
+      if (!Array.isArray(state.knownSpells[level])) return;
+      state.knownSpells[level].splice(index, 1);
+      saveState();
+      renderSpells();
+    }
+
+    function setSpiritKnownSpell(level, value) {
+      if (!state.spiritKnownSpells) state.spiritKnownSpells = { 1: '', 2: '', 3: '', 4: '' };
+      state.spiritKnownSpells[level] = value;
+      saveState();
+    }
+
     /* =====================================================================
-       6. RENDERIZADO DE TODAS LAS PESTAÑAS
+       6. RENDERIZADO DE LA INTERFAZ
        ===================================================================== */
+    function setInputIfIdle(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (document.activeElement !== el) {
+        el.value = value ?? '';
+      }
+    }
+
+    function getSpiritAbilityBonusInfo(key) {
+      const sb = getActiveSpiritBonus();
+      if (sb === 0) return null;
+      const map = {
+        archmage: { key: 'int', label: 'Pruebas/Skills INT' },
+        champion: { key: 'str', label: 'Pruebas/Skills FUE' },
+        guardian: { key: 'con', label: 'Pruebas CON' },
+        hierophant: { key: 'wis', label: 'Pruebas/Skills SAB' },
+        marshal: { key: 'cha', label: 'Pruebas/Skills CAR' },
+        trickster: { key: 'dex', label: 'Pruebas/Skills DES' }
+      };
+      const entry = map[state.spirit];
+      if (entry && entry.key === key) {
+        return { bonus: sb, label: entry.label };
+      }
+      return null;
+    }
+
     function renderAll() {
       applyTheme();
+      syncStaticInputs();
       renderHeader();
       renderSpiritSelector();
       renderInfluencePanel();
@@ -2141,996 +2316,1104 @@
       renderSkills();
       renderSpells();
       renderPowersTab();
-      syncStaticInputs();
     }
 
     function syncStaticInputs() {
-      const setVal = (id, val) => {
-        const el = document.getElementById(id);
-        if (el && document.activeElement !== el) el.value = val;
-      };
-      setVal('input-name', state.name);
-      setVal('input-level', state.level);
-      setVal('input-favored', state.favoredClass);
-      setVal('input-race', state.race);
-      setVal('input-alignment', state.alignment || '');
-      setVal('input-size', state.size);
-      setVal('input-speed', state.speed);
-      setVal('input-extra-skill-ranks', state.extraSkillRanks);
-      setVal('input-spell-dc-misc', state.spellDcMisc);
+      setInputIfIdle('input-name', state.name);
+      setInputIfIdle('input-level', state.level);
+      setInputIfIdle('input-favored', state.favoredClass);
+      setInputIfIdle('input-race', state.race);
+      setInputIfIdle('input-alignment', state.alignment);
+      setInputIfIdle('input-size', state.size);
+      setInputIfIdle('input-speed', state.speed);
 
-      document.getElementById('input-taboo').checked = state.tabooAccepted;
-      document.getElementById('input-hp-auto').checked = state.hp.autoAvg;
-      document.getElementById('input-hp-base').disabled = state.hp.autoAvg;
-      setVal('input-hp-base', state.hp.autoAvg ? (8 + (state.level - 1) * 5) : state.hp.baseRolled);
-      setVal('input-hp-misc', state.hp.misc);
-      setVal('input-hp-current', state.hp.current);
+      const hpAuto = document.getElementById('input-hp-auto');
+      if (hpAuto) hpAuto.checked = !!state.hp.autoAvg;
+      const hpBaseEl = document.getElementById('input-hp-base');
+      if (hpBaseEl) {
+        hpBaseEl.disabled = !!state.hp.autoAvg;
+        if (document.activeElement !== hpBaseEl) {
+          hpBaseEl.value = state.hp.autoAvg ? (8 + (state.level - 1) * 5) : state.hp.baseRolled;
+        }
+      }
+      setInputIfIdle('input-hp-misc', state.hp.misc);
+      setInputIfIdle('input-hp-current', state.hp.current);
 
-      setVal('input-ac-armor', state.ac.armor);
-      setVal('input-ac-shield', state.ac.shield);
-      setVal('input-ac-natural', state.ac.natural);
-      setVal('input-ac-deflect', state.ac.deflect);
-      setVal('input-ac-misc', state.ac.misc);
-      setVal('input-ac-acp', state.ac.acp);
+      setInputIfIdle('input-ac-armor', state.ac.armor);
+      setInputIfIdle('input-ac-armor-maxdex', state.ac.armorMaxDex === '' ? '' : state.ac.armorMaxDex);
+      setInputIfIdle('input-ac-armor-acp', state.ac.armorAcp);
+      setInputIfIdle('input-ac-shield', state.ac.shield);
+      setInputIfIdle('input-ac-shield-maxdex', state.ac.shieldMaxDex === '' ? '' : state.ac.shieldMaxDex);
+      setInputIfIdle('input-ac-shield-acp', state.ac.shieldAcp);
+      setInputIfIdle('input-ac-natural', state.ac.natural);
+      setInputIfIdle('input-ac-deflect', state.ac.deflect);
+      setInputIfIdle('input-ac-misc', state.ac.misc);
 
-      setVal('input-save-fort', state.saves.fortMisc);
-      setVal('input-save-ref', state.saves.refMisc);
-      setVal('input-save-will', state.saves.willMisc);
+      setInputIfIdle('input-save-fort', state.saves.fortMisc);
+      setInputIfIdle('input-save-ref', state.saves.refMisc);
+      setInputIfIdle('input-save-will', state.saves.willMisc);
 
-      setVal('input-init-misc', state.combat.initMisc);
-      setVal('input-melee-misc', state.combat.meleeMisc);
-      setVal('input-ranged-misc', state.combat.rangedMisc);
-      setVal('input-cmb-misc', state.combat.cmbMisc);
-      setVal('input-cmd-misc', state.combat.cmdMisc);
+      setInputIfIdle('input-init-misc', state.combat.initMisc);
+      setInputIfIdle('input-melee-misc', state.combat.meleeMisc);
+      setInputIfIdle('input-ranged-misc', state.combat.rangedMisc);
+      setInputIfIdle('input-cmb-misc', state.combat.cmbMisc);
+      setInputIfIdle('input-cmd-misc', state.combat.cmdMisc);
 
-      setVal('input-temp-atk', state.combatToggles.tempAtk);
-      setVal('input-temp-dmg', state.combatToggles.tempDmg);
+      setInputIfIdle('input-temp-atk', state.combatToggles.tempAtk);
+      setInputIfIdle('input-temp-dmg', state.combatToggles.tempDmg);
+
+      setInputIfIdle('input-extra-skill-ranks', state.extraSkillRanks);
+      setInputIfIdle('input-spell-dc-misc', state.spellDcMisc);
+      setInputIfIdle('input-spell-conc-misc', state.concMisc);
+
+      const tabooEl = document.getElementById('input-taboo');
+      if (tabooEl) tabooEl.checked = !!state.tabooAccepted;
     }
 
     function renderHeader() {
-      const sp = SPIRITS[state.spirit];
-      const sb = getActiveSpiritBonus();
-      const die = getSurgeDie(state.level);
+      const sp = SPIRITS[state.spirit] || SPIRITS.none;
       const bab = getBAB(state.level);
       const babStr = getBABIteratives(bab).map(fmtSign).join('/');
+      const sb = getActiveSpiritBonus();
+      const surge = getSurgeDie(state.level).label;
 
-      document.getElementById('header-char-name').textContent = state.name.trim() || 'Médium Sin Nombre';
-      document.getElementById('header-level').textContent = state.level;
       document.getElementById('header-spirit-icon').textContent = sp.icon;
+      document.getElementById('header-char-name').textContent = state.name || 'Sin Nombre';
+      document.getElementById('header-level').textContent = state.level;
       document.getElementById('header-spirit-name').textContent = sp.name;
       document.getElementById('header-spirit-bonus').textContent = fmtSign(sb);
-      document.getElementById('header-surge-die').textContent = die.label;
+      document.getElementById('header-surge-die').textContent = surge;
       document.getElementById('header-bab').textContent = babStr;
 
       document.getElementById('stat-bab-summary').textContent = babStr;
-      document.getElementById('stat-spirit-bonus-summary').textContent = fmtSign(getSpiritBonusRaw(state.level));
-      document.getElementById('stat-surge-summary').textContent = die.label;
+      document.getElementById('stat-spirit-bonus-summary').textContent = fmtSign(sb);
+      document.getElementById('stat-surge-summary').textContent = surge;
 
-      const headerDots = document.getElementById('header-influence-dots');
-      headerDots.innerHTML = '';
+      const dotsEl = document.getElementById('header-influence-dots');
+      dotsEl.innerHTML = '';
       for (let i = 1; i <= 5; i++) {
-        const active = i <= state.influence;
-        let colorClass = 'bg-slate-800 border-slate-700';
-        if (active) {
-          if (state.influence >= 5) colorClass = 'bg-rose-500 border-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.8)]';
-          else if (state.influence >= 3) colorClass = 'bg-amber-400 border-amber-200';
-          else colorClass = 'accent-bg border-white/40';
+        const filled = i <= state.influence;
+        let cls = 'bg-slate-800 border-slate-700';
+        if (filled) {
+          if (state.influence >= 5) cls = 'bg-rose-500 border-rose-300 shadow-[0_0_8px_rgba(244,63,94,0.7)]';
+          else if (state.influence >= 3) cls = 'bg-amber-400 border-amber-200 shadow-[0_0_8px_rgba(251,191,36,0.6)]';
+          else cls = 'accent-bg border-white/40';
         }
-        const btn = document.createElement('button');
-        btn.className = `w-3.5 h-3.5 rounded-full border transition-all ${colorClass}`;
-        btn.onclick = () => setInfluence(i === state.influence ? i - 1 : i);
-        headerDots.appendChild(btn);
+        dotsEl.innerHTML += `<button onclick="setInfluence(${i === state.influence ? i - 1 : i})" class="w-3 h-3 rounded-full border transition ${cls}" title="Influencia ${i}/5"></button>`;
       }
-
-      const infBadge = document.getElementById('header-influence-badge');
-      infBadge.textContent = `${state.influence}/5`;
-      infBadge.className = `text-xs font-bold tabular-nums ml-0.5 ${
-        state.influence >= 5 ? 'text-rose-400' : state.influence >= 3 ? 'text-amber-300' : 'text-slate-300'
-      }`;
+      document.getElementById('header-influence-badge').textContent = `${state.influence}/5`;
 
       const alertBox = document.getElementById('global-influence-alert');
       const alertText = document.getElementById('global-influence-alert-text');
-      if (state.influence >= 5) {
-        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 bg-rose-950/90 border border-rose-500/70 text-rose-200';
-        alertText.textContent = `🚨 INFLUENCIA 5/5: ¡${sp.name} ha tomado el control de tu personaje! Pasas a ser PNJ durante 24 horas.`;
-      } else if (state.influence >= 3) {
-        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between gap-2 bg-amber-950/70 border border-amber-500/50 text-amber-200';
-        alertText.textContent = `⚠️ INFLUENCIA ALTA (${state.influence}/5): Sufres la penalización de influencia de ${sp.name}.`;
+      if (state.spirit !== 'none' && state.influence >= 5) {
+        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 bg-rose-950/90 border border-rose-600/70 text-rose-200';
+        alertText.textContent = `🚨 INFLUENCIA 5/5: ¡${sp.name} ha tomado el control total de tu cuerpo! Pasas a ser PNJ del DJ durante 24 horas.`;
+      } else if (state.spirit !== 'none' && state.influence >= 3) {
+        alertBox.className = 'mt-2 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between gap-2 bg-amber-950/80 border border-amber-600/60 text-amber-200';
+        alertText.textContent = `⚠️ INFLUENCIA ALTA (${state.influence}/5): -2 a Iniciativa y penalizador de ${sp.name} activo (ver Poderes y Reglas). (+4 vs. Posesión, +2 vs. mind-affecting)`;
       } else {
         alertBox.className = 'hidden';
       }
+
+      const spSummary = getSkillPointsSummary();
+      const pill = document.getElementById('tab-skills-pill');
+      pill.textContent = `${spSummary.spent}/${spSummary.total}`;
+      pill.className = spSummary.remaining < 0
+        ? 'text-[11px] px-1.5 py-0.5 rounded-md bg-rose-900/80 text-rose-200 font-bold tabular-nums'
+        : spSummary.remaining > 0
+          ? 'text-[11px] px-1.5 py-0.5 rounded-md accent-bg-soft accent-text font-semibold tabular-nums'
+          : 'text-[11px] px-1.5 py-0.5 rounded-md bg-emerald-950 text-emerald-300 font-semibold tabular-nums';
     }
 
     function renderSpiritSelector() {
       const container = document.getElementById('spirit-selector-grid');
-      container.innerHTML = '';
-      Object.values(SPIRITS).forEach(sp => {
-        const isSelected = state.spirit === sp.id;
-        const btn = document.createElement('button');
-        btn.onclick = () => selectSpirit(sp.id);
-        btn.className = `flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all ${
-          isSelected
-            ? 'accent-bg-soft accent-border text-white shadow-md scale-[1.02]'
-            : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
-        }`;
-        btn.innerHTML = `
-          <span class="text-lg mb-0.5">${sp.icon}</span>
-          <span class="text-[11px] font-semibold leading-tight truncate w-full">${sp.short}</span>
+      container.innerHTML = Object.values(SPIRITS).map(sp => {
+        const active = state.spirit === sp.id;
+        return `
+          <button onclick="selectSpirit('${sp.id}')"
+            class="p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
+              active
+                ? 'accent-bg-soft accent-border text-white shadow-md scale-[1.02]'
+                : 'bg-slate-900/70 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+            }">
+            <span class="text-lg leading-none">${sp.icon}</span>
+            <span class="text-[11px] font-semibold truncate w-full">${sp.short}</span>
+          </button>
         `;
-        container.appendChild(btn);
-      });
+      }).join('');
     }
 
     function renderInfluencePanel() {
-      const dots = document.getElementById('panel-influence-dots');
-      dots.innerHTML = '';
+      const dotsEl = document.getElementById('panel-influence-dots');
+      dotsEl.innerHTML = '';
       for (let i = 1; i <= 5; i++) {
-        const active = i <= state.influence;
-        let cls = 'bg-slate-800 border-slate-700 text-slate-500';
-        if (active) {
-          if (state.influence >= 5) cls = 'bg-rose-600 border-rose-400 text-white';
-          else if (state.influence >= 3) cls = 'bg-amber-500 border-amber-300 text-slate-950';
-          else cls = 'accent-bg border-white/30 text-slate-950';
+        const filled = i <= state.influence;
+        let cls = 'bg-slate-950 border-slate-700 text-slate-600';
+        if (filled) {
+          if (state.influence >= 5) cls = 'bg-rose-600 border-rose-300 text-white';
+          else if (state.influence >= 3) cls = 'bg-amber-500 border-amber-200 text-slate-950';
+          else cls = 'accent-bg border-white/40 text-slate-950';
         }
-        const b = document.createElement('button');
-        b.onclick = () => setInfluence(i === state.influence ? i - 1 : i);
-        b.className = `w-7 h-7 rounded-lg border text-xs font-bold tabular-nums transition ${cls}`;
-        b.textContent = i;
-        dots.appendChild(b);
+        dotsEl.innerHTML += `<button onclick="setInfluence(${i})" class="w-7 h-7 rounded-lg border text-xs font-bold transition ${cls}">${i}</button>`;
       }
 
-      const pill = document.getElementById('influence-status-pill');
+      const statusPill = document.getElementById('influence-status-pill');
       if (state.spirit === 'none') {
-        pill.textContent = 'Sin espíritu';
-        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-400';
+        statusPill.textContent = 'Sin espíritu';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-400';
       } else if (state.influence >= 5) {
-        pill.textContent = '¡POSEÍDO (PNJ)!';
-        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-rose-600 text-white font-bold animate-pulse';
+        statusPill.textContent = 'Posesión (PNJ)';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-rose-950 text-rose-300 border border-rose-700/60 font-bold';
       } else if (state.influence >= 3) {
-        pill.textContent = 'Influencia Fuerte (3+)';
-        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold';
+        statusPill.textContent = 'Penalización activa';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-amber-950 text-amber-300 border border-amber-700/60 font-semibold';
       } else {
-        pill.textContent = 'Bajo control';
-        pill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+        statusPill.textContent = 'Bajo control';
+        statusPill.className = 'px-2 py-0.5 rounded-full text-[11px] bg-emerald-950/70 text-emerald-300 border border-emerald-800/60';
       }
 
-      document.getElementById('btn-spirit-surge').disabled = state.spirit === 'none' || state.influence >= 5;
+      const btnSurge = document.getElementById('btn-spirit-surge');
+      btnSurge.disabled = state.spirit === 'none' || state.influence >= 5;
 
-      const tabooBox = document.getElementById('taboo-uses-container');
-      const btnTabooSurge = document.getElementById('btn-taboo-surge');
-      if (state.tabooAccepted) {
-        tabooBox.classList.remove('hidden');
-        tabooBox.classList.add('flex');
-        document.getElementById('taboo-uses-count').textContent = `${state.tabooUsesLeft}/2`;
-        btnTabooSurge.classList.toggle('hidden', state.spirit === 'none' || state.tabooUsesLeft <= 0);
+      const btnTaboo = document.getElementById('btn-taboo-surge');
+      const tabooCont = document.getElementById('taboo-uses-container');
+      const tabooCount = document.getElementById('taboo-uses-count');
+      if (state.tabooAccepted && state.spirit !== 'none') {
+        tabooCont.classList.remove('hidden');
+        tabooCont.classList.add('flex');
+        tabooCount.textContent = `${state.tabooUsesLeft}/2`;
+        if (state.tabooUsesLeft > 0) {
+          btnTaboo.classList.remove('hidden');
+          btnTaboo.textContent = `Usar Oleada Gratis (${state.tabooUsesLeft}/2)`;
+        } else {
+          btnTaboo.classList.add('hidden');
+        }
       } else {
-        tabooBox.classList.add('hidden');
-        tabooBox.classList.remove('flex');
-        btnTabooSurge.classList.add('hidden');
+        tabooCont.classList.add('hidden');
+        tabooCont.classList.remove('flex');
+        btnTaboo.classList.add('hidden');
       }
     }
 
     function renderAbilities() {
       const grid = document.getElementById('abilities-grid');
-      grid.innerHTML = '';
-      ABILITIES.forEach(ab => {
+      grid.innerHTML = ABILITIES.map(ab => {
         const total = getAbilityTotal(ab.key);
         const mod = getAbilityMod(ab.key);
-        const spiritInfo = getSpiritAbilityBonusInfo(ab.key);
-        const card = document.createElement('div');
-        card.className = `rounded-xl p-3 border transition ${spiritInfo ? 'bg-slate-900/95 accent-border' : 'bg-slate-900/70 border-slate-800'}`;
-        card.innerHTML = `
-          <div class="flex items-center justify-between mb-1.5">
-            <div>
-              <div class="text-xs font-bold tracking-wider ${spiritInfo ? 'accent-text' : 'text-slate-300'}">${ab.label}</div>
-              <div class="text-[10px] text-slate-500">${ab.name}</div>
+        const spInfo = getSpiritAbilityBonusInfo(ab.key);
+        return `
+          <div class="bg-slate-900/80 border ${spInfo ? 'accent-border' : 'border-slate-800'} rounded-xl p-3 flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-300">${ab.label} <span class="text-[10px] text-slate-500">(${ab.shortEn})</span></div>
+                <div class="text-[10px] text-slate-500">${ab.name}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-extrabold ${mod >= 0 ? 'text-white' : 'text-rose-300'} tabular-nums leading-none">${fmtSign(mod)}</div>
+                <div class="text-[10px] text-slate-400 tabular-nums mt-0.5">Total ${total}</div>
+              </div>
             </div>
-            <div class="text-right">
-              <div class="text-xl font-bold text-white tabular-nums leading-none">${fmtSign(mod)}</div>
-              <div class="text-[11px] text-slate-400 tabular-nums mt-0.5">Tot: ${total}</div>
+            <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80">
+              <div>
+                <label class="block text-[10px] text-slate-500 mb-0.5">Base</label>
+                <input type="number" value="${state.abilities[ab.key].base}" oninput="updateAbility('${ab.key}', 'base', this.value)"
+                  class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-white tabular-nums accent-ring" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-500 mb-0.5">Bonos</label>
+                <input type="number" value="${state.abilities[ab.key].misc}" oninput="updateAbility('${ab.key}', 'misc', this.value)"
+                  class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-white tabular-nums accent-ring" />
+              </div>
             </div>
+            ${spInfo ? `<div class="text-[10px] px-2 py-0.5 rounded-md accent-bg-soft accent-text text-center font-medium truncate" title="${spInfo.label}">+${spInfo.bonus} ${spInfo.label}</div>` : ''}
           </div>
-          <div class="grid grid-cols-2 gap-1.5 mt-2">
-            <div>
-              <label class="block text-[10px] text-slate-500 mb-0.5">Base</label>
-              <input type="number" value="${state.abilities[ab.key].base}" onchange="updateAbility('${ab.key}', 'base', this.value)"
-                class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-white tabular-nums accent-ring" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500 mb-0.5">Bonos</label>
-              <input type="number" value="${state.abilities[ab.key].misc}" onchange="updateAbility('${ab.key}', 'misc', this.value)"
-                class="w-full text-center bg-slate-950 border border-slate-700/80 rounded-lg py-1 text-xs font-semibold text-slate-200 tabular-nums accent-ring" />
-            </div>
-          </div>
-          ${spiritInfo
-            ? `<div class="mt-2 text-[10px] font-semibold accent-text accent-bg-soft rounded-md px-2 py-0.5 text-center truncate">+${spiritInfo.bonus} ${spiritInfo.label}</div>`
-            : `<div class="mt-2 h-[19px]"></div>`
-          }
         `;
-        grid.appendChild(card);
-      });
+      }).join('');
     }
 
     function renderCombatAndSurvival() {
-      const sb = getActiveSpiritBonus();
-      const sp = state.spirit;
-      const bab = getBAB(state.level);
-      const strMod = getAbilityMod('str');
-      const dexMod = getAbilityMod('dex');
-      const conMod = getAbilityMod('con');
-      const wisMod = getAbilityMod('wis');
-      const sizeObj = SIZE_MODS[state.size] || SIZE_MODS.medium;
-
       // PG
-      const hpData = getMaxHP();
-      document.getElementById('stat-hp-max').textContent = hpData.total;
-      const hpParts = [`${hpData.base} base`, `${fmtSign(hpData.conTotal)} CON`];
-      if (hpData.fav) hpParts.push(`+${hpData.fav} Pred.`);
-      if (hpData.misc) hpParts.push(`${fmtSign(hpData.misc)} otros`);
-      document.getElementById('stat-hp-breakdown').textContent = hpParts.join(' · ');
+      const hpInfo = getMaxHP();
+      document.getElementById('stat-hp-max').textContent = hpInfo.total;
+      const hpParts = [`${hpInfo.base} base`, `${fmtSign(hpInfo.conTotal)} CON`];
+      if (hpInfo.fav > 0) hpParts.push(`+${hpInfo.fav} Pred.`);
+      if (hpInfo.misc !== 0) hpParts.push(`${fmtSign(hpInfo.misc)} extra`);
+      document.getElementById('stat-hp-breakdown').textContent = hpParts.join(' ');
 
-      // CA
-      const acSpirit = sp === 'guardian' ? sb : 0;
-      const acTotal = 10 + state.ac.armor + state.ac.shield + dexMod + sizeObj.acAtk + state.ac.natural + state.ac.deflect + state.ac.misc + acSpirit;
-      const acTouch = 10 + dexMod + sizeObj.acAtk + state.ac.deflect + state.ac.misc + acSpirit;
-      const acFlat = 10 + state.ac.armor + state.ac.shield + Math.min(0, dexMod) + sizeObj.acAtk + state.ac.natural + state.ac.deflect + state.ac.misc + acSpirit;
+      // CA (3 líneas: Armadura, Escudo, Extras)
+      const dexMod = getAbilityMod('dex');
+      const effMaxDex = getEffectiveMaxDex();
+      const appliedDex = effMaxDex !== null ? Math.min(dexMod, effMaxDex) : dexMod;
+      const flatDex = Math.min(0, appliedDex);
+      const sizeMod = (SIZE_MODS[state.size] || SIZE_MODS.medium).acAtk;
+      const armorAc = state.ac.armorEnabled ? (parseInt(state.ac.armor, 10) || 0) : 0;
+      const shieldAc = state.ac.shieldEnabled ? (parseInt(state.ac.shield, 10) || 0) : 0;
+      const natAc = parseInt(state.ac.natural, 10) || 0;
+      const defAc = parseInt(state.ac.deflect, 10) || 0;
+      const miscAc = parseInt(state.ac.misc, 10) || 0;
+      const sb = getActiveSpiritBonus();
+      const guardianAc = state.spirit === 'guardian' ? sb : 0;
 
-      document.getElementById('stat-ac-total').textContent = acTotal;
-      document.getElementById('stat-ac-touch').textContent = acTouch;
-      document.getElementById('stat-ac-flat').textContent = acFlat;
+      const totalAc = 10 + armorAc + shieldAc + appliedDex + sizeMod + natAc + defAc + miscAc + guardianAc;
+      const touchAc = 10 + appliedDex + sizeMod + defAc + miscAc + guardianAc;
+      const flatAc = 10 + armorAc + shieldAc + flatDex + sizeMod + natAc + defAc + miscAc + guardianAc;
+
+      document.getElementById('stat-ac-total').textContent = totalAc;
+      document.getElementById('stat-ac-touch').textContent = touchAc;
+      document.getElementById('stat-ac-flat').textContent = flatAc;
+
       const acTag = document.getElementById('ac-spirit-tag');
-      acTag.textContent = `+${acSpirit} Guardián`;
-      acTag.classList.toggle('hidden', acSpirit === 0);
-      document.getElementById('stat-ac-breakdown').textContent =
-        `10 + ${state.ac.armor} Arm + ${state.ac.shield} Esc + ${dexMod} DES${sizeObj.acAtk ? ` ${fmtSign(sizeObj.acAtk)} Tam` : ''} + ${state.ac.natural} Nat + ${state.ac.deflect} Desv + ${state.ac.misc} Otros` +
-        (acSpirit ? ` + ${acSpirit} Guardián` : '');
+      if (guardianAc > 0) {
+        acTag.classList.remove('hidden');
+        acTag.textContent = `+${guardianAc} Guardián`;
+      } else {
+        acTag.classList.add('hidden');
+      }
+
+      // Estilo de botones ON/OFF de Armadura y Escudo
+      const styleEquipRow = (enabled, rowId, btnId, badgeId) => {
+        const row = document.getElementById(rowId);
+        const btn = document.getElementById(btnId);
+        const badge = document.getElementById(badgeId);
+        if (!row || !btn || !badge) return;
+        if (enabled) {
+          row.className = 'bg-slate-900/85 border accent-border rounded-xl p-2.5 transition';
+          btn.className = 'w-full py-1.5 px-2.5 rounded-lg border accent-border accent-bg-soft accent-text text-xs font-bold transition flex items-center justify-between gap-1.5';
+          badge.className = 'text-[10px] px-1.5 py-0.5 rounded font-extrabold accent-bg text-slate-950';
+          badge.textContent = 'ON';
+        } else {
+          row.className = 'bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 opacity-60 transition';
+          btn.className = 'w-full py-1.5 px-2.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-slate-200 text-xs font-bold transition flex items-center justify-between gap-1.5';
+          badge.className = 'text-[10px] px-1.5 py-0.5 rounded font-extrabold bg-slate-800 text-slate-400';
+          badge.textContent = 'OFF';
+        }
+      };
+      styleEquipRow(state.ac.armorEnabled, 'ac-armor-row', 'btn-toggle-armor', 'badge-toggle-armor');
+      styleEquipRow(state.ac.shieldEnabled, 'ac-shield-row', 'btn-toggle-shield', 'badge-toggle-shield');
+
+      const acParts = ['10'];
+      if (armorAc) acParts.push(`${fmtSign(armorAc)} Arm.`);
+      if (shieldAc) acParts.push(`${fmtSign(shieldAc)} Esc.`);
+      acParts.push(`${fmtSign(appliedDex)} DES${effMaxDex !== null && dexMod > effMaxDex ? ` (tope ${effMaxDex})` : ''}`);
+      if (sizeMod) acParts.push(`${fmtSign(sizeMod)} Tam.`);
+      if (natAc) acParts.push(`${fmtSign(natAc)} Nat.`);
+      if (defAc) acParts.push(`${fmtSign(defAc)} Desv.`);
+      if (miscAc) acParts.push(`${fmtSign(miscAc)} Otros`);
+      if (guardianAc) acParts.push(`+${guardianAc} Guardián`);
+      const totalAcp = getTotalAcp();
+      document.getElementById('stat-ac-breakdown').textContent = `Desglose: ${acParts.join(' ')}${effMaxDex !== null ? ` • Max DES: +${effMaxDex}` : ''} • ACP total: ${totalAcp}`;
 
       // Salvaciones
       const baseSaves = getBaseSaves(state.level);
-      const fortSpirit = (sp === 'champion' || sp === 'guardian') ? sb : 0;
-      const refSpirit = (sp === 'guardian' || sp === 'trickster') ? sb : 0;
-      const willSpirit = (sp === 'hierophant' || sp === 'marshal') ? sb : 0;
+      const conMod = getAbilityMod('con');
+      const wisMod = getAbilityMod('wis');
 
-      document.getElementById('save-fort-total').textContent = fmtSign(baseSaves.fort + conMod + state.saves.fortMisc + fortSpirit);
-      document.getElementById('save-fort-breakdown').innerHTML = `Base ${baseSaves.fort} + CON ${fmtSign(conMod)}${fortSpirit ? ` + <span class="accent-text font-semibold">${fortSpirit} Esp.</span>` : ''}`;
+      const fortSpirit = (state.spirit === 'champion' || state.spirit === 'guardian') ? sb : 0;
+      const refSpirit = (state.spirit === 'guardian' || state.spirit === 'trickster') ? sb : 0;
+      const willSpirit = (state.spirit === 'hierophant' || state.spirit === 'marshal') ? sb : 0;
 
-      document.getElementById('save-ref-total').textContent = fmtSign(baseSaves.ref + dexMod + state.saves.refMisc + refSpirit);
-      document.getElementById('save-ref-breakdown').innerHTML = `Base ${baseSaves.ref} + DES ${fmtSign(dexMod)}${refSpirit ? ` + <span class="accent-text font-semibold">${refSpirit} Esp.</span>` : ''}`;
+      const fortMisc = parseInt(state.saves.fortMisc, 10) || 0;
+      const refMisc = parseInt(state.saves.refMisc, 10) || 0;
+      const willMisc = parseInt(state.saves.willMisc, 10) || 0;
 
-      document.getElementById('save-will-total').textContent = fmtSign(baseSaves.will + wisMod + state.saves.willMisc + willSpirit);
-      document.getElementById('save-will-breakdown').innerHTML = `Base ${baseSaves.will} + SAB ${fmtSign(wisMod)}${willSpirit ? ` + <span class="accent-text font-semibold">${willSpirit} Esp.</span>` : ''}`;
+      const fortTotal = baseSaves.fort + conMod + fortSpirit + fortMisc;
+      const refTotal = baseSaves.ref + dexMod + refSpirit + refMisc;
+      const willTotal = baseSaves.will + wisMod + willSpirit + willMisc;
+
+      document.getElementById('save-fort-total').textContent = fmtSign(fortTotal);
+      document.getElementById('save-fort-breakdown').textContent = `Base ${baseSaves.fort} ${fmtSign(conMod)} CON${fortSpirit ? ` +${fortSpirit} Esp.` : ''}${fortMisc ? ` ${fmtSign(fortMisc)} otros` : ''}`;
+
+      document.getElementById('save-ref-total').textContent = fmtSign(refTotal);
+      document.getElementById('save-ref-breakdown').textContent = `Base ${baseSaves.ref} ${fmtSign(dexMod)} DES${refSpirit ? ` +${refSpirit} Esp.` : ''}${refMisc ? ` ${fmtSign(refMisc)} otros` : ''}`;
+
+      document.getElementById('save-will-total').textContent = fmtSign(willTotal);
+      document.getElementById('save-will-breakdown').textContent = `Base ${baseSaves.will} ${fmtSign(wisMod)} SAB${willSpirit ? ` +${willSpirit} Esp.` : ''}${willMisc ? ` ${fmtSign(willMisc)} otros` : ''}`;
 
       // Iniciativa, Ataques y Maniobras
-      const initSpirit = (sp === 'trickster' || sp === 'marshal') ? sb : 0;
-      document.getElementById('stat-init-total').textContent = fmtSign(dexMod + state.combat.initMisc + initSpirit);
-      document.getElementById('stat-init-breakdown').innerHTML = `DES ${fmtSign(dexMod)}${initSpirit ? ` + <span class="accent-text font-semibold">${initSpirit} Esp.</span>` : ''}`;
+      const bab = getBAB(state.level);
+      const strMod = getAbilityMod('str');
+      const cmbSize = (SIZE_MODS[state.size] || SIZE_MODS.medium).cmbCmd;
 
-      const atkSpirit = sp === 'champion' ? sb : 0;
-      document.getElementById('stat-melee-total').textContent = fmtSign(bab + strMod + sizeObj.acAtk + state.combat.meleeMisc + atkSpirit);
-      document.getElementById('stat-melee-breakdown').innerHTML = `BAB ${bab} + FUE ${fmtSign(strMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+      const initSpirit = (state.spirit === 'marshal' || state.spirit === 'trickster') ? sb : 0;
+      const initInfPen = (state.spirit !== 'none' && state.influence >= 3) ? -2 : 0;
+      const initMisc = parseInt(state.combat.initMisc, 10) || 0;
+      const initTotal = dexMod + initSpirit + initInfPen + initMisc;
+      document.getElementById('stat-init-total').textContent = fmtSign(initTotal);
+      document.getElementById('stat-init-breakdown').textContent = `DES ${fmtSign(dexMod)}${initSpirit ? ` +${initSpirit} Esp.` : ''}${initInfPen ? ' -2 Inf.3+' : ''}${initMisc ? ` ${fmtSign(initMisc)} otros` : ''}`;
 
-      document.getElementById('stat-ranged-total').textContent = fmtSign(bab + dexMod + sizeObj.acAtk + state.combat.rangedMisc + atkSpirit);
-      document.getElementById('stat-ranged-breakdown').innerHTML = `BAB ${bab} + DES ${fmtSign(dexMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+      const champAtk = state.spirit === 'champion' ? sb : 0;
+      const meleeMisc = parseInt(state.combat.meleeMisc, 10) || 0;
+      const meleeTotal = bab + strMod + sizeMod + champAtk + meleeMisc;
+      document.getElementById('stat-melee-total').textContent = fmtSign(meleeTotal);
+      document.getElementById('stat-melee-breakdown').textContent = `BAB ${bab} ${fmtSign(strMod)} FUE${sizeMod ? ` ${fmtSign(sizeMod)} Tam` : ''}${champAtk ? ` +${champAtk} Esp.` : ''}${meleeMisc ? ` ${fmtSign(meleeMisc)} otros` : ''}`;
 
-      document.getElementById('stat-cmb-total').textContent = fmtSign(bab + strMod + sizeObj.cmbCmd + state.combat.cmbMisc + atkSpirit);
-      document.getElementById('stat-cmb-breakdown').innerHTML = `BAB ${bab} + FUE ${fmtSign(strMod)}${atkSpirit ? ` + <span class="accent-text font-semibold">${atkSpirit} Camp.</span>` : ''}`;
+      const rangedMisc = parseInt(state.combat.rangedMisc, 10) || 0;
+      const rangedTotal = bab + dexMod + sizeMod + champAtk + rangedMisc;
+      document.getElementById('stat-ranged-total').textContent = fmtSign(rangedTotal);
+      document.getElementById('stat-ranged-breakdown').textContent = `BAB ${bab} ${fmtSign(dexMod)} DES${sizeMod ? ` ${fmtSign(sizeMod)} Tam` : ''}${champAtk ? ` +${champAtk} Esp.` : ''}${rangedMisc ? ` ${fmtSign(rangedMisc)} otros` : ''}`;
 
-      const cmdGuardBonus = sp === 'guardian' ? (sb + 1) : 0;
-      document.getElementById('stat-cmd-total').textContent = 10 + bab + strMod + dexMod + sizeObj.cmbCmd + state.ac.deflect + state.combat.cmdMisc + cmdGuardBonus;
-      document.getElementById('stat-cmd-breakdown').innerHTML = `10 + BAB ${bab} + FUE ${fmtSign(strMod)} + DES ${fmtSign(dexMod)}${cmdGuardBonus ? ` + <span class="accent-text font-semibold">${cmdGuardBonus} Guard.</span>` : ''}`;
+      const cmbMisc = parseInt(state.combat.cmbMisc, 10) || 0;
+      const cmbTotal = bab + strMod + cmbSize + champAtk + cmbMisc;
+      document.getElementById('stat-cmb-total').textContent = fmtSign(cmbTotal);
+      document.getElementById('stat-cmb-breakdown').textContent = `BAB ${bab} ${fmtSign(strMod)} FUE${cmbSize ? ` ${fmtSign(cmbSize)} Tam` : ''}${champAtk ? ` +${champAtk} Esp.` : ''}${cmbMisc ? ` ${fmtSign(cmbMisc)} otros` : ''}`;
 
-      const seanceEl = document.getElementById('combat-seance-summary');
-      if (sp === 'champion') seanceEl.innerHTML = `<strong class="text-white">+${sb + 2} al daño de armas</strong> (+${sb} Esp. + 2 Don).${state.level >= 6 ? ' <span class="accent-text font-semibold">Sudden Attack activo.</span>' : ''}`;
-      else if (sp === 'archmage') seanceEl.innerHTML = `<strong class="text-white">+2 daño con conjuros</strong>. Concentración y NL +${sb}.`;
-      else if (sp === 'hierophant') seanceEl.innerHTML = `<strong class="text-white">+2 a curaciones</strong>. Voluntad y Concentración +${sb}.`;
-      else if (sp === 'guardian') seanceEl.innerHTML = `<strong class="text-white">+${sb} CA</strong> y <strong class="text-white">+${sb + 1} DMC</strong> (+${sb} Esp. + 1 Don).`;
-      else if (sp === 'marshal') seanceEl.innerHTML = `Oleada Espiritual a aliados con <strong class="text-white">+${sb + 1} extra</strong>.`;
-      else if (sp === 'trickster') seanceEl.innerHTML = `Todas las skills sin entrenar. 2 skills con rangos máximos (Trickster's Edge).`;
-      else seanceEl.textContent = 'Sin espíritu canalizado.';
+      const guardCmd = state.spirit === 'guardian' ? (sb + 1) : 0;
+      const cmdMisc = parseInt(state.combat.cmdMisc, 10) || 0;
+      const cmdTotal = 10 + bab + strMod + dexMod + cmbSize + defAc + guardCmd + cmdMisc;
+      document.getElementById('stat-cmd-total').textContent = cmdTotal;
+      document.getElementById('stat-cmd-breakdown').textContent = `10 + BAB ${bab} ${fmtSign(strMod)} FUE ${fmtSign(dexMod)} DES${defAc ? ` +${defAc} Desv.` : ''}${guardCmd ? ` +${guardCmd} Guard.` : ''}${cmdMisc ? ` ${fmtSign(cmdMisc)} otros` : ''}`;
+
+      const sp = SPIRITS[state.spirit] || SPIRITS.none;
+      document.getElementById('combat-seance-summary').textContent = sp.boon;
     }
 
-    /* =====================================================================
-       RENDERIZADO DE LA PESTAÑA 2: ARMAS Y COMBATE (DADOS FÍSICOS)
-       ===================================================================== */
     function renderWeaponsTab() {
       const bab = getBAB(state.level);
       const scale = 1 + Math.floor(bab / 4);
       const t = state.combatToggles;
       const isChamp6 = state.spirit === 'champion' && state.level >= 6;
-      const surgeDie = getSurgeDie(state.level);
-      const marshalExtra = state.spirit === 'marshal' ? (getActiveSpiritBonus() + 1) : 0;
 
       document.getElementById('weapons-bab-label').textContent = fmtSign(bab);
       document.getElementById('weapons-scale-label').textContent = `-${scale} Atk / +${2 * scale} (+${3 * scale} 2H) Dmg`;
 
-      const preciseWarn = document.getElementById('precise-shot-warning');
-      preciseWarn.classList.toggle('hidden', !(t.targetInMelee && !t.hasPreciseShot));
+      const warnEl = document.getElementById('precise-shot-warning');
+      if (t.targetInMelee && !t.hasPreciseShot) warnEl.classList.remove('hidden');
+      else warnEl.classList.add('hidden');
 
-      const rangedToggles = [
-        { key: 'pointBlankShot', title: 'Point-Blank Shot', badge: '+1 Atk / +1 Dmg', badgeTone: 'pos', active: t.pointBlankShot },
-        { key: 'hasPreciseShot', title: 'Precise Shot', badge: 'Negates -4', badgeTone: 'pos', active: t.hasPreciseShot },
-        { key: 'targetInMelee', title: 'Target in Melee', badge: t.hasPreciseShot ? '0 (Negated)' : '-4 Atk', badgeTone: t.hasPreciseShot ? 'neutral' : 'neg', active: t.targetInMelee, warn: t.targetInMelee && !t.hasPreciseShot },
-        { key: 'rapidShot', title: 'Rapid Shot', badge: '-2 Atk / +1 Shot', badgeTone: 'neg', active: t.rapidShot },
-        { key: 'deadlyAim', title: 'Deadly Aim', badge: `-${scale} Atk / +${2 * scale} Dmg`, badgeTone: 'neg', active: t.deadlyAim },
-        { key: 'manyshot', title: 'Manyshot', badge: '1st Shot ×2 Dmg', badgeTone: 'pos', active: t.manyshot },
-        { key: 'clusteredShots', title: 'Clustered Shots', badge: 'DR once', badgeTone: 'neutral', active: t.clusteredShots }
+      const rangedDefs = [
+        { key: 'pointBlankShot', name: 'Point-Blank Shot', badge: '+1 Atk / +1 Dmg', sub: 'Objetivo a ≤ 30 pies', tone: 'pos' },
+        { key: 'hasPreciseShot', name: 'Precise Shot', badge: 'Anula -4 CaC', sub: 'Sin penalizador al disparar a CaC', tone: 'pos' },
+        { key: 'targetInMelee', name: 'Target in Melee', badge: t.hasPreciseShot ? '0 (Precise Shot)' : '-4 Atk', sub: 'Enemigo trabado en CaC', tone: t.hasPreciseShot ? 'neutral' : 'neg' },
+        { key: 'rapidShot', name: 'Rapid Shot', badge: '-2 Atk / +1 Shot', sub: 'Solo en Ataque Completo', tone: 'neg' },
+        { key: 'deadlyAim', name: 'Deadly Aim', badge: `-${scale} Atk / +${2 * scale} Dmg`, sub: 'Escala con BAB', tone: 'neg' },
+        { key: 'manyshot', name: 'Manyshot', badge: '2 Arrows (1st)', sub: 'Arco en Ataque Completo', tone: 'pos' },
+        { key: 'clusteredShots', name: 'Clustered Shots', badge: 'Combine DR', sub: 'Suma daño antes de RD', tone: 'pos' }
       ];
 
-      const renderBadge = (text, tone, active) => {
-        if (!active) return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-semibold tabular-nums">${text}</span>`;
-        if (tone === 'neg') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold tabular-nums">${text}</span>`;
-        if (tone === 'pos') return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold tabular-nums">${text}</span>`;
-        return `<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 border border-sky-500/40 font-bold tabular-nums">${text}</span>`;
-      };
-
-      const rangedEl = document.getElementById('ranged-toggles-container');
-      rangedEl.innerHTML = rangedToggles.map(item => `
-        <button onclick="toggleCombatOption('${item.key}')"
-          class="text-left p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
-            item.warn
-              ? 'bg-rose-950/60 border-rose-500/70 text-rose-100'
-              : item.active
+      document.getElementById('ranged-toggles-container').innerHTML = rangedDefs.map(def => {
+        const active = !!t[def.key];
+        const badgeCls = !active
+          ? 'bg-slate-800 text-slate-400'
+          : def.tone === 'neg'
+            ? 'bg-rose-950/90 text-rose-300 border border-rose-700/60'
+            : def.tone === 'pos'
+              ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/60'
+              : 'bg-slate-800 text-slate-200';
+        return `
+          <button onclick="toggleCombatOption('${def.key}')"
+            class="text-left p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+              active
                 ? 'accent-bg-soft accent-border text-white shadow-sm'
-                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-          }">
-          <div class="min-w-0 space-y-1">
-            <div class="text-xs font-bold truncate">${item.title}</div>
-            <div>${renderBadge(item.badge, item.badgeTone, item.active)}</div>
-          </div>
-          <span class="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center text-[10px] ${
-            item.warn ? 'bg-rose-500 border-rose-300 text-white' : item.active ? 'accent-bg border-white/40 text-slate-950 font-bold' : 'border-slate-600'
-          }">${item.active ? '✓' : ''}</span>
-        </button>
-      `).join('');
+                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-600'
+            }">
+            <div class="min-w-0">
+              <div class="text-xs font-bold truncate">${def.name}</div>
+              <div class="text-[10px] text-slate-400 truncate">${def.sub}</div>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap tabular-nums ${badgeCls}">${def.badge}</span>
+          </button>
+        `;
+      }).join('');
 
-      const globalToggles = [
-        { key: 'powerAttack', title: 'Power Attack', badge: `-${scale} Atk / +${2 * scale} (1H) · +${3 * scale} (2H)`, badgeTone: 'neg', active: t.powerAttack, disabled: false },
-        { key: 'haste', title: 'Haste', badge: '+1 Atk / +1 Extra Atk', badgeTone: 'pos', active: t.haste, disabled: false },
-        { key: 'suddenAttack', title: 'Sudden Attack', badge: isChamp6 ? '+2 Atk / +1 Extra Atk' : 'Champion Lv. 6+', badgeTone: 'pos', active: isChamp6 && t.suddenAttack, disabled: !isChamp6 }
+      const globalDefs = [
+        { key: 'powerAttack', name: 'Power Attack', badge: `-${scale} Atk / +${2 * scale}(+${3 * scale})`, sub: 'Solo armas CaC', disabled: false, tone: 'neg' },
+        { key: 'haste', name: 'Haste', badge: '+1 Atk / +1 Extra', sub: 'Ataque extra al BAB máx.', disabled: false, tone: 'pos' },
+        { key: 'suddenAttack', name: 'Sudden Attack', badge: isChamp6 ? '+1 Extra (+2 Atk)' : 'Campeón Niv. 6', sub: 'Poder Intermedio Campeón', disabled: !isChamp6, tone: 'pos' }
       ];
 
-      const globalEl = document.getElementById('global-toggles-container');
-      globalEl.innerHTML = globalToggles.map(item => `
-        <button onclick="${item.disabled ? '' : `toggleCombatOption('${item.key}')`}" ${item.disabled ? 'disabled' : ''}
-          class="text-left p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
-            item.disabled
-              ? 'bg-slate-950/40 border-slate-800/60 text-slate-600 cursor-not-allowed opacity-60'
-              : item.active
-                ? 'accent-bg-soft accent-border text-white'
-                : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-          }">
-          <div class="min-w-0 space-y-1">
-            <div class="text-xs font-bold truncate">${item.title}</div>
-            <div>${renderBadge(item.badge, item.badgeTone, item.active)}</div>
-          </div>
-          <span class="w-4 h-4 rounded-full border shrink-0 flex items-center justify-center text-[10px] ${
-            item.active ? 'accent-bg border-white/40 text-slate-950 font-bold' : 'border-slate-600'
-          }">${item.active ? '✓' : ''}</span>
-        </button>
-      `).join('');
+      document.getElementById('global-toggles-container').innerHTML = globalDefs.map(def => {
+        const active = !def.disabled && !!t[def.key];
+        const badgeCls = !active
+          ? 'bg-slate-800 text-slate-400'
+          : def.tone === 'neg'
+            ? 'bg-rose-950/90 text-rose-300 border border-rose-700/60'
+            : 'bg-emerald-950/90 text-emerald-300 border border-emerald-700/60';
+        return `
+          <button onclick="${def.disabled ? '' : `toggleCombatOption('${def.key}')`}" ${def.disabled ? 'disabled' : ''}
+            class="text-left p-2.5 rounded-xl border transition-all flex flex-col justify-between gap-1.5 ${
+              def.disabled
+                ? 'bg-slate-950/40 border-slate-800/60 text-slate-600 cursor-not-allowed opacity-60'
+                : active
+                  ? 'accent-bg-soft accent-border text-white shadow-sm'
+                  : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-600'
+            }">
+            <div class="flex items-center justify-between gap-1 w-full">
+              <span class="text-xs font-bold truncate">${def.name}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap tabular-nums ${badgeCls}">${def.badge}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 truncate">${def.sub}</div>
+          </button>
+        `;
+      }).join('');
 
-      const pillClass = (type) => {
-        if (type === 'neg') return 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold';
-        if (type === 'pos') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35 font-semibold';
-        return 'bg-slate-900 text-slate-300 border-slate-700/80';
-      };
+      const surgeDie = getSurgeDie(state.level).label;
+      const surgeExtra = state.spirit === 'marshal' ? ` + ${getActiveSpiritBonus() + 1}` : '';
+      const weaponsGrid = document.getElementById('weapons-grid');
 
-      const grid = document.getElementById('weapons-grid');
-      grid.innerHTML = '';
-
-      state.weapons.forEach(w => {
+      weaponsGrid.innerHTML = state.weapons.map(w => {
         const calc = calculateWeaponStats(w);
-        const typeLabels = { bow: 'A distancia (Arco)', crossbow: 'A distancia (Ballesta)', melee1h: calc.isTwoHanded ? 'Cuerpo a cuerpo (2M Grip)' : 'Cuerpo a cuerpo (1M)', melee2h: 'Cuerpo a cuerpo (2M)' };
-        const typeIcons = { bow: '🏹', crossbow: '🎯', melee1h: '✴️', melee2h: '⚔️' };
-        const critStr = `${w.critMin < 20 ? `${w.critMin}–20` : '20'}/×${w.critMult}`;
-        const enhLabel = w.enhancement === -1 ? 'Masterwork' : (w.enhancement > 0 ? `+${w.enhancement}` : 'Normal');
+        const typeMeta = {
+          bow: { icon: '🏹', label: 'Arco' },
+          crossbow: { icon: '🎯', label: 'Ballesta' },
+          melee2h: { icon: '⚔️', label: 'CaC 2 Manos' },
+          melee1h: { icon: '🔨', label: 'CaC 1 Mano' }
+        }[w.type] || { icon: '⚔️', label: 'Arma' };
 
-        const fullAtkHtml = calc.fullSequence.map(atk => `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-sm font-extrabold tabular-nums ${
-            atk.manyshot ? 'bg-sky-500/20 text-sky-200 border border-sky-400/50' : 'bg-slate-950 text-white border border-slate-700'
-          }" title="${atk.tag}">
-            ${fmtSign(atk.bonus)}
-            ${atk.shortTag ? `<span class="text-[9px] uppercase ${atk.manyshot ? 'text-sky-300' : atk.shortTag === 'RS' ? 'text-rose-300' : 'text-amber-300'}">${atk.shortTag}</span>` : ''}
-          </span>
-        `).join('<span class="text-slate-600 text-xs font-bold">/</span>');
+        const critText = `${w.critMin < 20 ? `${w.critMin}–20` : '20'}/×${w.critMult}`;
 
-        const atkPillsHtml = calc.atkPills.map(p => `<span class="px-1.5 py-0.5 rounded-md border text-[10px] tabular-nums ${pillClass(p.type)}">${p.label}</span>`).join('');
-        const dmgPillsHtml = calc.dmgPills.map(p => `<span class="px-1.5 py-0.5 rounded-md border text-[10px] tabular-nums ${pillClass(p.type)}">${p.label}</span>`).join('');
+        const renderPills = (pills) => pills.map(p => {
+          const cls = p.type === 'neg'
+            ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+            : p.type === 'pos'
+              ? 'bg-emerald-950/75 text-emerald-300 border-emerald-700/50'
+              : 'bg-slate-800/90 text-slate-300 border-slate-700/70';
+          return `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md border tabular-nums ${cls}">${escapeHtml(p.label)}</span>`;
+        }).join('');
 
-        const card = document.createElement('div');
-        card.className = 'card-occult rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5';
-        card.innerHTML = `
-          <div class="space-y-3">
+        const fullSeqHtml = calc.fullSequence.map((atk, idx) => `
+          <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950 border ${atk.manyshot ? 'border-sky-500/60 text-sky-200' : 'border-slate-700 text-white'} tabular-nums" title="${escapeAttr(atk.tag)}">
+            <span class="text-sm font-extrabold">${fmtSign(atk.bonus)}</span>
+            ${atk.shortTag ? `<span class="text-[10px] font-bold accent-text">${atk.shortTag}</span>` : ''}
+          </div>
+          ${idx < calc.fullSequence.length - 1 ? '<span class="text-slate-600 font-bold">/</span>' : ''}
+        `).join('');
+
+        return `
+          <div class="card-occult rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-4">
             <!-- Cabecera del Arma -->
             <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-10 h-10 rounded-xl accent-bg-soft border accent-border flex items-center justify-center text-lg shrink-0">
-                  ${typeIcons[w.type] || '⚔️'}
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-lg">${typeMeta.icon}</span>
+                  <h3 class="font-display font-bold text-base text-white truncate">${escapeHtml(w.name)}</h3>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">${typeMeta.label}</span>
+                  ${w.weaponFocus ? '<span class="text-[10px] px-2 py-0.5 rounded-full accent-bg-soft accent-text border accent-border font-semibold">Weapon Focus</span>' : ''}
                 </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <h3 class="font-display font-bold text-base text-white truncate">${escapeAttr(w.name)}</h3>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">${enhLabel}</span>
-                    ${w.weaponFocus ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 font-semibold">Weapon Focus +1</span>` : ''}
-                  </div>
-                  <div class="text-[11px] text-slate-400 mt-0.5">
-                    ${typeLabels[w.type]} · Crít. <strong class="text-slate-200">${critStr}</strong> · ${escapeAttr(w.damageType)}
-                    ${w.type === 'bow' ? ` · STR Rating +${w.strRating}` : ''}
-                    ${calc.reloadLabel ? ` · <span class="text-sky-300">${calc.reloadLabel}</span>` : ''}
-                  </div>
+                <div class="text-[11px] text-slate-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <span>Crítico: <strong class="text-slate-200">${critText}</strong></span>
+                  <span>•</span>
+                  <span>${escapeHtml(w.damageType || 'Físico')}</span>
+                  ${calc.reloadLabel ? `<span>•</span><span class="text-sky-300">${calc.reloadLabel}</span>` : ''}
+                  ${calc.isBow ? `<span>•</span><span>STR Rating: +${w.strRating || 0}</span>` : ''}
+                  ${w.type === 'melee1h' && w.twoHandedGrip ? '<span>•</span><span class="text-amber-300 font-semibold">2H Grip (1.5×STR)</span>' : ''}
                 </div>
               </div>
-              <button onclick="toggleWeaponExpand('${w.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-xs font-medium shrink-0 transition">
-                ${w.expanded ? 'Ocultar ▲' : 'Editar ⚙️'}
+              <button onclick="toggleWeaponExpand('${w.id}')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 shrink-0 transition">
+                ${w.expanded ? '▲ Cerrar' : '⚙️ Editar'}
               </button>
             </div>
 
-            <!-- Controles rápidos por arma -->
-            ${w.type === 'melee1h' ? `
-              <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-1.5">
-                <label class="inline-flex items-center gap-2 text-xs text-slate-200 cursor-pointer select-none">
-                  <input type="checkbox" ${w.twoHandedGrip ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'twoHandedGrip', this.checked)" class="rounded bg-slate-800 border-slate-600 accent-amber-400" />
-                  <span class="font-semibold">Two-Handed Grip</span>
-                  <span class="text-[11px] text-slate-400">(1.5×STR y Power Attack 2H)</span>
-                </label>
-              </div>
-            ` : ''}
-
-            ${w.type === 'crossbow' ? `
-              <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/60 border border-slate-800 rounded-xl px-3 py-1.5">
-                <div class="flex items-center gap-1.5">
-                  <button onclick="applyWeaponPreset('${w.id}', 'heavy_xbow')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${w.dice === '1d10' ? 'accent-bg text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Heavy (1d10)</button>
-                  <button onclick="applyWeaponPreset('${w.id}', 'light_xbow')" class="px-2 py-0.5 rounded-md text-[11px] font-semibold transition ${w.dice === '1d8' ? 'accent-bg text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Light (1d8)</button>
-                </div>
-                <label class="inline-flex items-center gap-1.5 text-xs text-slate-200 cursor-pointer select-none">
-                  <input type="checkbox" ${w.rapidReload ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'rapidReload', this.checked)" class="rounded bg-slate-800 border-slate-600" />
-                  <span>Rapid Reload</span>
-                </label>
-              </div>
-            ` : ''}
-
-            <!-- Bloques Principales de Vista Previa en Vivo -->
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-              <div class="sm:col-span-3 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 text-center">
+            <!-- Bloques Grandes para Dados Físicos -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-4 bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-center flex flex-col justify-center">
                 <div class="text-[10px] uppercase tracking-wider text-slate-400">Ataque Estándar</div>
-                <div class="text-2xl font-extrabold text-white tabular-nums mt-0.5">${fmtSign(calc.stdAtk)}</div>
+                <div class="text-3xl font-extrabold text-white tabular-nums mt-0.5">${fmtSign(calc.stdAtk)}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">1 ataque</div>
               </div>
-              <div class="sm:col-span-5 bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col justify-center">
-                <div class="text-[10px] uppercase tracking-wider text-slate-400 mb-1">
-                  Ataque Completo ${calc.isManyshotActive ? '<span class="text-sky-300 normal-case">(×2 flechas en 1º)</span>' : ''}
+
+              <div class="sm:col-span-8 bg-slate-900/90 border accent-border rounded-xl p-3 flex flex-col justify-center">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[10px] uppercase tracking-wider accent-text font-bold">Ataque Completo (${calc.fullSequence.length} tiradas)</span>
+                  ${calc.isManyshotActive ? '<span class="text-[10px] text-sky-300 font-semibold">1º impacto = ×2 flechas</span>' : ''}
                 </div>
-                <div class="flex flex-wrap items-center gap-1">${fullAtkHtml}</div>
-              </div>
-              <div class="sm:col-span-4 bg-slate-900/90 border accent-border rounded-xl p-2.5 text-center">
-                <div class="text-[10px] uppercase tracking-wider accent-text">Daño (${calc.minDmg}–${calc.maxDmg})</div>
-                <div class="text-lg font-extrabold text-white tabular-nums mt-0.5">${calc.dmgFormula}</div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  ${fullSeqHtml}
+                </div>
               </div>
             </div>
 
-            <!-- Desglose Transparente en Vivo -->
-            <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2.5 space-y-2">
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 w-10 shrink-0">Atk:</span>
-                ${atkPillsHtml}
+            <!-- Daño + Desglose con Píldoras -->
+            <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 space-y-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Daño por impacto</span>
+                  <span class="text-xl font-extrabold text-white tabular-nums">${escapeHtml(calc.dmgFormula)}</span>
+                  <span class="text-xs text-slate-400 ml-2 tabular-nums">(Rango: ${calc.minDmg}–${calc.maxDmg})</span>
+                </div>
+                ${calc.isRanged && t.clusteredShots ? '<span class="text-[10px] px-2 py-1 rounded-lg bg-sky-950/80 border border-sky-700/60 text-sky-200 font-semibold">Clustered Shots: suma todo antes de RD</span>' : ''}
               </div>
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 w-10 shrink-0">Dmg:</span>
-                ${dmgPillsHtml}
+
+              <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+                <div class="flex flex-wrap items-center gap-1">
+                  <span class="text-[10px] font-bold uppercase text-slate-500 mr-1">Atk:</span>
+                  ${renderPills(calc.atkPills)}
+                </div>
+                <div class="flex flex-wrap items-center gap-1">
+                  <span class="text-[10px] font-bold uppercase text-slate-500 mr-1">Dmg:</span>
+                  ${renderPills(calc.dmgPills)}
+                </div>
               </div>
-              ${calc.isRanged && state.combatToggles.clusteredShots ? `<div class="text-[11px] text-sky-300 pt-0.5">🎯 <strong>Clustered Shots:</strong> Suma el daño de todos los impactos antes de aplicar RD.</div>` : ''}
+
+              <!-- Recordatorio rápido de Spirit Surge -->
+              <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                <span>⚡ Si fallas un ataque (con bono de espíritu): <strong class="accent-text">Spirit Surge +${surgeDie}${surgeExtra}</strong></span>
+                ${w.type === 'melee1h' ? `
+                  <label class="inline-flex items-center gap-1.5 text-amber-200 cursor-pointer select-none font-medium">
+                    <input type="checkbox" ${w.twoHandedGrip ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'twoHandedGrip', this.checked)" class="rounded bg-slate-800 border-slate-600" />
+                    <span>Two-Handed Grip</span>
+                  </label>
+                ` : ''}
+                ${calc.isCrossbow ? `
+                  <label class="inline-flex items-center gap-1.5 text-sky-200 cursor-pointer select-none font-medium">
+                    <input type="checkbox" ${w.rapidReload ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'rapidReload', this.checked)" class="rounded bg-slate-800 border-slate-600" />
+                    <span>Rapid Reload</span>
+                  </label>
+                ` : ''}
+              </div>
             </div>
 
             <!-- Panel de Edición Desplegable -->
             ${w.expanded ? `
               <div class="bg-slate-950/90 border border-slate-700/80 rounded-xl p-3.5 space-y-3 animate-fade">
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  <div class="col-span-2 sm:col-span-1">
-                    <label class="block text-[10px] text-slate-400 mb-1">Nombre</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Nombre del Arma</label>
                     <input type="text" value="${escapeAttr(w.name)}" onchange="updateWeapon('${w.id}', 'name', this.value)"
                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
                   </div>
                   <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Tipo de Arma</label>
-                    <select onchange="updateWeapon('${w.id}', 'type', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring">
-                      <option value="bow" ${w.type === 'bow' ? 'selected' : ''}>Arco (A distancia)</option>
-                      <option value="crossbow" ${w.type === 'crossbow' ? 'selected' : ''}>Ballesta (A distancia)</option>
-                      <option value="melee1h" ${w.type === 'melee1h' ? 'selected' : ''}>Melé 1 Mano</option>
-                      <option value="melee2h" ${w.type === 'melee2h' ? 'selected' : ''}>Melé 2 Manos</option>
+                    <label class="block text-[10px] text-slate-400 mb-1">Tipo</label>
+                    <select onchange="updateWeapon('${w.id}', 'type', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring">
+                      <option value="bow" ${w.type === 'bow' ? 'selected' : ''}>Arco (Bow)</option>
+                      <option value="crossbow" ${w.type === 'crossbow' ? 'selected' : ''}>Ballesta (Crossbow)</option>
+                      <option value="melee2h" ${w.type === 'melee2h' ? 'selected' : ''}>CaC a Dos Manos (2H)</option>
+                      <option value="melee1h" ${w.type === 'melee1h' ? 'selected' : ''}>CaC a Una Mano (1H)</option>
                     </select>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Bono Mágico / Calidad</label>
-                    <select onchange="updateWeapon('${w.id}', 'enhancement', parseInt(this.value))"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring">
-                      <option value="0" ${w.enhancement === 0 ? 'selected' : ''}>Normal (+0)</option>
-                      <option value="-1" ${w.enhancement === -1 ? 'selected' : ''}>Masterwork (+1 Atk)</option>
-                      <option value="1" ${w.enhancement === 1 ? 'selected' : ''}>Mágica +1</option>
-                      <option value="2" ${w.enhancement === 2 ? 'selected' : ''}>Mágica +2</option>
-                      <option value="3" ${w.enhancement === 3 ? 'selected' : ''}>Mágica +3</option>
-                      <option value="4" ${w.enhancement === 4 ? 'selected' : ''}>Mágica +4</option>
-                      <option value="5" ${w.enhancement === 5 ? 'selected' : ''}>Mágica +5</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Dado Base (ej. 1d8, 2d6)</label>
-                    <input type="text" value="${escapeAttr(w.dice)}" onchange="updateWeapon('${w.id}', 'dice', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
-                  </div>
-                  <div class="grid grid-cols-2 gap-1.5">
-                    <div>
-                      <label class="block text-[10px] text-slate-400 mb-1">Crít. Min</label>
-                      <input type="number" min="15" max="20" value="${w.critMin}" onchange="updateWeapon('${w.id}', 'critMin', Math.max(15, Math.min(20, parseInt(this.value) || 20)))"
-                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
-                    </div>
-                    <div>
-                      <label class="block text-[10px] text-slate-400 mb-1">Mult (×)</label>
-                      <input type="number" min="2" max="4" value="${w.critMult}" onchange="updateWeapon('${w.id}', 'critMult', Math.max(2, Math.min(4, parseInt(this.value) || 2)))"
-                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Dado Extra (ej. 1d6)</label>
-                    <input type="text" value="${escapeAttr(w.extraDice || '')}" placeholder="1d6" onchange="updateWeapon('${w.id}', 'extraDice', this.value)"
-                      class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white accent-ring" />
-                  </div>
-
-                  ${w.type === 'bow' ? `
-                    <div>
-                      <label class="block text-[10px] text-slate-400 mb-1">STR Rating (+0..+10)</label>
-                      <input type="number" min="0" max="10" value="${w.strRating}" onchange="updateWeapon('${w.id}', 'strRating', Math.max(0, parseInt(this.value) || 0))"
-                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
-                    </div>
-                  ` : ''}
-
-                  <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Atk Extra Arma</label>
-                    <input type="number" value="${w.extraAtk || 0}" onchange="updateWeapon('${w.id}', 'extraAtk', parseInt(this.value) || 0)"
-                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
-                  </div>
-                  <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Dmg Extra Arma</label>
-                    <input type="number" value="${w.extraDmg || 0}" onchange="updateWeapon('${w.id}', 'extraDmg', parseInt(this.value) || 0)"
-                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
                   </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800">
-                  <label class="inline-flex items-center gap-1.5 text-xs text-slate-200 cursor-pointer">
+                ${w.type === 'crossbow' ? `
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-400 text-[11px]">Preset rápido:</span>
+                    <button onclick="applyWeaponPreset('${w.id}', 'heavy_xbow')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] border border-slate-700">Heavy (1d10)</button>
+                    <button onclick="applyWeaponPreset('${w.id}', 'light_xbow')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] border border-slate-700">Light (1d8)</button>
+                  </div>
+                ` : ''}
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dado Base</label>
+                    <input type="text" value="${escapeAttr(w.dice)}" onchange="updateWeapon('${w.id}', 'dice', this.value)" placeholder="1d8"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Amenaza Crít.</label>
+                    <input type="number" min="15" max="20" value="${w.critMin}" onchange="updateWeapon('${w.id}', 'critMin', Math.max(15, Math.min(20, parseInt(this.value) || 20)))"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Mult. Crít.</label>
+                    <input type="number" min="2" max="4" value="${w.critMult}" onchange="updateWeapon('${w.id}', 'critMult', Math.max(2, Math.min(4, parseInt(this.value) || 2)))"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Mejora</label>
+                    <select onchange="updateWeapon('${w.id}', 'enhancement', parseInt(this.value))" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring">
+                      <option value="0" ${w.enhancement === 0 ? 'selected' : ''}>Normal (0)</option>
+                      <option value="-1" ${w.enhancement === -1 ? 'selected' : ''}>Masterwork (+1 Atk)</option>
+                      <option value="1" ${w.enhancement === 1 ? 'selected' : ''}>+1 Mágica</option>
+                      <option value="2" ${w.enhancement === 2 ? 'selected' : ''}>+2 Mágica</option>
+                      <option value="3" ${w.enhancement === 3 ? 'selected' : ''}>+3 Mágica</option>
+                      <option value="4" ${w.enhancement === 4 ? 'selected' : ''}>+4 Mágica</option>
+                      <option value="5" ${w.enhancement === 5 ? 'selected' : ''}>+5 Mágica</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  ${w.type === 'bow' ? `
+                    <div>
+                      <label class="block text-[10px] text-slate-400 mb-1">STR Rating</label>
+                      <input type="number" min="0" max="10" value="${w.strRating || 0}" onchange="updateWeapon('${w.id}', 'strRating', Math.max(0, parseInt(this.value) || 0))"
+                        class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                    </div>
+                  ` : `
+                    <div>
+                      <label class="block text-[10px] text-slate-400 mb-1">Tipo de Daño</label>
+                      <input type="text" value="${escapeAttr(w.damageType || '')}" onchange="updateWeapon('${w.id}', 'damageType', this.value)"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white accent-ring" />
+                    </div>
+                  `}
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dados Extra</label>
+                    <input type="text" value="${escapeAttr(w.extraDice || '')}" onchange="updateWeapon('${w.id}', 'extraDice', this.value.trim())" placeholder="Ej. 1d6"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Atk Extra</label>
+                    <input type="number" value="${w.extraAtk || 0}" onchange="updateWeapon('${w.id}', 'extraAtk', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Dmg Extra</label>
+                    <input type="number" value="${w.extraDmg || 0}" onchange="updateWeapon('${w.id}', 'extraDmg', parseInt(this.value) || 0)"
+                      class="w-full text-center bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-xs text-white tabular-nums accent-ring" />
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                  <label class="inline-flex items-center gap-2 text-xs text-slate-200 cursor-pointer select-none">
                     <input type="checkbox" ${w.weaponFocus ? 'checked' : ''} onchange="updateWeapon('${w.id}', 'weaponFocus', this.checked)" class="rounded bg-slate-800 border-slate-600" />
                     <span>Weapon Focus (+1 Atk)</span>
                   </label>
-                  <button onclick="deleteWeapon('${w.id}')" class="px-2.5 py-1 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-300 text-xs font-medium border border-rose-800/50">
-                    Eliminar Arma
+                  <button onclick="deleteWeapon('${w.id}')" class="px-2.5 py-1 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/60 text-xs font-semibold transition">
+                    🗑️ Eliminar
                   </button>
                 </div>
               </div>
             ` : ''}
           </div>
-
-          <!-- Recordatorio compacto de Oleada Espiritual física -->
-          <div class="flex items-center justify-between pt-2.5 border-t border-slate-800/80 text-[11px]">
-            <span class="text-slate-400">
-              ⚡ Spirit Surge disponible:
-              <strong class="accent-text ml-1">${state.spirit === 'none' ? 'Sin espíritu' : `+${surgeDie.label}${marshalExtra ? ` + ${marshalExtra}` : ''} físico`}</strong>
-            </span>
-            <span class="text-slate-500 tabular-nums">Inf: ${state.influence}/5</span>
-          </div>
         `;
-        grid.appendChild(card);
-      });
+      }).join('');
     }
 
-    /* =====================================================================
-       RENDERIZADO DE SKILLS, CONJUROS Y PODERES
-       ===================================================================== */
     function renderSkills() {
       const summary = getSkillPointsSummary();
       document.getElementById('skills-spent').textContent = summary.spent;
       document.getElementById('skills-total').textContent = summary.total;
-      document.getElementById('tab-skills-pill').textContent = `${summary.spent}/${summary.total}`;
 
       const remBadge = document.getElementById('skills-remaining-badge');
       if (summary.remaining < 0) {
-        remBadge.textContent = `¡${Math.abs(summary.remaining)} excedidos!`;
-        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-semibold';
+        remBadge.textContent = `${Math.abs(summary.remaining)} excedidos`;
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700/60 font-bold';
       } else if (summary.remaining === 0) {
         remBadge.textContent = 'Completo';
-        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-medium';
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-semibold';
       } else {
         remBadge.textContent = `${summary.remaining} restantes`;
-        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium';
+        remBadge.className = 'ml-1 text-xs px-2 py-0.5 rounded-full accent-bg-soft accent-text border accent-border font-semibold';
       }
 
-      document.getElementById('skills-formula-note').textContent =
-        `${summary.perLevel}/niv × ${state.level}` +
-        (summary.humanBonus ? ` + ${summary.humanBonus} Humano` : '') +
-        (summary.fav ? ` + ${summary.fav} Clase Pred.` : '') +
-        (summary.extra ? ` + ${summary.extra} extra` : '');
+      const formulaParts = [`${summary.perLevel}/niv × ${state.level}`];
+      if (summary.fav > 0) formulaParts.push(`+${summary.fav} Clase Pred.`);
+      if (summary.humanBonus > 0) formulaParts.push(`+${summary.humanBonus} Humano`);
+      if (summary.extra > 0) formulaParts.push(`+${summary.extra} Extra`);
+      document.getElementById('skills-formula-note').textContent = `Cálculo: ${formulaParts.join(' ')} = ${summary.total} rangos`;
 
-      // Estado visual del toggle Humano (+1/niv)
+      // Botón Humano (+1/niv)
       const humanBtn = document.getElementById('btn-human-skills');
       const humanCheck = document.getElementById('human-skills-check');
       const humanBonusEl = document.getElementById('human-skills-bonus');
-      if (humanBtn && humanCheck && humanBonusEl) {
-        if (state.humanSkillBonus) {
-          humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 accent-bg-soft accent-border text-white shadow-sm';
-          humanCheck.className = 'w-4 h-4 rounded accent-bg border border-white/40 text-slate-950 flex items-center justify-center text-[10px] font-extrabold';
-          humanCheck.textContent = '✓';
-          humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md accent-bg text-slate-950 font-bold tabular-nums';
-          humanBonusEl.textContent = `+${state.level}`;
-        } else {
-          humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200';
-          humanCheck.className = 'w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[10px] font-bold';
-          humanCheck.textContent = '';
-          humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-500 tabular-nums';
-          humanBonusEl.textContent = '+0';
-        }
+      if (state.humanSkillBonus) {
+        humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 accent-bg-soft accent-border text-white shadow-sm';
+        humanCheck.className = 'w-4 h-4 rounded flex items-center justify-center text-[10px] font-extrabold accent-bg text-slate-950';
+        humanCheck.textContent = '✓';
+        humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md accent-bg text-slate-950 font-bold tabular-nums';
+        humanBonusEl.textContent = `+${state.level}`;
+      } else {
+        humanBtn.className = 'px-3 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-600';
+        humanCheck.className = 'w-4 h-4 rounded border border-slate-600 flex items-center justify-center text-[10px] font-bold';
+        humanCheck.textContent = '';
+        humanBonusEl.className = 'text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 tabular-nums';
+        humanBonusEl.textContent = '+0';
       }
 
-      // Panel del Embaucador (2 Filo + 1 Don)
+      // ACP activo
+      const totalAcp = getTotalAcp();
+      const acpBadge = document.getElementById('skills-acp-badge');
+      if (totalAcp < 0) {
+        acpBadge.classList.remove('hidden');
+        acpBadge.classList.add('flex');
+        document.getElementById('skills-acp-badge-text').textContent = `ACP ${totalAcp}`;
+      } else {
+        acpBadge.classList.add('hidden');
+        acpBadge.classList.remove('flex');
+      }
+
+      // Panel Embaucador
       const trickPanel = document.getElementById('trickster-skills-panel');
       if (state.spirit === 'trickster') {
         trickPanel.classList.remove('hidden');
-        const sel1 = document.getElementById('select-trickster-edge-1');
-        const sel2 = document.getElementById('select-trickster-edge-2');
-        const selBoon = document.getElementById('select-trickster-boon');
-        if (sel1.options.length === 0) {
-          SKILLS_LIST.forEach(s => {
-            const txt = `${s.name} (${s.ability.toUpperCase()})`;
-            sel1.add(new Option(txt, s.id));
-            sel2.add(new Option(txt, s.id));
-            selBoon.add(new Option(txt, s.id));
-          });
-        }
-        sel1.value = state.tricksterEdgeSkill1;
-        sel2.value = state.tricksterEdgeSkill2;
-        selBoon.value = state.tricksterBoonSkill;
+        const optionsHtml = SKILLS_LIST.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+        ['select-trickster-edge-1', 'select-trickster-edge-2', 'select-trickster-boon'].forEach((elId, idx) => {
+          const sel = document.getElementById(elId);
+          if (sel) {
+            sel.innerHTML = optionsHtml;
+            sel.value = idx === 0 ? state.tricksterEdgeSkill1 : idx === 1 ? state.tricksterEdgeSkill2 : state.tricksterBoonSkill;
+          }
+        });
       } else {
         trickPanel.classList.add('hidden');
       }
 
-      const search = (document.getElementById('skills-search').value || '').toLowerCase().trim();
-      const onlyTrained = document.getElementById('skills-filter-trained').checked;
-      const onlyUsable = document.getElementById('skills-filter-usable')?.checked;
-      const acpVal = -Math.abs(parseInt(state.ac.acp) || 0);
-      const sizeStealth = (SIZE_MODS[state.size] || SIZE_MODS.medium).stealth;
+      const search = (document.getElementById('skills-search')?.value || '').trim().toLowerCase();
+      const onlyUsable = !!document.getElementById('skills-filter-usable')?.checked;
+      const onlyTrained = !!document.getElementById('skills-filter-trained')?.checked;
+      const stealthSize = (SIZE_MODS[state.size] || SIZE_MODS.medium).stealth;
 
-      // Badge informativo de ACP en la cabecera de Skills
-      const acpBadge = document.getElementById('skills-acp-badge');
-      const acpBadgeText = document.getElementById('skills-acp-badge-text');
-      if (acpBadge && acpBadgeText) {
-        if (acpVal < 0) {
-          acpBadge.classList.remove('hidden');
-          acpBadge.classList.add('flex');
-          acpBadgeText.textContent = `ACP ${acpVal}`;
-        } else {
-          acpBadge.classList.add('hidden');
-          acpBadge.classList.remove('flex');
-        }
-      }
-
-      const tbody = document.getElementById('skills-table-body');
-      tbody.innerHTML = '';
-
+      const rows = [];
       SKILLS_LIST.forEach(skill => {
-        const isEdge = isTricksterEdge(skill.id);
-        const isBoon = state.spirit === 'trickster' && state.tricksterBoonSkill === skill.id;
-        const rawRanks = parseInt(state.skills[skill.id]?.ranks) || 0;
-        const effectiveRanks = isEdge ? state.level : rawRanks;
-        const canUse = !skill.trainedOnly || state.spirit === 'trickster' || effectiveRanks >= 1;
+        const skData = state.skills[skill.id] || { ranks: 0, misc: 0, classOverride: skill.classSkill };
+        const edge = isTricksterEdge(skill.id);
+        const effRanks = edge ? state.level : Math.min(state.level, parseInt(skData.ranks, 10) || 0);
+        const isCS = isSkillClassSkill(skill);
+        const csBonus = (isCS && effRanks > 0) ? 3 : 0;
+        const canUse = !skill.trainedOnly || effRanks > 0 || state.spirit === 'trickster';
 
         if (search && !skill.name.toLowerCase().includes(search)) return;
-        if (onlyTrained && effectiveRanks === 0) return;
         if (onlyUsable && !canUse) return;
+        if (onlyTrained && effRanks <= 0) return;
 
-        const isClass = isSkillClassSkill(skill);
         const abMod = getAbilityMod(skill.ability);
-        const classBonus = (isClass && effectiveRanks >= 1) ? 3 : 0;
-        const { spirit: spBonus, boon: boonBonus } = getSkillSpiritBonus(skill);
-        const totalSpirit = spBonus + boonBonus;
-        const skillAcp = skill.acp ? acpVal : 0;
-        const misc = (parseInt(state.skills[skill.id]?.misc) || 0) + (skill.id === 'stealth' ? sizeStealth : 0);
+        const spBonuses = getSkillSpiritBonus(skill);
+        const spTotal = spBonuses.spirit + spBonuses.boon;
+        const acpVal = skill.acp ? totalAcp : 0;
+        const sizeVal = skill.id === 'stealth' ? stealthSize : 0;
+        const miscVal = (parseInt(skData.misc, 10) || 0) + sizeVal;
+        const total = effRanks + abMod + csBonus + spTotal + acpVal + miscVal;
 
-        const total = abMod + effectiveRanks + classBonus + totalSpirit + skillAcp + misc;
-        const abLabel = ABILITIES.find(a => a.key === skill.ability)?.shortEn || skill.ability.toUpperCase();
+        const abObj = ABILITIES.find(a => a.key === skill.ability);
+        const trickForcedCS = state.spirit === 'trickster' && (edge || state.tricksterBoonSkill === skill.id);
 
-        const tr = document.createElement('tr');
-        tr.className = `hover:bg-slate-800/40 transition ${isEdge ? 'bg-cyan-950/20' : ''}`;
-        tr.innerHTML = `
-          <td class="py-2.5 px-2.5 text-center">
-            <button type="button"
-              ${isEdge || isBoon ? 'disabled' : `onclick="toggleSkillClass('${skill.id}', ${!isClass})"`}
-              title="${isClass ? 'Class Skill activa (+3 si ≥1 rango)' : 'Marcar como Class Skill'}"
-              class="w-7 h-7 rounded-lg border text-xs font-extrabold transition-all inline-flex items-center justify-center ${
-                isClass
-                  ? 'accent-bg text-slate-950 border-white/30 shadow-[0_0_12px_-2px_var(--accent-glow)]'
-                  : 'bg-slate-900/90 border-slate-700/80 text-slate-600 hover:border-slate-500 hover:text-slate-300'
-              } ${isEdge || isBoon ? 'cursor-default' : 'cursor-pointer hover:brightness-110 active:scale-95'}">
-              ${isClass ? (isEdge || isBoon ? '★' : '✓') : ''}
-            </button>
-          </td>
-          <td class="py-2.5 px-3">
-            <div class="font-medium text-slate-200 text-xs sm:text-sm flex flex-wrap items-center gap-1.5">
-              <span>${skill.name}</span>
-              ${classBonus > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded accent-bg-soft accent-text border accent-border font-semibold">+3 CS</span>` : ''}
-              ${skillAcp < 0 ? `<span class="sm:hidden text-[10px] px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold tabular-nums">ACP ${skillAcp}</span>` : ''}
-              ${skill.trainedOnly && state.spirit !== 'trickster' ? `<span class="text-[10px] text-slate-500">(Trained)</span>` : ''}
-              ${isEdge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold">Edge</span>` : ''}
-              ${isBoon ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-200 border border-cyan-500/30">+1 Boon</span>` : ''}
-            </div>
-          </td>
-          <td class="py-2.5 px-2 text-center text-[11px] font-semibold text-slate-400">${abLabel}</td>
-          <td class="py-2.5 px-2 text-center">
-            ${isEdge
-              ? `<span class="inline-block px-2 py-1 rounded-lg bg-cyan-950/70 border border-cyan-500/40 text-xs font-bold text-cyan-300 tabular-nums">${state.level} ★</span>`
-              : `<div class="inline-flex items-center gap-1">
-                  <button onclick="changeSkillRank('${skill.id}', -1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">−</button>
-                  <input type="number" min="0" max="${state.level}" value="${rawRanks}" onchange="setSkillRank('${skill.id}', this.value)"
+        rows.push(`
+          <tr class="hover:bg-slate-900/50 transition ${!canUse ? 'opacity-55' : ''}">
+            <td class="py-2.5 px-2.5 text-center">
+              <button type="button" onclick="toggleSkillClass('${skill.id}', ${!skData.classOverride})"
+                class="w-7 h-7 rounded-lg border text-xs font-extrabold transition inline-flex items-center justify-center ${
+                  isCS
+                    ? 'accent-bg text-slate-950 border-white/30 shadow-sm'
+                    : 'bg-slate-950 border-slate-700 text-slate-600 hover:border-slate-500 hover:text-slate-300'
+                }"
+                title="${isCS ? 'Class Skill activa (+3 con ≥1 rango)' : 'Marcar como Class Skill'}">
+                ${trickForcedCS ? '★' : (isCS ? '✓' : '·')}
+              </button>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="font-medium text-slate-100">${escapeHtml(skill.name)}</span>
+                ${skill.trainedOnly ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700" title="Trained Only">T</span>` : ''}
+                ${csBonus > 0 ? `<span class="text-[10px] px-1.5 py-0.5 rounded accent-bg-soft accent-text border accent-border font-bold">+3 CS</span>` : ''}
+                ${edge ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-semibold">Edge</span>` : ''}
+                ${state.spirit === 'trickster' && state.tricksterBoonSkill === skill.id ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-200 border border-cyan-700/60 font-semibold">+1 Boon</span>` : ''}
+              </div>
+            </td>
+            <td class="py-2.5 px-2 text-center text-xs font-semibold text-slate-400">${abObj ? abObj.shortEn : skill.ability.toUpperCase()}</td>
+            <td class="py-2.5 px-2 text-center">
+              ${edge ? `
+                <span class="inline-block px-2.5 py-1 rounded-lg bg-cyan-950/80 border border-cyan-700/60 text-xs font-bold text-cyan-200 tabular-nums" title="Rangos automáticos por Trickster's Edge">${state.level}</span>
+              ` : `
+                <div class="inline-flex items-center gap-1">
+                  <button onclick="changeSkillRank('${skill.id}', -1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">−</button>
+                  <input type="number" min="0" max="${state.level}" value="${effRanks}" onchange="setSkillRank('${skill.id}', this.value)"
                     class="w-10 text-center bg-slate-950 border border-slate-700 rounded-md py-0.5 text-xs font-bold text-white tabular-nums accent-ring" />
-                  <button onclick="changeSkillRank('${skill.id}', 1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">+</button>
-                </div>`
-            }
-          </td>
-          <td class="py-2.5 px-2 text-center text-xs text-slate-300 tabular-nums hidden md:table-cell">${fmtSign(abMod)}</td>
-          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${totalSpirit ? 'accent-text font-semibold' : 'text-slate-600'}">${totalSpirit ? `+${totalSpirit}` : '—'}</td>
-          <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${skillAcp ? 'text-rose-400 font-semibold' : 'text-slate-600'}">${skillAcp ? skillAcp : '—'}</td>
-          <td class="py-2.5 px-2 text-center">
-            <input type="number" value="${state.skills[skill.id]?.misc || 0}" onchange="setSkillMisc('${skill.id}', this.value)"
-              class="w-12 text-center bg-slate-950 border border-slate-800 rounded-md py-0.5 text-xs text-slate-300 tabular-nums accent-ring" />
-          </td>
-          <td class="py-2.5 px-3 sm:px-4 text-right">
-            <span class="inline-block min-w-[2.5rem] text-center px-2 py-1 rounded-lg font-bold text-sm tabular-nums ${
-              !canUse
-                ? 'bg-slate-900/60 text-slate-600 border border-slate-800'
-                : effectiveRanks > 0
-                  ? 'accent-bg-soft accent-text border accent-border'
-                  : 'bg-slate-900 text-slate-300 border border-slate-800'
-            }">${canUse ? fmtSign(total) : '—'}</span>
-          </td>
-        `;
-        tbody.appendChild(tr);
+                  <button onclick="changeSkillRank('${skill.id}', 1)" class="w-6 h-6 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+</button>
+                </div>
+              `}
+            </td>
+            <td class="py-2.5 px-2 text-center text-xs text-slate-300 tabular-nums hidden md:table-cell">${fmtSign(abMod)}</td>
+            <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${spTotal > 0 ? 'accent-text font-bold' : 'text-slate-600'}">${spTotal > 0 ? fmtSign(spTotal) : '—'}</td>
+            <td class="py-2.5 px-2 text-center text-xs tabular-nums hidden sm:table-cell ${acpVal < 0 ? 'text-rose-300 font-bold' : 'text-slate-600'}">${skill.acp ? (acpVal < 0 ? acpVal : '0') : '—'}</td>
+            <td class="py-2.5 px-2 text-center">
+              <input type="number" value="${skData.misc || 0}" onchange="setSkillMisc('${skill.id}', this.value)"
+                class="w-12 text-center bg-slate-950 border border-slate-800 rounded-md py-0.5 text-xs text-slate-200 tabular-nums accent-ring" />
+            </td>
+            <td class="py-2.5 px-3 sm:px-4 text-right">
+              <span class="inline-block min-w-[2.5rem] text-center px-2 py-1 rounded-lg font-extrabold tabular-nums text-sm ${
+                !canUse
+                  ? 'bg-slate-900 text-slate-500 border border-slate-800'
+                  : effRanks > 0
+                    ? 'accent-bg-soft accent-text border accent-border'
+                    : 'bg-slate-900 text-white border border-slate-800'
+              }">${canUse ? fmtSign(total) : '—'}</span>
+            </td>
+          </tr>
+        `);
       });
+
+      const tbody = document.getElementById('skills-table-body');
+      tbody.innerHTML = rows.length > 0
+        ? rows.join('')
+        : '<tr><td colspan="9" class="py-8 text-center text-xs text-slate-500">No hay skills que coincidan con el filtro actual.</td></tr>';
     }
 
     function renderSpells() {
-      const sp = state.spirit;
-      const sb = getActiveSpiritBonus();
+      const chaTotal = getAbilityTotal('cha');
       const chaMod = getAbilityMod('cha');
-      const cl = state.level;
-      const dcMisc = parseInt(state.spellDcMisc) || 0;
+      const sb = getActiveSpiritBonus();
+      const isCasterSpirit = state.spirit === 'archmage' || state.spirit === 'hierophant';
+      const champClPen = (state.spirit === 'champion' && state.influence >= 3) ? -sb : 0;
 
-      const clBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
-      const concBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
-      const dcSpiritBonus = (sp === 'archmage' || sp === 'hierophant') ? sb : 0;
+      const cl = Math.max(0, state.level + champClPen);
+      const clCheckBonus = state.spirit === 'archmage' ? sb : 0;
+      const concSpirit = isCasterSpirit ? sb : 0;
+      const concMisc = parseInt(state.concMisc, 10) || 0;
+      const concTotal = cl + chaMod + concSpirit + concMisc;
 
       document.getElementById('spell-cl').textContent = cl;
-      document.getElementById('spell-cl-note').textContent = clBonus ? `Pruebas NL: +${cl + clBonus} (+${clBonus} Esp.)` : `Pruebas NL: +${cl}`;
-      document.getElementById('spell-conc').textContent = fmtSign(cl + chaMod + concBonus);
-      document.getElementById('spell-conc-note').textContent = concBonus ? `Niv ${cl} + CAR ${fmtSign(chaMod)} + ${concBonus} Esp.` : `Niv ${cl} + CAR ${fmtSign(chaMod)}`;
+      document.getElementById('spell-cl-note').textContent = `Pruebas NL: ${fmtSign(cl + clCheckBonus)}${champClPen < 0 ? ' (Pen. Inf.)' : ''}`;
+      document.getElementById('spell-conc').textContent = fmtSign(concTotal);
+      document.getElementById('spell-conc-note').textContent = `NL ${cl} ${fmtSign(chaMod)} CAR${concSpirit ? ` +${concSpirit} Esp.` : ''}${concMisc ? ` ${fmtSign(concMisc)} Var.` : ''}`;
 
+      const dcMisc = parseInt(state.spellDcMisc, 10) || 0;
       const dcList = document.getElementById('spell-dc-list');
-      dcList.innerHTML = '';
-      for (let lvl = 0; lvl <= 4; lvl++) {
-        dcList.innerHTML += `
-          <div class="bg-slate-950 border border-slate-800 rounded-lg py-1.5">
+      dcList.innerHTML = [0, 1, 2, 3, 4].map(lvl => {
+        const dc = 10 + lvl + chaMod + dcMisc;
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-lg p-1.5">
             <div class="text-[10px] text-slate-500">Niv ${lvl}</div>
-            <div class="text-sm font-bold text-white tabular-nums">${10 + lvl + chaMod + dcMisc + dcSpiritBonus}</div>
+            <div class="text-sm font-bold text-white tabular-nums">${dc}</div>
           </div>
         `;
-      }
+      }).join('');
 
-      const bonusBox = document.getElementById('spell-spirit-bonus-box');
-      if (sp === 'archmage') {
-        bonusBox.classList.remove('hidden');
-        bonusBox.innerHTML = `<strong class="accent-text">🔮 Archimago:</strong> Espacios arcanos extra (Hechicero/Mago), <strong>+${sb}</strong> Concentración y pruebas NL, y <strong>+2</strong> al daño de conjuros.`;
-      } else if (sp === 'hierophant') {
-        bonusBox.classList.remove('hidden');
-        bonusBox.innerHTML = `<strong class="accent-text">🌿 Hierofante:</strong> Espacios divinos extra (Clérigo/Oráculo), <strong>+${sb}</strong> Concentración, y <strong>+2</strong> a toda curación.`;
+      const spBox = document.getElementById('spell-spirit-bonus-box');
+      if (state.spirit === 'archmage') {
+        spBox.classList.remove('hidden');
+        spBox.innerHTML = `🔮 <strong>Archimago:</strong> Tus conjuros de daño ganan <strong>+2 al daño</strong> (Seance Boon). Además recibes <strong>+${sb}</strong> a Concentración y pruebas de Nivel de Lanzador, y 1 espacio arcano extra por nivel lanzable.`;
+      } else if (state.spirit === 'hierophant') {
+        spBox.classList.remove('hidden');
+        spBox.innerHTML = `🌿 <strong>Hierofante:</strong> Tus conjuros y efectos de curación curan <strong>+2 PG adicionales</strong> (Seance Boon). Además recibes <strong>+${sb}</strong> a Concentración y 1 espacio divino extra por nivel lanzable.`;
+      } else if (state.spirit === 'champion' && state.influence >= 3) {
+        spBox.classList.remove('hidden');
+        spBox.innerHTML = `⚠️ <strong>Influencia Alta (Campeón):</strong> Tu Nivel de Lanzador sufre <strong>-${sb}</strong> (NL efectivo: ${cl}).`;
       } else {
-        bonusBox.classList.add('hidden');
+        spBox.classList.add('hidden');
       }
 
-      const slotsContainer = document.getElementById('spell-slots-container');
-      slotsContainer.innerHTML = `
-        <div class="flex items-center justify-between bg-slate-900/70 border border-slate-800 rounded-xl px-3.5 py-2.5">
-          <div>
-            <span class="text-xs font-bold text-slate-200">Nivel 0 (Trucos Psíquicos)</span>
-            <span class="text-[11px] text-slate-400 ml-2">CD ${10 + chaMod + dcMisc}</span>
-          </div>
-          <span class="text-xs font-semibold accent-text px-2.5 py-1 rounded-lg accent-bg-soft border accent-border">A voluntad</span>
-        </div>
-      `;
+      // Niveles 0 (Trucos/Knacks) a 4 con espacios diarios + lista editable de conjuros conocidos
+      const baseSlots = MEDIUM_SPELLS_PER_DAY[state.level] || [0, 0, 0, 0];
+      const container = document.getElementById('spell-slots-container');
+      const levelBlocks = [];
 
-      const basePerDay = MEDIUM_SPELLS_PER_DAY[state.level];
-      const chaTotal = getAbilityTotal('cha');
+      for (let lvl = 0; lvl <= 4; lvl++) {
+        const knownList = Array.isArray(state.knownSpells[lvl]) ? state.knownSpells[lvl] : [];
+        const base = lvl === 0 ? 0 : (baseSlots[lvl - 1] || 0);
+        const canCast = lvl === 0 ? (chaTotal >= 10) : (base > 0 && chaTotal >= 10 + lvl);
+        const bonusCha = canCast && lvl > 0 ? getBonusSpellsByCha(lvl, chaMod) : 0;
+        const totalSlots = lvl === 0 ? 0 : (canCast ? base + bonusCha : 0);
+        const used = lvl === 0 ? 0 : Math.min(totalSlots, state.spellsUsed[lvl] || 0);
 
-      for (let sLvl = 1; sLvl <= 4; sLvl++) {
-        const baseSlots = basePerDay[sLvl - 1];
-        const canCast = chaTotal >= (10 + sLvl);
-        const bonusSlots = baseSlots > 0 ? getBonusSpellsByCha(sLvl, chaMod) : 0;
-        const totalSlots = (baseSlots > 0 && canCast) ? (baseSlots + bonusSlots) : 0;
-        const used = Math.min(totalSlots, state.spellsUsed[sLvl] || 0);
-
-        let bubblesHtml = '';
-        if (totalSlots === 0) {
-          bubblesHtml = `<span class="text-xs text-slate-500">${!canCast && baseSlots > 0 ? `Requiere CAR ${10 + sLvl}` : 'Bloqueado en este nivel'}</span>`;
+        let slotsHtml = '';
+        if (lvl === 0) {
+          slotsHtml = '<span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold">∞ A voluntad (Knacks)</span>';
+        } else if (!canCast) {
+          const reason = chaTotal < 10 + lvl ? `Requiere CAR ${10 + lvl}+` : 'No desbloqueado aún';
+          slotsHtml = `<span class="text-xs text-slate-500 italic">${reason}</span>`;
         } else {
+          const boxes = [];
           for (let i = 0; i < totalSlots; i++) {
-            const isUsed = i < used;
-            bubblesHtml += `
-              <button onclick="toggleSpellSlot(${sLvl}, ${i}, false)"
-                class="w-7 h-7 rounded-lg border text-xs font-bold transition flex items-center justify-center ${
-                  isUsed ? 'bg-slate-950 border-slate-700 text-slate-600 line-through' : 'accent-bg-soft accent-border accent-text hover:brightness-125'
-                }">${isUsed ? '✕' : '✦'}</button>
-            `;
+            const isSpent = i < used;
+            boxes.push(`
+              <button onclick="toggleSpellSlot(${lvl}, ${i}, false)"
+                class="w-7 h-7 rounded-lg border text-xs font-bold transition ${
+                  isSpent
+                    ? 'bg-slate-950 border-slate-800 text-slate-600 line-through'
+                    : 'accent-bg-soft accent-border accent-text hover:brightness-125'
+                }" title="${isSpent ? 'Gastado (clic para recuperar)' : 'Disponible (clic para gastar)'}">
+                ${isSpent ? '✕' : '✦'}
+              </button>
+            `);
           }
-        }
-
-        slotsContainer.innerHTML += `
-          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/70 border border-slate-800 rounded-xl px-3.5 py-2.5">
-            <div>
-              <div class="text-xs font-bold text-slate-200">Nivel ${sLvl} <span class="text-slate-500 font-normal ml-1">CD ${10 + sLvl + chaMod + dcMisc}</span></div>
-              <div class="text-[11px] text-slate-400">
-                ${totalSlots > 0 ? `Base ${baseSlots} + CAR ${bonusSlots} = <strong class="text-slate-200">${totalSlots - used}/${totalSlots}</strong> disp.` : '0 espacios base'}
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-1.5">${bubblesHtml}</div>
-          </div>
-        `;
-      }
-
-      const spiritSection = document.getElementById('spirit-bonus-spells-section');
-      const spiritSlotsEl = document.getElementById('spirit-bonus-slots-container');
-      if (sp === 'archmage' || sp === 'hierophant') {
-        spiritSection.classList.remove('hidden');
-        document.getElementById('spirit-bonus-spells-title').textContent =
-          sp === 'archmage' ? '🔮 Espacios Arcanos Adicionales (Archimago)' : '🌿 Espacios Divinos Adicionales (Hierofante)';
-        spiritSlotsEl.innerHTML = '';
-        for (let sLvl = 1; sLvl <= 4; sLvl++) {
-          const unlocked = (sLvl === 1) || (basePerDay[sLvl - 1] > 0);
-          if (!unlocked) continue;
-          const canCast = chaTotal >= (10 + sLvl);
-          const used = Math.min(1, state.spiritSpellsUsed[sLvl] || 0);
-          spiritSlotsEl.innerHTML += `
-            <div class="flex items-center justify-between bg-slate-950/70 border accent-border rounded-xl px-3.5 py-2">
-              <span class="text-xs font-semibold text-slate-200">
-                ${sp === 'archmage' ? 'Arcano' : 'Divino'} Nivel ${sLvl}
-                <span class="text-slate-400 font-normal ml-1">(CD ${10 + sLvl + chaMod + dcMisc})</span>
-              </span>
-              ${!canCast
-                ? `<span class="text-xs text-slate-500">Requiere CAR ${10 + sLvl}</span>`
-                : `<button onclick="toggleSpellSlot(${sLvl}, 0, true)" class="px-3 py-1 rounded-lg border text-xs font-bold transition ${
-                    used > 0 ? 'bg-slate-950 border-slate-700 text-slate-500 line-through' : 'accent-bg text-slate-950 border-transparent hover:brightness-110'
-                  }">${used > 0 ? 'Gastado' : '1 Disponible'}</button>`
-              }
+          slotsHtml = `
+            <div class="flex flex-wrap items-center gap-1.5">
+              ${boxes.join('')}
+              <span class="text-[11px] text-slate-400 ml-1 tabular-nums">${totalSlots - used}/${totalSlots} <span class="text-slate-500">(${base}+${bonusCha} CAR)</span></span>
             </div>
           `;
         }
+
+        const spellsListHtml = knownList.map((spName, idx) => `
+          <div class="flex items-center gap-1.5 bg-slate-950/90 border border-slate-800 rounded-lg px-2 py-1">
+            <input type="text" value="${escapeAttr(spName)}" oninput="updateKnownSpell(${lvl}, ${idx}, this.value)"
+              class="flex-1 bg-transparent text-xs text-slate-100 focus:outline-none min-w-0" />
+            <button onclick="removeKnownSpell(${lvl}, ${idx})" class="text-slate-500 hover:text-rose-400 text-xs px-1 font-bold" title="Eliminar conjuro">✕</button>
+          </div>
+        `).join('');
+
+        levelBlocks.push(`
+          <div class="bg-slate-900/75 border border-slate-800 rounded-xl p-3 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-slate-800 text-xs font-bold text-white">Nivel ${lvl}</span>
+                <span class="text-[11px] text-slate-400">CD ${10 + lvl + chaMod + dcMisc}</span>
+              </div>
+              <div>${slotsHtml}</div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/80 space-y-2">
+              ${knownList.length > 0 ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${spellsListHtml}</div>` : ''}
+              <div class="flex items-center gap-2">
+                <input type="text" id="input-add-spell-${lvl}" placeholder="Escribir conjuro de nivel ${lvl}..."
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addKnownSpell(${lvl});}"
+                  class="flex-1 bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 accent-ring" />
+                <button onclick="addKnownSpell(${lvl})" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition whitespace-nowrap">
+                  + Añadir
+                </button>
+              </div>
+            </div>
+          </div>
+        `);
+      }
+      container.innerHTML = levelBlocks.join('');
+
+      // Espacios extra de Archimago / Hierofante
+      const spiritSection = document.getElementById('spirit-bonus-spells-section');
+      const spiritContainer = document.getElementById('spirit-bonus-slots-container');
+      const spiritTitle = document.getElementById('spirit-bonus-spells-title');
+
+      if (isCasterSpirit) {
+        spiritSection.classList.remove('hidden');
+        spiritTitle.textContent = state.spirit === 'archmage'
+          ? '🔮 Espacios Arcanos del Archimago (Hechicero/Mago)'
+          : '🌿 Espacios Divinos del Hierofante (Clérigo/Oráculo)';
+
+        const maxSpiritSpellLvl = state.level >= 13 ? 4 : state.level >= 10 ? 3 : state.level >= 7 ? 2 : 1;
+        const rows = [];
+        for (let lvl = 1; lvl <= maxSpiritSpellLvl; lvl++) {
+          const used = (state.spiritSpellsUsed[lvl] || 0) >= 1;
+          const spellVal = state.spiritKnownSpells?.[lvl] || '';
+          rows.push(`
+            <div class="bg-slate-900/85 border accent-border rounded-xl p-2.5 flex flex-wrap items-center gap-2.5">
+              <span class="px-2 py-0.5 rounded-md accent-bg-soft accent-text text-xs font-bold whitespace-nowrap">Niv ${lvl}</span>
+              <button onclick="toggleSpellSlot(${lvl}, 0, true)"
+                class="w-7 h-7 rounded-lg border text-xs font-bold transition shrink-0 ${
+                  used
+                    ? 'bg-slate-950 border-slate-800 text-slate-600 line-through'
+                    : 'accent-bg text-slate-950 border-white/30 hover:brightness-110'
+                }" title="${used ? 'Gastado' : 'Disponible'}">
+                ${used ? '✕' : '✦'}
+              </button>
+              <input type="text" value="${escapeAttr(spellVal)}" oninput="setSpiritKnownSpell(${lvl}, this.value)"
+                placeholder="Conjuro diario del espíritu (Niv ${lvl})..."
+                class="flex-1 min-w-[160px] bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 accent-ring" />
+            </div>
+          `);
+        }
+        spiritContainer.innerHTML = rows.join('');
       } else {
         spiritSection.classList.add('hidden');
       }
     }
 
     function renderPowersTab() {
-      const spObj = SPIRITS[state.spirit];
+      const sp = SPIRITS[state.spirit] || SPIRITS.none;
       const sb = getActiveSpiritBonus();
+      const lvl = state.level;
 
-      document.getElementById('spirit-detail-icon').textContent = spObj.icon;
-      document.getElementById('spirit-detail-name').textContent = spObj.name;
-      document.getElementById('spirit-detail-subtitle').textContent = spObj.subtitle;
+      document.getElementById('spirit-detail-icon').textContent = sp.icon;
+      document.getElementById('spirit-detail-name').textContent = sp.name;
+      document.getElementById('spirit-detail-subtitle').textContent = sp.subtitle;
       document.getElementById('spirit-detail-bonus').textContent = fmtSign(sb);
-      document.getElementById('spirit-detail-boon').textContent = spObj.boon;
-      document.getElementById('spirit-detail-proficiencies').textContent = spObj.proficiencies;
+      document.getElementById('spirit-detail-boon').textContent = sp.boon;
+      document.getElementById('spirit-detail-proficiencies').textContent = sp.proficiencies;
 
-      // Penalizador de Influencia Alta (3+ Influencia)
-      const penaltyCard = document.getElementById('spirit-influence-penalty-card');
-      const penaltyBadge = document.getElementById('spirit-influence-penalty-badge');
-      const penaltyText = document.getElementById('spirit-detail-influence-penalty');
-      const displaySb = state.spirit === 'none' ? getSpiritBonusRaw(state.level) : sb;
-      const isPenaltyActive = state.spirit !== 'none' && state.influence >= 3;
+      // Penalizador de Influencia Alta
+      const penCard = document.getElementById('spirit-influence-penalty-card');
+      const penBadge = document.getElementById('spirit-influence-penalty-badge');
+      const penText = document.getElementById('spirit-detail-influence-penalty');
+      const penActive = state.spirit !== 'none' && state.influence >= 3;
 
-      penaltyText.textContent = (spObj.influencePenalty || '—').replace(/\{sb\}/g, displaySb);
-      if (isPenaltyActive) {
-        penaltyCard.className = 'bg-amber-950/35 border border-amber-500/60 rounded-xl p-3.5 space-y-2 transition shadow-[0_0_16px_-6px_rgba(245,158,11,0.4)]';
-        penaltyBadge.textContent = state.influence >= 5 ? 'POSEÍDO (5/5)' : `ACTIVO (Inf. ${state.influence}/5)`;
-        penaltyBadge.className = state.influence >= 5
-          ? 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-600 text-white animate-pulse'
-          : 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/25 text-amber-200 border border-amber-400/50';
+      penText.textContent = sp.influencePenalty.replace(/\{sb\}/g, String(sb || getSpiritBonusRaw(lvl)));
+      if (penActive) {
+        penCard.className = 'bg-amber-950/35 border border-amber-500/70 rounded-xl p-3.5 space-y-2 shadow-[0_0_20px_-6px_rgba(245,158,11,0.35)] transition';
+        penBadge.className = 'text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500 text-slate-950';
+        penBadge.textContent = `ACTIVO (Inf. ${state.influence}/5)`;
       } else {
-        penaltyCard.className = 'bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2 transition';
-        penaltyBadge.textContent = state.spirit === 'none' ? 'Sin espíritu' : 'Se activa en Inf. 3+';
-        penaltyBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-400';
+        penCard.className = 'bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2 transition';
+        penBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-400';
+        penBadge.textContent = state.spirit === 'none' ? 'Sin espíritu' : `Inactivo (Inf. ${state.influence}/5)`;
       }
 
-      // Poderes del Espíritu (Menor / Intermedio / Mayor / Supremo)
-      const powersGrid = document.getElementById('spirit-powers-grid');
-      powersGrid.innerHTML = spObj.powers.map(p => {
-        const unlocked = state.spirit !== 'none' && state.level >= p.minLevel;
+      // 4 Poderes del Espíritu
+      document.getElementById('spirit-powers-grid').innerHTML = sp.powers.map(p => {
+        const unlocked = state.spirit !== 'none' && lvl >= p.minLevel;
         return `
-          <div class="rounded-xl p-3.5 border transition ${unlocked ? 'bg-slate-900/90 accent-border' : 'bg-slate-950/60 border-slate-800/80 opacity-60'}">
+          <div class="rounded-xl p-3.5 border transition ${
+            unlocked
+              ? 'bg-slate-900/90 accent-border'
+              : 'bg-slate-950/60 border-slate-800/80 opacity-60'
+          }">
             <div class="flex items-center justify-between gap-2 mb-1.5">
-              <span class="text-xs font-bold uppercase tracking-wider ${unlocked ? 'accent-text' : 'text-slate-500'}">Poder ${p.tier} (Niv. ${p.minLevel})</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${unlocked ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
-                ${unlocked ? 'ACTIVO' : 'BLOQUEADO'}
-              </span>
+              <span class="text-xs font-bold ${unlocked ? 'text-white' : 'text-slate-400'}">${p.tier}: ${escapeHtml(p.name)}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                unlocked
+                  ? 'accent-bg text-slate-950'
+                  : 'bg-slate-800 text-slate-400'
+              }">${unlocked ? 'ACTIVO' : `Niv. ${p.minLevel}`}</span>
             </div>
-            <div class="text-sm font-bold text-white mb-1">${p.name}</div>
-            <p class="text-xs text-slate-300 leading-relaxed">${p.desc}</p>
+            <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(p.desc)}</p>
           </div>
         `;
       }).join('');
 
-      // Habilidades de Clase del Médium (Desbloqueo por Nivel)
-      const onlyUnlocked = document.getElementById('filter-unlocked-features')?.checked;
-      const unlockedCount = MEDIUM_CLASS_FEATURES.filter(f => state.level >= f.minLevel).length;
-      document.getElementById('class-features-count').textContent = `${unlockedCount}/${MEDIUM_CLASS_FEATURES.length} activas`;
+      // Habilidades de Clase del Médium
+      const onlyUnlocked = !!document.getElementById('filter-unlocked-features')?.checked;
+      const unlockedCount = MEDIUM_CLASS_FEATURES.filter(f => lvl >= f.minLevel).length;
+      document.getElementById('class-features-count').textContent = `${unlockedCount}/${MEDIUM_CLASS_FEATURES.length}`;
 
-      const featuresGrid = document.getElementById('class-features-grid');
-      featuresGrid.innerHTML = MEDIUM_CLASS_FEATURES
-        .filter(f => !onlyUnlocked || state.level >= f.minLevel)
-        .map(f => {
-          const unlocked = state.level >= f.minLevel;
-          return `
-            <div class="rounded-xl p-3.5 border transition flex flex-col justify-between gap-2 ${unlocked ? 'bg-slate-900/90 accent-border' : 'bg-slate-950/55 border-slate-800/70 opacity-55'}">
-              <div>
-                <div class="flex items-center justify-between gap-2 mb-1.5">
-                  <span class="text-[11px] font-bold uppercase tracking-wider ${unlocked ? 'accent-text' : 'text-slate-500'}">Nivel ${f.minLevel} · (${f.tag})</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${unlocked ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
-                    ${unlocked ? 'ACTIVA' : 'BLOQUEADA'}
-                  </span>
+      const featuresToRender = onlyUnlocked
+        ? MEDIUM_CLASS_FEATURES.filter(f => lvl >= f.minLevel)
+        : MEDIUM_CLASS_FEATURES;
+
+      document.getElementById('class-features-grid').innerHTML = featuresToRender.map(f => {
+        const unlocked = lvl >= f.minLevel;
+        return `
+          <div class="rounded-xl p-3.5 border flex flex-col justify-between gap-2 transition ${
+            unlocked
+              ? 'bg-slate-900/85 border-slate-700/90'
+              : 'bg-slate-950/50 border-slate-800/70 opacity-55'
+          }">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-1.5">
+                <div class="text-xs font-bold ${unlocked ? 'text-white' : 'text-slate-400'}">
+                  ${escapeHtml(f.name)} <span class="text-[10px] font-normal text-slate-400">(${f.tag})</span>
                 </div>
-                <div class="text-sm font-bold text-white mb-1">${f.name}</div>
-                <p class="text-xs text-slate-300 leading-relaxed">${f.getDesc(state.level)}</p>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                  unlocked ? 'accent-bg-soft accent-text border accent-border' : 'bg-slate-800 text-slate-500'
+                }">${unlocked ? `ACTIVA (Niv. ${f.minLevel})` : `Bloqueada (Niv. ${f.minLevel})`}</span>
               </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed">${escapeHtml(f.getDesc(lvl))}</p>
             </div>
-          `;
-        }).join('');
+          </div>
+        `;
+      }).join('');
 
-      // Tabla de Progresión 1–20 con todos los hitos de clase
-      const progBody = document.getElementById('progression-table-body');
+      // Tabla de Progresión 1–20
       const milestones = {
-        1: 'Knacks, Spirit, Poder Menor',
+        1: 'Spirit, Spirit Power (Lesser), Spirit Surge 1d6',
         2: 'Shared Seance, Taboo',
         3: 'Haunt Channeler',
-        4: 'Conjuros Niv. 1',
+        4: 'Spirit Bonus +2, Conjuros Niv. 1',
         5: 'Location Channel',
-        6: 'Poder Intermedio',
-        7: 'Connection Channel',
-        8: 'Bono Esp. +3',
+        6: 'Spirit Power (Intermediate)',
+        7: 'Connection Channel, Conjuros Niv. 2',
+        8: 'Spirit Bonus +3',
         9: 'Propitiation',
-        10: 'Spirit Surge 1d8',
-        11: 'Poder Mayor',
-        12: 'Bono Esp. +4',
-        13: 'Ask the Spirits',
+        10: 'Spirit Surge 1d8, Conjuros Niv. 3',
+        11: 'Spirit Power (Greater)',
+        12: 'Spirit Bonus +4',
+        13: 'Ask the Spirits, Conjuros Niv. 4',
         14: 'Astral Journey',
         15: 'Trance of Three',
-        16: 'Bono Esp. +5',
-        17: 'Poder Supremo',
+        16: 'Spirit Bonus +5',
+        17: 'Spirit Power (Supreme)',
         18: 'Spacious Soul',
         19: 'Spirit Mastery',
-        20: 'Astral Beacon, 1d10'
+        20: 'Astral Beacon, Spirit Bonus +6, Surge 1d10'
       };
-      progBody.innerHTML = '';
-      for (let lvl = 1; lvl <= 20; lvl++) {
-        const isCurr = lvl === state.level;
-        const sv = getBaseSaves(lvl);
-        progBody.innerHTML += `
-          <tr class="${isCurr ? 'accent-bg-soft text-white font-bold' : 'text-slate-400'}">
-            <td class="py-1.5 px-2">${lvl}</td>
-            <td class="py-1.5 px-2">${getBABIteratives(getBAB(lvl)).map(fmtSign).join('/')}</td>
-            <td class="py-1.5 px-2">+${sv.fort}/+${sv.ref}/+${sv.will}</td>
-            <td class="py-1.5 px-2 ${isCurr ? 'accent-text' : ''}">+${getSpiritBonusRaw(lvl)}</td>
-            <td class="py-1.5 px-2">${getSurgeDie(lvl).label}</td>
-            <td class="py-1.5 px-2">${milestones[lvl] || '—'}</td>
+
+      const progBody = document.getElementById('progression-table-body');
+      const rows = [];
+      for (let i = 1; i <= 20; i++) {
+        const b = getBAB(i);
+        const s = getBaseSaves(i);
+        const isCurrent = i === lvl;
+        rows.push(`
+          <tr class="${isCurrent ? 'accent-bg-soft text-white font-bold' : 'text-slate-300'}">
+            <td class="py-1.5 px-2">${i}</td>
+            <td class="py-1.5 px-2">${getBABIteratives(b).map(fmtSign).join('/')}</td>
+            <td class="py-1.5 px-2">+${s.fort}/+${s.ref}/+${s.will}</td>
+            <td class="py-1.5 px-2 accent-text">+${getSpiritBonusRaw(i)}</td>
+            <td class="py-1.5 px-2">${getSurgeDie(i).label}</td>
+            <td class="py-1.5 px-2 text-[11px] ${isCurrent ? 'text-white' : 'text-slate-400'}">${milestones[i]}</td>
           </tr>
-        `;
+        `);
       }
+      progBody.innerHTML = rows.join('');
     }
 
     /* =====================================================================
-       7. EXPORTAR, IMPORTAR, REINICIAR Y TOASTS
+       7. MODALES (EXPORTAR / IMPORTAR / REINICIAR) Y TOASTS
        ===================================================================== */
     function openExportModal() {
       document.getElementById('export-json-text').value = JSON.stringify(state, null, 2);
@@ -3138,23 +3421,38 @@
     }
 
     function copyExportJson() {
+      const text = document.getElementById('export-json-text').value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast('JSON copiado al portapapeles.'))
+          .catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
       const ta = document.getElementById('export-json-text');
       ta.select();
       try {
         document.execCommand('copy');
         showToast('JSON copiado al portapapeles.');
       } catch (e) {
-        showToast('Copia el texto manualmente.', 'warn');
+        showToast('Selecciona el texto y cópialo manualmente.', 'warn');
       }
     }
 
     function downloadExportJson() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const dataStr = JSON.stringify(state, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
+      const safeName = (state.name || 'medium_pf1e').toLowerCase().replace(/[^a-z0-9]+/gi, '_');
       a.href = url;
-      a.download = `${(state.name || 'medium_pf1e').toLowerCase().replace(/[^a-z0-9]+/g, '_')}_niv${state.level}.json`;
+      a.download = `${safeName}_niv${state.level}.json`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('Archivo JSON descargado.');
     }
@@ -3166,55 +3464,68 @@
     }
 
     function handleImportFile(event) {
-      const file = event.target.files[0];
+      const file = event.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = e => { document.getElementById('import-json-text').value = e.target.result; };
+      reader.onload = (e) => {
+        document.getElementById('import-json-text').value = e.target.result || '';
+      };
       reader.readAsText(file);
     }
 
     function confirmImportJson() {
-      const text = document.getElementById('import-json-text').value.trim();
-      if (!text) return showToast('Pega un JSON válido o sube un archivo.', 'warn');
+      const raw = document.getElementById('import-json-text').value.trim();
+      if (!raw) {
+        showToast('Pega un JSON o selecciona un archivo primero.', 'warn');
+        return;
+      }
       try {
-        JSON.parse(text);
-        localStorage.setItem(STORAGE_KEY, text);
-        state = loadState();
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') throw new Error('JSON inválido');
+        state = mergeStateWithDefaults(parsed);
         saveState();
         renderAll();
         closeModal('modal-import');
         showToast('Ficha importada correctamente.');
       } catch (e) {
-        showToast('El texto no es un JSON válido.', 'danger');
+        showToast('Error al leer el JSON. Verifica el formato.', 'danger');
       }
     }
 
-    function openResetModal() { document.getElementById('modal-reset').classList.remove('hidden'); }
+    function openResetModal() {
+      document.getElementById('modal-reset').classList.remove('hidden');
+    }
 
     function confirmResetSheet() {
       state = createDefaultState();
       saveState();
       renderAll();
       closeModal('modal-reset');
-      showToast('Ficha reiniciada.');
+      showToast('Ficha reiniciada a los valores por defecto.');
     }
 
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
+      if (!container) return;
       const toast = document.createElement('div');
-      let colors = 'bg-slate-900 border-slate-700 text-slate-100';
-      if (type === 'warn') colors = 'bg-amber-950/95 border-amber-500/60 text-amber-100';
-      if (type === 'danger') colors = 'bg-rose-950/95 border-rose-500/70 text-rose-100';
-      toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-xl text-xs font-medium animate-fade ${colors}`;
+      const colorCls = type === 'danger'
+        ? 'bg-rose-950/95 border-rose-600/70 text-rose-100'
+        : type === 'warn'
+          ? 'bg-amber-950/95 border-amber-600/70 text-amber-100'
+          : 'bg-slate-900/95 accent-border text-slate-100';
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-xl text-xs font-semibold animate-fade ${colorCls}`;
       toast.textContent = message;
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3000);
     }
 
     /* =====================================================================
